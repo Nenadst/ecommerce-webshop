@@ -1,3 +1,3 @@
-import Products from "./components/Products";
+import Products from './components/Products';
 
-export default Products
+export default Products;
