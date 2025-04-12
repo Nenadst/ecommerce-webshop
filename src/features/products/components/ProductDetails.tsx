@@ -1,7 +1,7 @@
-import { Card } from '@/common/components/elements/Card'
-import { Separator } from '@/common/components/elements/Separator'
-import Star from '@/common/components/elements/Star'
-import { PRODUCTS } from '@/common/constant/products'
+import { Card } from '@/components/elements/Card'
+import { Separator } from '@/components/elements/Separator'
+import Star from '@/components/elements/Star'
+import { PRODUCTS } from '@/data/products'
 import React from 'react'
 
 const ProductDetails = () => {

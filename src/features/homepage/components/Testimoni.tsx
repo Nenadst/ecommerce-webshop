@@ -1,7 +1,7 @@
 import React from 'react'
-import { TESTIMONI } from '@/common/constant/testimoni'
-import { Card } from '@/common/components/elements/Card'
-import DotSlide from '@/common/components/elements/DotSlide'
+import { TESTIMONI } from '@/data/testimoni'
+import { Card } from '@/components/elements/Card'
+import DotSlide from '@/components/elements/DotSlide'
 
 const Testimoni = () => {
     return (

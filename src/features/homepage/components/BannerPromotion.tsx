@@ -1,4 +1,4 @@
-import Button from '@/common/components/elements/Button'
+import Button from '@/components/elements/Button'
 import React from 'react'
 
 const BannerPromotion = () => {

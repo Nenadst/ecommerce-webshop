@@ -1,7 +1,7 @@
-import Button from '@/common/components/elements/Button'
-import { Card } from '@/common/components/elements/Card'
-import DotSlide from '@/common/components/elements/DotSlide'
-import Star from '@/common/components/elements/Star'
+import Button from '@/components/elements/Button'
+import { Card } from '@/components/elements/Card'
+import DotSlide from '@/components/elements/DotSlide'
+import Star from '@/components/elements/Star'
 import React from 'react'
 
 const TopSeller = () => {

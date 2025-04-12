@@ -1,4 +1,4 @@
-import { Card } from '@/common/components/elements/Card'
+import { Card } from '@/components/elements/Card'
 import Link from 'next/link'
 import React from 'react'
 

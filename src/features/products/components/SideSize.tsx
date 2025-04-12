@@ -1,5 +1,5 @@
 import React from 'react'
-import { SIZE } from '@/common/constant/size'
+import { SIZE } from '@/data/size'
 
 export const SideSize = () => {
     return (

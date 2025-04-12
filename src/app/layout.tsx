@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { METADATA } from '../common/constant/metadata'
-import { poppins } from '@/common/styles/fonts'
+import { METADATA } from '../data/metadata'
+import { poppins } from '@/lib/fonts'
 
 export const metadata: Metadata = {
   title: METADATA.title + METADATA.bTitle,

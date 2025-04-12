@@ -1,7 +1,7 @@
 import React from 'react'
-import { BLOGS } from '@/common/constant/blogs'
-import { Card } from '@/common/components/elements/Card'
-import DotSlide from '@/common/components/elements/DotSlide'
+import { BLOGS } from '@/data/blogs'
+import { Card } from '@/components/elements/Card'
+import DotSlide from '@/components/elements/DotSlide'
 
 const Blogs = () => {
     return (

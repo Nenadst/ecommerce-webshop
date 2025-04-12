@@ -1,10 +1,10 @@
-import Button from '@/common/components/elements/Button';
-import ButtonLove from '@/common/components/elements/ButtonLove';
-import { Card } from '@/common/components/elements/Card';
-import DotSlide from '@/common/components/elements/DotSlide';
-import Star from '@/common/components/elements/Star';
-import { PRODUCTS } from '@/common/constant/products';
-import { IProduct } from '@/common/types/products';
+import Button from '@/components/elements/Button';
+import ButtonLove from '@/components/elements/ButtonLove';
+import { Card } from '@/components/elements/Card';
+import DotSlide from '@/components/elements/DotSlide';
+import Star from '@/components/elements/Star';
+import { PRODUCTS } from '@/data/products';
+import { IProduct } from '@/types/products';
 import Link from 'next/link';
 import React from 'react'
 

@@ -1,7 +1,7 @@
-import { Broadcum } from '@/common/components/layouts/Broadcrum'
-import Footer from '@/common/components/layouts/Footer'
-import HeaderBottom from '@/common/components/layouts/HeaderBottom'
-import HeaderTop from '@/common/components/layouts/HeaderTop'
+import { Broadcum } from '@/components/layouts/Broadcrum'
+import Footer from '@/components/layouts/Footer'
+import HeaderBottom from '@/components/layouts/HeaderBottom'
+import HeaderTop from '@/components/layouts/HeaderTop'
 import ProductDetails from '@/features/products/components/ProductDetails'
 import React from 'react'
 

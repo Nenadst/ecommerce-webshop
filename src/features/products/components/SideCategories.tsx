@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useState } from 'react'
-import { CATEGORIES } from '@/common/constant/categories'
+import { CATEGORIES } from '@/data/categories'
 
 const SideCategories = () => {
     const [checked, setChecked] = useState(true)

@@ -1,8 +1,8 @@
 import React from 'react'
 import SearchSection from './SearchSection'
 import Link from 'next/link'
-import CartSection from '@/common/components/layouts/CartSection'
-import Navigation from '@/common/components/layouts/Navigation'
+import CartSection from '@/components/layouts/CartSection'
+import Navigation from '@/components/layouts/Navigation'
 
 const HeaderBottom = () => {
     return (

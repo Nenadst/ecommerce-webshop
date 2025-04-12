@@ -1,4 +1,4 @@
-import InputField from '@/common/components/elements/InputField'
+import InputField from '@/components/elements/InputField'
 import React from 'react'
 
 const Newsletter = () => {
