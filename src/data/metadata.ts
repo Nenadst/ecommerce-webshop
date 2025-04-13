@@ -1,7 +1,7 @@
 export const METADATA = {
-  title: 'Kriscommerce',
-  bTitle: ' | Electon Design',
-  keywords: 'kriscommerce',
-  description: 'Electon Design',
+  title: 'Ecommerce',
+  bTitle: ' | WebShop',
+  keywords: 'ecommerce',
+  description: 'WebShop',
   author: 'Kris Kurniawan',
 };

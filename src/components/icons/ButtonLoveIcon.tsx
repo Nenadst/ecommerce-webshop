@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ButtonLove = () => {
+const ButtonLoveIcon = () => {
   return (
     <div className="w-7 h-7 bg-slate-300 rounded-full justify-center items-center gap-1.5 flex absolute top-10 right-7 cursor-pointer hover:bg-amber-500">
       <svg
@@ -22,4 +22,4 @@ const ButtonLove = () => {
   );
 };
 
-export default ButtonLove;
+export default ButtonLoveIcon;

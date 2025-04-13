@@ -1,21 +1,13 @@
 'use client';
 
 import { useAuth } from '@/lib/authContext';
-import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function LoginPage() {
-  const { isLoggedIn, login } = useAuth();
-  const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.push('/');
-    }
-  }, [isLoggedIn, router]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +19,6 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-sky-900 mb-6 text-center">Login</h1>
-
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -52,6 +43,7 @@ export default function LoginPage() {
             Login
           </button>
         </form>
+
         <p className="mt-4 text-sm text-center">
           Don’t have an account?{' '}
           <a href="/register" className="text-sky-900 hover:underline">

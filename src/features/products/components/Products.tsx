@@ -7,7 +7,7 @@ import SideBrand from './SideBrand';
 import SideColor from './SideColor';
 import { SideSize } from './SideSize';
 import { Card } from '@/components/elements/Card';
-import ButtonLove from '@/components/elements/ButtonLove';
+import ButtonLoveIcon from '@/components/icons/ButtonLoveIcon';
 import Star from '@/components/elements/Star';
 import { PRODUCTS } from '@/data/products';
 import BannerPromotion from '@/features/homepage/components/BannerPromotion';
@@ -39,7 +39,7 @@ const Products = () => {
                 className="w-80 h-80 justify-center flex relative cursor-pointer hover:bg-slate-100"
               >
                 <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} />
-                <ButtonLove />
+                <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
                   <div className="text-sky-900 text-lg font-medium">{product.name}</div>
                   <div className="text-neutral-600 text-lg font-semibold">${product.price}</div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import React from 'react';
+import { ChevronDownIcon } from '../icons';
 
 const Navigation = () => {
   return (
@@ -11,22 +12,7 @@ const Navigation = () => {
             className="ml-16 w-52 h-16 bg-amber-500 flex items-center justify-center hover:bg-amber-600"
           >
             <div className="text-white font-semibold text-base mr-3">Browse categories</div>
-            <svg
-              width="25"
-              height="25"
-              viewBox="0 0 25 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20.42 9.45001L13.9 15.97C13.13 16.74 11.87 16.74 11.1 15.97L4.58002 9.45001"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronDownIcon />
           </Link>
           <div className="mr-20" />
           <Link
@@ -36,22 +22,7 @@ const Navigation = () => {
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">
               Home
             </div>
-            <svg
-              className="ml-2 group-hover:stroke-white stroke-slate-500"
-              width="24"
-              height="25"
-              viewBox="0 0 24 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M19.92 9.45001L13.4 15.97C12.63 16.74 11.37 16.74 10.6 15.97L4.08002 9.45001"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronDownIcon />
           </Link>
           <Link
             href="/products"
@@ -60,22 +31,7 @@ const Navigation = () => {
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">
               Catalog
             </div>
-            <svg
-              className="ml-2 group-hover:stroke-white stroke-slate-500"
-              width="24"
-              height="25"
-              viewBox="0 0 24 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M19.92 9.45001L13.4 15.97C12.63 16.74 11.37 16.74 10.6 15.97L4.08002 9.45001"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronDownIcon />
           </Link>
           <div className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group">
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">
@@ -86,22 +42,7 @@ const Navigation = () => {
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">
               Pages
             </div>
-            <svg
-              className="ml-2 group-hover:stroke-white stroke-slate-500"
-              width="24"
-              height="25"
-              viewBox="0 0 24 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M19.92 9.45001L13.4 15.97C12.63 16.74 11.37 16.74 10.6 15.97L4.08002 9.45001"
-                strokeWidth="1.5"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <ChevronDownIcon />
           </div>
           <div className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group">
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">

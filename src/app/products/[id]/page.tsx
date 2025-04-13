@@ -1,4 +1,4 @@
-import { Broadcum } from '@/components/layouts/Broadcrum';
+import { BreadCrumb } from '@/components/layouts/BreadCrumb';
 import Footer from '@/components/layouts/Footer';
 import HeaderBottom from '@/components/layouts/HeaderBottom';
 import HeaderTop from '@/components/layouts/HeaderTop';
@@ -10,7 +10,7 @@ const ProductDetail = () => {
     <main className="bg-white">
       <HeaderTop />
       <HeaderBottom />
-      <Broadcum />
+      <BreadCrumb />
       <ProductDetails />
       <Footer />
     </main>
