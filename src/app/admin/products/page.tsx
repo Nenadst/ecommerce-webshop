@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import Image from 'next/image';
-import { Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
 import { Toaster } from 'react-hot-toast';
@@ -81,20 +81,28 @@ export default function AdminProductsPage() {
                 key={product.id}
                 className="relative bg-white shadow-md rounded p-4 flex flex-col gap-2 border hover:shadow-lg transition w-[250px]"
               >
-                {/* Delete button top-right */}
-                <button
-                  onClick={() => handleDeleteProduct(product.id)}
-                  className="absolute top-3 right-3 bg-slate-300 hover:bg-amber-500 text-[#292D32] rounded-full p-1 shadow"
-                  aria-label="Delete product"
-                >
-                  <Trash2 size={16} />
-                </button>
-                <Link
-                  href={`/admin/products/${product.id}/edit`}
-                  className="text-blue-600 text-xs hover:underline"
-                >
-                  Edit
-                </Link>
+                <div className="flex justify-end gap-2 mb-2">
+                  <Link
+                    href={`/admin/products/${product.id}/edit`}
+                    className="bg-slate-300 hover:bg-blue-500 text-[#292D32] rounded-full p-1 shadow relative group"
+                    aria-label="Edit product"
+                  >
+                    <Pencil size={16} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                      Edit Product
+                    </span>
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteProduct(product.id)}
+                    className="bg-slate-300 hover:bg-amber-500 text-[#292D32] rounded-full p-1 shadow relative group"
+                    aria-label="Delete product"
+                  >
+                    <Trash2 size={16} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                      Delete Product
+                    </span>
+                  </button>
+                </div>
                 <Image
                   src={product.image || '/assets/img/no-product.png'}
                   alt={product.name}
