@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { METADATA } from '../data/metadata';
 import { poppins } from '@/lib/fonts';
-import { AuthProvider } from '@/lib/authContext';
+import ClientProviders from '@/components/clientProviders/CllientProviders';
 
 export const metadata: Metadata = {
   title: METADATA.title + METADATA.bTitle,
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={poppins.className}>
-        <AuthProvider>{children}</AuthProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
