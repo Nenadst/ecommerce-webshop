@@ -8,4 +8,5 @@ export type Product = {
   quantity: number;
   image?: string;
   category: Category;
+  file?: File | null;
 };
