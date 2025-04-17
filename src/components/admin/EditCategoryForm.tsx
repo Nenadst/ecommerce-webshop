@@ -55,7 +55,7 @@ export default function EditCategoryForm({ categoryId }: { categoryId: string })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md p-4">
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
       <input
         type="text"
         placeholder="Category Name"
