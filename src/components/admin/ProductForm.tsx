@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { Category } from '@/app/admin/categories/types';
+import toast from 'react-hot-toast';
+import { X } from 'lucide-react';
 
 const GET_CATEGORIES = gql`
   query {
@@ -40,9 +42,10 @@ export default function ProductForm() {
     quantity: '',
     categoryId: '',
     file: null as File | null,
+    imagePreview: '',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: catData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
   const [createProduct] = useMutation(CREATE_PRODUCT, {
@@ -67,8 +70,6 @@ export default function ProductForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
 
     try {
       let imageUrl = '';
@@ -89,23 +90,28 @@ export default function ProductForm() {
         },
       });
 
-      setSuccess(true);
-      setForm({ name: '', description: '', price: '', quantity: '', categoryId: '', file: null });
+      setForm({
+        name: '',
+        description: '',
+        price: '',
+        quantity: '',
+        categoryId: '',
+        file: null,
+        imagePreview: '',
+      });
+      toast.success('Product created successfully');
       router.push('/admin/products');
     } catch (err) {
       if (err instanceof Error) {
-        setError(err.message);
+        toast.error(err.message);
       } else {
-        setError('Something went wrong');
+        toast.error('Something went wrong.');
       }
     }
   };
 
   return (
     <div>
-      {success && <p className="text-green-600 mb-2">Product created successfully!</p>}
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <input
           type="text"
@@ -155,11 +161,58 @@ export default function ProductForm() {
           ))}
         </select>
 
+        {form.imagePreview && (
+          <div className="relative">
+            <img
+              src={form.imagePreview}
+              alt="Preview"
+              className="h-48 w-full object-contain rounded mb-2 bg-gray-100"
+            />
+            <button
+              type="button"
+              title="Remove image"
+              onClick={() => {
+                setForm((f) => ({ ...f, file: null, imagePreview: '' }));
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = '';
+                }
+              }}
+              className="absolute top-2 right-2 w-7 h-7 bg-white text-red-600 rounded-full flex items-center justify-center shadow hover:bg-red-100"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           className="w-full border p-2 rounded"
-          onChange={(e) => setForm((f) => ({ ...f, file: e.target.files?.[0] || null }))}
+          onChange={(e) => {
+            const selected = e.target.files?.[0];
+
+            if (selected && selected.size > 2 * 1024 * 1024) {
+              toast.error('Image must be smaller than 2MB');
+
+              // Clear form state
+              setForm((f) => ({ ...f, file: null, imagePreview: '' }));
+
+              // Clear file input field visibly
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+
+              return;
+            }
+
+            // Update state if valid
+            setForm((f) => ({
+              ...f,
+              file: selected || null,
+              imagePreview: selected ? URL.createObjectURL(selected) : '',
+            }));
+          }}
         />
 
         <button

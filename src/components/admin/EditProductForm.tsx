@@ -170,8 +170,13 @@ export default function EditProductForm({ productId }: { productId: string }) {
           <button
             type="button"
             title="Remove image"
-            onClick={() => setForm((f) => ({ ...f, file: null, image: '' }))}
-            className="absolute top-2 right-2 w-7 h-7 bg-white text-red-600 rounded-full flex items-center justify-center shadow hover:bg-red-100 transition"
+            onClick={() => {
+              setForm((f) => ({ ...f, file: null, imagePreview: '' }));
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+            }}
+            className="absolute top-2 right-2 w-7 h-7 bg-white text-red-600 rounded-full flex items-center justify-center shadow hover:bg-red-100"
           >
             <X size={16} />
           </button>

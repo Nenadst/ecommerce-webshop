@@ -6,9 +6,9 @@ import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmModal } from '@/components/modals/ConfirmModal';
-import { Toaster } from 'react-hot-toast';
 import { Product } from './types';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 const GET_PRODUCTS = gql`
   query {
@@ -55,8 +55,13 @@ export default function AdminProductsPage() {
       show: true,
       message: 'Are you sure you want to delete this product?',
       onConfirm: async () => {
-        await deleteProduct({ variables: { id } });
-        await refetchProducts();
+        try {
+          await deleteProduct({ variables: { id } });
+          await refetchProducts();
+          toast.success('Product deleted successfully!');
+        } catch (err) {
+          toast.error('Failed to delete product.');
+        }
       },
     });
   };
@@ -131,7 +136,6 @@ export default function AdminProductsPage() {
           onCancel={() => setModal((prev) => ({ ...prev, show: false }))}
         />
       )}
-      <Toaster />
     </>
   );
 }
