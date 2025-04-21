@@ -1,5 +1,5 @@
-import { Card } from '@/components/elements/Card';
-import { ArrowLeftIcon, ArrowRightIcon } from '@/components/icons';
+import { Card } from '@/shared/components/elements/Card';
+import { ArrowLeftIcon, ArrowRightIcon } from '@/shared/components/icons';
 import Link from 'next/link';
 import React from 'react';
 

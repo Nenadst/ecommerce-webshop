@@ -1,7 +1,7 @@
-import { Card } from '@/components/elements/Card';
-import { Separator } from '@/components/elements/Separator';
-import Star from '@/components/elements/Star';
-import { HeartIconBig } from '@/components/icons';
+import { Card } from '@/shared/components/elements/Card';
+import { Separator } from '@/shared/components/elements/Separator';
+import Star from '@/shared/components/elements/Star';
+import { HeartIconBig } from '@/shared/components/icons';
 import React from 'react';
 
 const ProductDetails = () => {

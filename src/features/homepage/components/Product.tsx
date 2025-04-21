@@ -1,10 +1,10 @@
-import Button from '@/components/elements/Button';
-import { Card } from '@/components/elements/Card';
-import DotSlide from '@/components/elements/DotSlide';
-import Star from '@/components/elements/Star';
-import { ButtonLoveIcon, EyeIcon, ShoppingCartIcon } from '@/components/icons';
+import Button from '@/shared/components/elements/Button';
+import { Card } from '@/shared/components/elements/Card';
+import DotSlide from '@/shared/components/elements/DotSlide';
+import Star from '@/shared/components/elements/Star';
+import { ButtonLoveIcon, EyeIcon, ShoppingCartIcon } from '@/shared/components/icons';
 import { PRODUCTS } from '@/data/products';
-import { IProduct } from '@/types/products';
+import { IProduct } from '@/entities/product/types/product.types';
 import Link from 'next/link';
 import React from 'react';
 

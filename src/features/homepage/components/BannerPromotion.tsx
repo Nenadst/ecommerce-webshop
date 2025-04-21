@@ -1,4 +1,4 @@
-import Button from '@/components/elements/Button';
+import Button from '@/shared/components/elements/Button';
 import React from 'react';
 
 const BannerPromotion = () => {

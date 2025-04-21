@@ -1,4 +1,4 @@
-import { BestQualityIcon, FreeDeliveryIcon, WarrantyIcon } from '@/components/icons';
+import { BestQualityIcon, FreeDeliveryIcon, WarrantyIcon } from '@/shared/components/icons';
 import React from 'react';
 
 const Features = () => {

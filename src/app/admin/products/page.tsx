@@ -5,7 +5,7 @@ import { gql, useQuery, useMutation } from '@apollo/client';
 import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { ConfirmModal } from '@/components/modals/ConfirmModal';
+import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
 import { Product } from './types';
 import Link from 'next/link';
 import toast from 'react-hot-toast';

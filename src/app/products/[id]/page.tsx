@@ -1,7 +1,7 @@
-import { BreadCrumb } from '@/components/layouts/BreadCrumb';
-import Footer from '@/components/layouts/Footer';
-import HeaderBottom from '@/components/layouts/HeaderBottom';
-import HeaderTop from '@/components/layouts/HeaderTop';
+import { BreadCrumb } from '@/shared/components/layouts/BreadCrumb';
+import Footer from '@/shared/components/layouts/Footer';
+import HeaderBottom from '@/shared/components/layouts/HeaderBottom';
+import HeaderTop from '@/shared/components/layouts/HeaderTop';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import React from 'react';
 

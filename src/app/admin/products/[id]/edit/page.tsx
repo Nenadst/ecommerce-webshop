@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import EditProductForm from '@/components/admin/EditProductForm';
+import EditProductForm from '@/features/admin/product/edit/EditProductForm';
 
 export default function EditProductPage() {
   const params = useParams();

@@ -1,14 +1,14 @@
 import React from 'react';
 import SideCategories from './SideCategories';
-import { Separator } from '@/components/elements/Separator';
+import { Separator } from '@/shared/components/elements/Separator';
 import SideAvaliability from './SideAvaliability';
 import SideProductType from './SideProductType';
 import SideBrand from './SideBrand';
 import SideColor from './SideColor';
 import { SideSize } from './SideSize';
-import { Card } from '@/components/elements/Card';
-import ButtonLoveIcon from '@/components/icons/ButtonLoveIcon';
-import Star from '@/components/elements/Star';
+import { Card } from '@/shared/components/elements/Card';
+import ButtonLoveIcon from '@/shared/components/icons/ButtonLoveIcon';
+import Star from '@/shared/components/elements/Star';
 import { PRODUCTS } from '@/data/products';
 import BannerPromotion from '@/features/homepage/components/BannerPromotion';
 import Link from 'next/link';

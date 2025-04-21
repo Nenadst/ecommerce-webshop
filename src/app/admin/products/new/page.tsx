@@ -1,6 +1,6 @@
 'use client';
 
-import ProductForm from '@/components/admin/ProductForm';
+import AddProductForm from '@/features/admin/product/create/AddProductForm';
 import { useRouter } from 'next/navigation';
 
 export default function NewProductPage() {
@@ -17,7 +17,7 @@ export default function NewProductPage() {
         </span>
       </button>
       <h1 className="text-2xl font-bold text-sky-900 mb-4">Create New Product</h1>
-      <ProductForm />
+      <AddProductForm />
     </div>
   );
 }

@@ -1,8 +1,8 @@
-import Button from '@/components/elements/Button';
-import { Card } from '@/components/elements/Card';
-import DotSlide from '@/components/elements/DotSlide';
-import Star from '@/components/elements/Star';
-import { EyeIcon, ShoppingCartIcon } from '@/components/icons';
+import Button from '@/shared/components/elements/Button';
+import { Card } from '@/shared/components/elements/Card';
+import DotSlide from '@/shared/components/elements/DotSlide';
+import Star from '@/shared/components/elements/Star';
+import { EyeIcon, ShoppingCartIcon } from '@/shared/components/icons';
 import React from 'react';
 
 const TopSeller = () => {

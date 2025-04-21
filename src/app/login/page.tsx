@@ -1,18 +1,15 @@
 'use client';
 
-import { useAuth } from '@/lib/authContext';
 import { useState } from 'react';
 
 export default function LoginPage() {
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(email, password);
-    if (!success) setError('Invalid credentials');
+    console.log('eeeee', e);
   };
 
   return (

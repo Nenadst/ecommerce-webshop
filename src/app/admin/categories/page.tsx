@@ -4,7 +4,7 @@ import { gql, useQuery, useMutation } from '@apollo/client';
 import { Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ConfirmModal } from '@/components/modals/ConfirmModal';
+import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
 import { Category } from './types';
 
 const GET_CATEGORIES = gql`
