@@ -10,7 +10,7 @@ const TopSeller = () => {
     <div className="container mx-auto">
       <div className="flex justify-center items-center gap-5 mb-5">
         <Card className="w-[830px] h-[500px] justify-center items-center gap-10 flex relative">
-          <img className="p-3 rounded-2xl" src="/assets/img/jbl-bar.png" />
+          <img className="p-3 rounded-2xl" src="/assets/img/jbl-bar.png" alt="" />
           <div className="justify-center items-center flex absolute bottom-10">
             <DotSlide count={1} />
           </div>
@@ -53,6 +53,7 @@ const TopSeller = () => {
               <img
                 className="w-72 h-44 p-2 relative rounded-2xl"
                 src="https://source.unsplash.com/288x176?gaming"
+                alt=""
               />
               <div className="flex-col justify-center items-start gap-4 inline-flex">
                 <div className="text-sky-900 text-lg font-medium">Play game</div>
@@ -66,6 +67,7 @@ const TopSeller = () => {
               <img
                 className="w-72 h-44 p-2 relative rounded-2xl"
                 src="https://source.unsplash.com/288x176?laptop"
+                alt=""
               />
               <div className="flex-col justify-center items-start gap-4 inline-flex">
                 <div className="text-sky-900 text-lg font-medium">Play game</div>

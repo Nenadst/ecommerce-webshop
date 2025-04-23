@@ -1,63 +1,39 @@
 'use client';
 
-import { Product } from '@/app/admin/products/types';
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, Reference, StoreObject } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EditProduct } from './types';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
-
-const GET_PRODUCT = gql`
-  query Product($id: ID!) {
-    product(id: $id) {
-      id
-      name
-      description
-      price
-      quantity
-      image
-      category {
-        id
-      }
-    }
-  }
-`;
-
-const GET_CATEGORIES = gql`
-  query {
-    categories {
-      id
-      name
-    }
-  }
-`;
-
-const UPDATE_PRODUCT = gql`
-  mutation UpdateProduct($id: ID!, $input: ProductInput!) {
-    updateProduct(id: $id, input: $input) {
-      id
-      name
-      description
-      price
-      quantity
-      image
-      category {
-        id
-        name
-      }
-    }
-  }
-`;
+import { GET_PRODUCT, UPDATE_PRODUCT } from '@/shared/graphql/product';
+import { GET_CATEGORIES } from '@/shared/graphql/category';
+import { Product } from '@/entities/product/types/product.types';
+import { Category } from '@/entities/category/types/category.types';
+import { EditProduct } from '@/entities/product/types/edit-product.types';
 
 export default function EditProductForm({ productId }: { productId: string }) {
   const router = useRouter();
-  const { data } = useQuery(GET_PRODUCT, { variables: { id: productId } });
-  const { data: catData } = useQuery(GET_CATEGORIES);
+  const { data: productData } = useQuery<{ product: Product }>(GET_PRODUCT, {
+    variables: { id: productId },
+  });
+  const { data: categoriesData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
 
   const [updateProduct] = useMutation(UPDATE_PRODUCT, {
-    refetchQueries: ['products'],
-    awaitRefetchQueries: true,
+    update(cache, { data }) {
+      if (!data?.updateProduct) return;
+
+      cache.modify({
+        fields: {
+          products(existingProducts: readonly (Reference | StoreObject)[] = [], { readField }) {
+            return existingProducts.map((prod) =>
+              readField('id', prod) === data.updateProduct.id
+                ? { ...prod, ...data.updateProduct }
+                : prod
+            );
+          },
+        },
+      });
+    },
   });
 
   const [form, setForm] = useState<EditProduct>({
@@ -72,33 +48,38 @@ export default function EditProductForm({ productId }: { productId: string }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (data?.product) {
-      const p = data.product;
+    if (productData?.product) {
+      const product = productData.product;
       setForm({
-        name: p.name,
-        description: p.description || '',
-        price: p.price.toString(),
-        quantity: p.quantity.toString(),
-        image: p.image || '',
-        categoryId: p.category?.id || '',
+        name: product.name,
+        description: product.description || '',
+        price: product.price.toString(),
+        quantity: product.quantity.toString(),
+        image: product.image || '',
+        categoryId: product.category?.id || '',
         file: null,
       });
     }
-  }, [data]);
+  }, [productData]);
 
   const imagePreviewUrl = useMemo(() => {
     return form.file ? URL.createObjectURL(form.file) : '';
   }, [form.file]);
 
   const handleUpload = async (): Promise<string> => {
-    const formData = new FormData();
-    if (form.file) {
+    if (!form.file) return '';
+
+    try {
+      const formData = new FormData();
       formData.append('file', form.file);
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
       return data.url;
+    } catch (err) {
+      toast.error('Image upload failed');
+      console.log(err);
+      return '';
     }
-    return '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,20 +93,41 @@ export default function EditProductForm({ productId }: { productId: string }) {
       imageUrl = '';
     }
 
-    await updateProduct({
-      variables: {
-        id: productId,
-        input: {
-          name: form.name,
-          description: form.description,
-          price: parseFloat(form.price),
-          quantity: parseInt(form.quantity),
-          image: imageUrl,
-          categoryId: form.categoryId,
+    try {
+      await updateProduct({
+        variables: {
+          id: productId,
+          input: {
+            name: form.name,
+            description: form.description,
+            price: parseFloat(form.price),
+            quantity: parseInt(form.quantity),
+            image: imageUrl,
+            categoryId: form.categoryId,
+          },
         },
-      },
-    });
-    router.push('/admin/products');
+      });
+      toast.success('Product updated successfully!');
+      router.push('/admin/products');
+    } catch (error) {
+      toast.error('Failed to update product');
+      console.error(error);
+    }
+  };
+
+  const handleImageClear = () => {
+    setForm((f) => ({ ...f, file: null, image: '' }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected && selected.size > 2 * 1024 * 1024) {
+      toast.error('Image must be smaller than 2MB');
+      handleImageClear();
+      return;
+    }
+    setForm((f) => ({ ...f, file: selected || null }));
   };
 
   return (
@@ -169,13 +171,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
           />
           <button
             type="button"
-            title="Remove image"
-            onClick={() => {
-              setForm((f) => ({ ...f, file: null, imagePreview: '' }));
-              if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-              }
-            }}
+            onClick={handleImageClear}
             className="absolute top-2 right-2 w-7 h-7 bg-white text-red-600 rounded-full flex items-center justify-center shadow hover:bg-red-100"
           >
             <X size={16} />
@@ -205,23 +201,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
         accept="image/*"
         ref={fileInputRef}
         className="w-full border p-2 rounded"
-        onChange={(e) => {
-          const selected = e.target.files?.[0];
-
-          if (selected && selected.size > 2 * 1024 * 1024) {
-            toast.error('Image must be smaller than 2MB');
-
-            setForm((f) => ({ ...f, file: null }));
-
-            if (fileInputRef.current) {
-              fileInputRef.current.value = '';
-            }
-
-            return;
-          }
-
-          setForm((f) => ({ ...f, file: selected || null }));
-        }}
+        onChange={handleFileChange}
       />
       <select
         className="w-full border p-2 rounded"
@@ -230,9 +210,9 @@ export default function EditProductForm({ productId }: { productId: string }) {
         required
       >
         <option value="">Select Category</option>
-        {catData?.categories?.map((cat: Product) => (
-          <option key={cat.id} value={cat.id}>
-            {cat.name}
+        {categoriesData?.categories?.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
           </option>
         ))}
       </select>

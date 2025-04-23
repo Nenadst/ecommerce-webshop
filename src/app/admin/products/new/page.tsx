@@ -1,6 +1,6 @@
 'use client';
 
-import AddProductForm from '@/features/admin/product/create/AddProductForm';
+import AddProductForm from '@/features/admin/product/ui/AdminAddProductForm';
 import { useRouter } from 'next/navigation';
 
 export default function NewProductPage() {

@@ -23,7 +23,7 @@ const Product = () => {
               key={product.id}
               className="w-80 h-80 justify-center gap-9 flex flex-wrap relative"
             >
-              <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} />
+              <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="" />
               <ButtonLoveIcon />
               <div className="flex justify-between gap-5 mb-4">
                 <Button className="w-56 h-14 pl-6 justify-between flex items-center bg-blue-300 hover:bg-blue-400 text-slate-800 text-base font-semibold">
@@ -46,7 +46,7 @@ const Product = () => {
                 key={product.id}
                 className="w-80 h-80 justify-center flex flex-wrap relative cursor-pointer hover:bg-slate-100"
               >
-                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} />
+                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="" />
                 <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
                   <div className="text-sky-900 text-lg font-medium">{product.name}</div>

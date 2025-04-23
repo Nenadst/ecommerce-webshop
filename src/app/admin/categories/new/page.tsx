@@ -1,49 +1,54 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { gql, useMutation } from '@apollo/client';
-
-const CREATE_CATEGORY = gql`
-  mutation CreateCategory($input: CategoryInput!) {
-    createCategory(input: $input) {
-      id
-      name
-    }
-  }
-`;
+import { useCallback, useState } from 'react';
+import { gql, Reference, useMutation } from '@apollo/client';
+import { CREATE_CATEGORY } from '@/shared/graphql/category';
+import toast from 'react-hot-toast';
 
 export default function NewCategoryPage() {
   const router = useRouter();
   const [name, setName] = useState('');
-  const [error, setError] = useState('');
 
-  const [createCategory] = useMutation(CREATE_CATEGORY, {
-    update(cache, { data: { createCategory } }) {
+  const [createCategory, { loading }] = useMutation(CREATE_CATEGORY, {
+    update(cache, { data }) {
+      if (!data?.createCategory) return;
+
+      const newRef = cache.writeFragment<Reference>({
+        data: data.createCategory,
+        fragment: gql`
+          fragment NewCategory on Category {
+            id
+            name
+          }
+        `,
+      });
+
       cache.modify({
         fields: {
-          categories(existing = []) {
-            return [...existing, createCategory];
+          categories(existingRefs: readonly Reference[] = []) {
+            return [...existingRefs, newRef].filter((ref): ref is Reference => Boolean(ref));
           },
         },
       });
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    try {
-      await createCategory({ variables: { input: { name } } });
-      router.push('/admin/categories');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Something went wrong');
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      try {
+        await createCategory({ variables: { input: { name } } });
+        toast.success('Category created!');
+        router.push('/admin/categories');
+      } catch (err) {
+        console.error(err);
+        toast.error(err instanceof Error ? err.message : 'Something went wrong');
       }
-    }
-  };
+    },
+    [name, createCategory, router]
+  );
 
   return (
     <div className="p-6 max-w-md">
@@ -56,7 +61,6 @@ export default function NewCategoryPage() {
         </span>
       </button>
       <h1 className="text-2xl font-bold text-sky-900 mb-4">Create New Category</h1>
-      {error && <p className="text-red-600 mb-2">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
@@ -67,7 +71,7 @@ export default function NewCategoryPage() {
           required
         />
         <button type="submit" className="w-full bg-sky-900 text-white py-2 px-4 rounded">
-          Create Category
+          {loading ? 'Creating...' : 'Create Category'}
         </button>
       </form>
     </div>

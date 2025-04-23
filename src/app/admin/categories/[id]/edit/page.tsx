@@ -1,6 +1,6 @@
 'use client';
 import { useParams, useRouter } from 'next/navigation';
-import EditCategoryForm from '@/features/admin/category/edit/EditCategoryForm';
+import EditCategoryForm from '@/features/admin/category/ui/EditCategoryForm';
 
 export default function EditCategoryPage() {
   const params = useParams();

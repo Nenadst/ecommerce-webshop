@@ -7,13 +7,13 @@ const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({ baseDirectory: __dirname });
 
-const eslintConfig = [
+const config = [
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'plugin:prettier/recommended'),
   {
     rules: {
-      'prettier/prettier': 'error',
+      '@next/next/no-img-element': 'off',
     },
   },
 ];
 
-export default eslintConfig;
+export default config;

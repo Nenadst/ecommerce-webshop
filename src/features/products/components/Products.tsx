@@ -38,7 +38,7 @@ const Products = () => {
                 key={index}
                 className="w-80 h-80 justify-center flex relative cursor-pointer hover:bg-slate-100"
               >
-                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} />
+                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="img" />
                 <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
                   <div className="text-sky-900 text-lg font-medium">{product.name}</div>

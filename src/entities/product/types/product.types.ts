@@ -1,14 +1,12 @@
-export interface IProduct {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  description: string;
-  rating: number;
-  featured: boolean;
-}
+import { Category } from '../../category/types/category.types';
 
-export interface ProductItemProps {
-  product: IProduct[];
-}
+export type Product = {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  category: Category;
+  file?: File | null;
+};

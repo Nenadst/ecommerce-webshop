@@ -19,7 +19,11 @@ const Slider = () => {
         <br />
         camera
       </div>
-      <img className="left-[932px] top-[38px] absolute rounded-lg" src="/assets/img/8-1.png" />
+      <img
+        className="left-[932px] top-[38px] absolute rounded-lg"
+        src="/assets/img/8-1.png"
+        alt=""
+      />
       <div className="left-[174px] top-[216px] absolute justify-center items-center gap-5 inline-flex">
         <Button
           onClick={handleClick}

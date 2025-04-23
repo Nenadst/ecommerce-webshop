@@ -12,7 +12,7 @@ const Partner = () => {
               className="transition ease-in-out hover:-translate-y-1 hover:scale-110"
             >
               <a href={partner.url} target="_blank" className="cursor-pointer rounded-lg">
-                <img className="rounded-xl p-2" src={partner.logo} />
+                <img className="rounded-xl p-2" src={partner.logo} alt="img" />
               </a>
             </div>
           ))}

@@ -1,41 +1,19 @@
 'use client';
 
-import { gql, useMutation, useQuery } from '@apollo/client';
+import { CategoryData, UpdateCategoryData } from '@/entities/category/types/category.types';
+import { GET_CATEGORIES, GET_CATEGORY, UPDATE_CATEGORY } from '@/shared/graphql/category';
+import { useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-const GET_CATEGORY = gql`
-  query Category($id: ID!) {
-    category(id: $id) {
-      id
-      name
-    }
-  }
-`;
-
-const GET_CATEGORIES = gql`
-  query categories {
-    categories {
-      id
-      name
-    }
-  }
-`;
-
-const UPDATE_CATEGORY = gql`
-  mutation UpdateCategory($id: ID!, $input: CategoryInput!) {
-    updateCategory(id: $id, input: $input) {
-      id
-      name
-    }
-  }
-`;
+import toast from 'react-hot-toast';
 
 export default function EditCategoryForm({ categoryId }: { categoryId: string }) {
   const router = useRouter();
-  const { data } = useQuery(GET_CATEGORY, { variables: { id: categoryId } });
+  const { data, loading: loadingCategory } = useQuery<CategoryData>(GET_CATEGORY, {
+    variables: { id: categoryId },
+  });
   const [name, setName] = useState('');
-  const [updateCategory] = useMutation(UPDATE_CATEGORY, {
+  const [updateCategory] = useMutation<UpdateCategoryData>(UPDATE_CATEGORY, {
     refetchQueries: [{ query: GET_CATEGORIES }],
     awaitRefetchQueries: true,
   });
@@ -48,11 +26,15 @@ export default function EditCategoryForm({ categoryId }: { categoryId: string })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateCategory({
-      variables: { id: categoryId, input: { name } },
-    });
+    if (!name.trim()) {
+      toast.error('Name is required');
+      return;
+    }
+    await updateCategory({ variables: { id: categoryId, input: { name } } });
     router.push('/admin/categories');
   };
+
+  if (loadingCategory) return <div className="p-6">Loading...</div>;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-md">

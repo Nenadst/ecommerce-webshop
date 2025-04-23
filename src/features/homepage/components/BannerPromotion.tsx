@@ -8,6 +8,7 @@ const BannerPromotion = () => {
         <img
           className="w-[1350px] h-[417px] rounded-lg"
           src="/assets/img/pexels-nao-triponez-129208-1.png"
+          alt="img"
         />
         <div className="w-32 h-11 bg-amber-500 rounded-2xl justify-center items-center gap-2.5 flex absolute right-72 top-20">
           <div className="text-white text-sm font-medium">New laptop </div>

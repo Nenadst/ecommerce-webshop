@@ -18,6 +18,7 @@ const Testimoni = () => {
                   <img
                     className="w-20 h-20 left-[6.54px] top-[6.54px] absolute rounded-full"
                     src={testimoni.image}
+                    alt=""
                   />
                 </div>
               </div>
