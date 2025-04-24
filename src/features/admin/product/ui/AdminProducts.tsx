@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
 import { useAdminProducts } from '@/features/admin/product/hooks/useAminProducts';
+import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 
 export default function AdminProducts() {
   const router = useRouter();
@@ -13,13 +14,7 @@ export default function AdminProducts() {
 
   const handleAddProduct = () => router.push('/admin/products/new');
 
-  if (productsLoading)
-    return (
-      <div className="flex justify-center items-center min-h-[300px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-900"></div>
-        <span className="ml-4 text-sky-900 font-medium">Loading products...</span>
-      </div>
-    );
+  if (productsLoading) return <FullScreenSpinner />;
 
   return (
     <>
@@ -48,9 +43,6 @@ export default function AdminProducts() {
                       aria-label="Edit product"
                     >
                       <Pencil size={16} />
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                        Edit Product
-                      </span>
                     </Link>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
@@ -60,14 +52,7 @@ export default function AdminProducts() {
                       aria-label="Delete product"
                       disabled={deleteLoading}
                     >
-                      {deleteLoading && modal.productId === product.id ? (
-                        <span className="animate-spin w-4 h-4 border-b-2 border-red-600 rounded-full block"></span>
-                      ) : (
-                        <Trash2 size={16} />
-                      )}
-                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
-                        Delete Product
-                      </span>
+                      <Trash2 size={16} />
                     </button>
                   </div>
                   <Image

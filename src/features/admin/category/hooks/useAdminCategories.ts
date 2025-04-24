@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { DELETE_CATEGORY, GET_CATEGORIES } from '@/shared/graphql/category';
 import { Category } from '@/entities/category/types/category.types';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 type ModalState = {
   show: boolean;
@@ -12,6 +13,7 @@ type ModalState = {
 };
 
 export function useAdminCategories() {
+  const router = useRouter();
   const { data, loading, error } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
 
   const [modal, setModal] = useState<ModalState>({
@@ -26,7 +28,6 @@ export function useAdminCategories() {
         cache.modify({
           fields: {
             categories(existingRefs: readonly Reference[] = [], { readField }) {
-              // Remove the deleted category from cache by id
               return existingRefs.filter(
                 (ref: Reference) => readField('id', ref) !== modal.categoryId
               );
@@ -37,8 +38,8 @@ export function useAdminCategories() {
     },
   });
 
-  const handleAddCategory = (routerPush: (url: string) => void) => {
-    routerPush('/admin/categories/new');
+  const handleAddCategory = () => {
+    router.push('/admin/categories/new');
   };
 
   const handleDeleteCategory = (id: string) => {

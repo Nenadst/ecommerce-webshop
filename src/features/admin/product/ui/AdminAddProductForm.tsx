@@ -5,8 +5,9 @@ import { Category } from '@/entities/category/types/category.types';
 import { X } from 'lucide-react';
 import { GET_CATEGORIES } from '@/shared/graphql/category';
 import { useAddProductForm } from '../hooks/useAddProductForm';
+import Spinner from '@/shared/components/spinner/Spinner';
 
-export default function AddProductForm() {
+export default function AdminAddProductForm() {
   const { data: catData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
 
   const {
@@ -17,10 +18,21 @@ export default function AddProductForm() {
     handleInputChange,
     handleSubmit,
     loading,
+    router,
+    loadingUpload,
   } = useAddProductForm();
 
   return (
-    <div>
+    <div className="p-6">
+      <button
+        onClick={() => router.back()}
+        className="mb-4 inline-flex items-center gap-2 text-sky-900 font-medium relative group"
+      >
+        <span className="after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[2px] after:w-full after:bg-sky-900 after:scale-x-0 group-hover:after:scale-x-100 after:transition-transform after:origin-left pb-1">
+          ← Back
+        </span>
+      </button>
+      <h1 className="text-2xl font-bold text-sky-900 mb-4">Create New Product</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <input
           type="text"
@@ -103,9 +115,10 @@ export default function AddProductForm() {
 
         <button
           type="submit"
-          className="w-full bg-sky-900 text-white font-semibold py-2 px-4 rounded hover:bg-sky-800"
-          disabled={loading}
+          className="w-full bg-sky-900 text-white font-semibold py-2 px-4 rounded hover:bg-sky-800 flex items-center justify-center gap-2"
+          disabled={loading || loadingUpload}
         >
+          {loading && <Spinner className="mr-2 text-white" />}
           {loading ? 'Creating...' : 'Create Product'}
         </button>
       </form>

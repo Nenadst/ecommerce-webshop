@@ -1,4 +1,3 @@
-// src/features/admin/product/add/useAddProductForm.ts
 import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
@@ -18,6 +17,7 @@ export function useAddProductForm() {
     file: null as File | null,
     imagePreview: '',
   });
+  const [loadingUpload, setLoadingUpload] = useState(false);
 
   const [createProduct, { loading }] = useMutation(CREATE_PRODUCT, {
     update(cache, { data: { createProduct } }) {
@@ -33,10 +33,12 @@ export function useAddProductForm() {
 
   const handleUpload = useCallback(async (): Promise<string> => {
     if (!form.file) return '';
+    setLoadingUpload(true);
     const formData = new FormData();
     formData.append('file', form.file);
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
     const data = await res.json();
+    setLoadingUpload(false);
     return data.url;
   }, [form.file]);
 
@@ -119,5 +121,7 @@ export function useAddProductForm() {
     handleInputChange,
     handleSubmit,
     loading,
+    router,
+    loadingUpload,
   };
 }

@@ -1,21 +1,21 @@
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
-import { AdminCategoriesUIProps, Category } from '@/entities/category/types/category.types';
+import { Category } from '@/entities/category/types/category.types';
+import { useAdminCategories } from '../hooks/useAdminCategories';
+import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 
-export function AdminCategories({
-  categories,
-  loading,
-  error,
-  modal,
-  setModal,
-  handleAddCategory,
-  handleDeleteCategory,
-  deleteLoading,
-  routerPush,
-}: AdminCategoriesUIProps) {
-  if (loading) return <p className="p-6">Loading categories...</p>;
-  if (error) return <p className="p-6 text-red-600">Failed to load categories.</p>;
+export function AdminCategories() {
+  const {
+    categories,
+    loading,
+    modal,
+    setModal,
+    handleAddCategory,
+    handleDeleteCategory,
+    deleteLoading,
+  } = useAdminCategories();
+  if (loading) return <FullScreenSpinner />;
 
   return (
     <div className="p-6 space-y-10">
@@ -29,7 +29,7 @@ export function AdminCategories({
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-sky-900">Categories</h2>
         <button
-          onClick={() => handleAddCategory(routerPush)}
+          onClick={() => handleAddCategory()}
           className="bg-sky-900 text-white px-4 py-2 rounded hover:bg-sky-800"
         >
           + Add New Category
@@ -55,11 +55,7 @@ export function AdminCategories({
               aria-label="Delete category"
               disabled={deleteLoading}
             >
-              {deleteLoading && cat.id === modal.categoryId ? (
-                <span className="animate-spin w-4 h-4 border-b-2 border-red-600 rounded-full block"></span>
-              ) : (
-                <Trash2 size={14} />
-              )}
+              <Trash2 size={14} />
             </button>
           </div>
         ))}
