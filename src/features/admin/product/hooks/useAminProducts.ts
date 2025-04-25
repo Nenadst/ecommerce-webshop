@@ -3,18 +3,22 @@ import { useState } from 'react';
 import { GET_PRODUCTS, DELETE_PRODUCT } from '@/shared/graphql/product';
 import { Product } from '@/entities/product/types/product.types';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/router';
+
+export type ModalState = {
+  show: boolean;
+  message: string;
+  onConfirm: () => void;
+  productId?: string;
+};
 
 export function useAdminProducts() {
+  const router = useRouter();
   const { data: productData, loading: productsLoading } = useQuery<{ products: Product[] }>(
     GET_PRODUCTS
   );
 
-  const [modal, setModal] = useState<{
-    show: boolean;
-    message: string;
-    onConfirm: () => void;
-    productId?: string;
-  }>({
+  const [modal, setModal] = useState<ModalState>({
     show: false,
     message: '',
     onConfirm: () => {},
@@ -35,6 +39,8 @@ export function useAdminProducts() {
       }
     },
   });
+
+  const handleAddProduct = () => router.push('/admin/products/new');
 
   const handleDeleteProduct = (id: string) => {
     setModal({
@@ -66,5 +72,6 @@ export function useAdminProducts() {
     setModal,
     handleDeleteProduct,
     deleteLoading,
+    handleAddProduct,
   };
 }

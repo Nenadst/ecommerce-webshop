@@ -1,5 +1,4 @@
 'use client';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -8,11 +7,15 @@ import { useAdminProducts } from '@/features/admin/product/hooks/useAminProducts
 import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 
 export default function AdminProducts() {
-  const router = useRouter();
-  const { products, productsLoading, modal, setModal, handleDeleteProduct, deleteLoading } =
-    useAdminProducts();
-
-  const handleAddProduct = () => router.push('/admin/products/new');
+  const {
+    products,
+    productsLoading,
+    modal,
+    setModal,
+    handleDeleteProduct,
+    deleteLoading,
+    handleAddProduct,
+  } = useAdminProducts();
 
   if (productsLoading) return <FullScreenSpinner />;
 
@@ -84,6 +87,7 @@ export default function AdminProducts() {
             setModal((prev) => ({ ...prev, show: false }));
           }}
           onCancel={() => setModal((prev) => ({ ...prev, show: false }))}
+          deleteLoading={deleteLoading}
         />
       )}
     </>

@@ -24,6 +24,7 @@ export function AdminCategories() {
         message={modal.message}
         onConfirm={modal.onConfirm}
         onCancel={() => setModal((prev) => ({ ...prev, show: false }))}
+        deleteLoading={deleteLoading}
       />
 
       <div className="flex items-center justify-between mb-4">
