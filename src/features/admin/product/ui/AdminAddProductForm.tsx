@@ -3,7 +3,7 @@
 import { useQuery } from '@apollo/client';
 import { Category } from '@/entities/category/types/category.types';
 import { X } from 'lucide-react';
-import { GET_CATEGORIES } from '@/shared/graphql/category';
+import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { useAddProductForm } from '../hooks/useAddProductForm';
 import Spinner from '@/shared/components/spinner/Spinner';
 

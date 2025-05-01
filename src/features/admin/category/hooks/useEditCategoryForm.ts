@@ -2,7 +2,11 @@ import { useMutation, useQuery } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { GET_CATEGORIES, GET_CATEGORY, UPDATE_CATEGORY } from '@/shared/graphql/category';
+import {
+  GET_CATEGORIES,
+  GET_CATEGORY,
+  UPDATE_CATEGORY,
+} from '@/entities/category/api/category.queries';
 import { CategoryData, UpdateCategoryData } from '@/entities/category/types/category.types';
 
 export function useEditCategoryForm() {

@@ -2,11 +2,11 @@ import { useMutation, useQuery, Reference, StoreObject } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { GET_PRODUCT, UPDATE_PRODUCT } from '@/shared/graphql/product';
-import { GET_CATEGORIES } from '@/shared/graphql/category';
+import { GET_PRODUCT, UPDATE_PRODUCT } from '@/entities/product/api/product.queries';
+import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { Product } from '@/entities/product/types/product.types';
 import { Category } from '@/entities/category/types/category.types';
-import { EditProduct } from '@/entities/product/types/edit-product.types';
+import { EditProduct } from '@/entities/product/types/product-edit.types';
 
 export function useEditProductForm() {
   const router = useRouter();

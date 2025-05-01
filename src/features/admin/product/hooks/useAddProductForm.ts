@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
-import { CREATE_PRODUCT } from '@/shared/graphql/product';
+import { CREATE_PRODUCT } from '@/entities/product/api/product.queries';
 
 export function useAddProductForm() {
   const router = useRouter();

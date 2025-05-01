@@ -1,6 +1,6 @@
 import { gql } from 'graphql-tag';
-import productResolvers from '../../entities/product/graphql/product.resolver';
-import categoryResolvers from '../../entities/category/graphql/category.resolver';
+import productResolvers from '../../entities/product/api/product.resolver';
+import categoryResolvers from '../../entities/category/api/category.resolver';
 
 export const typeDefs = gql`
   type Product {

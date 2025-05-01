@@ -2,7 +2,7 @@
 import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
 import { typeDefs, resolvers } from '@/shared/graphql/schema';
-import { connectToDatabase } from '@/shared/db';
+import { connectToDatabase } from '@/shared/lib/db';
 
 const server = new ApolloServer({
   typeDefs,

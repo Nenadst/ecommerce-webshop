@@ -1,6 +1,6 @@
 import { useQuery, useMutation, Reference } from '@apollo/client';
 import { useState } from 'react';
-import { DELETE_CATEGORY, GET_CATEGORIES } from '@/shared/graphql/category';
+import { DELETE_CATEGORY, GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { Category } from '@/entities/category/types/category.types';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';

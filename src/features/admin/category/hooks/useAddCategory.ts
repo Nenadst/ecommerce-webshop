@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useRef } from 'react';
 import { gql, Reference, useMutation } from '@apollo/client';
-import { CREATE_CATEGORY } from '@/shared/graphql/category';
+import { CREATE_CATEGORY } from '@/entities/category/api/category.queries';
 import toast from 'react-hot-toast';
 
 export function useAddCategory() {

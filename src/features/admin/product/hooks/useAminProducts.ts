@@ -1,9 +1,9 @@
 import { useQuery, useMutation, Reference } from '@apollo/client';
 import { useState } from 'react';
-import { GET_PRODUCTS, DELETE_PRODUCT } from '@/shared/graphql/product';
+import { GET_PRODUCTS, DELETE_PRODUCT } from '@/entities/product/api/product.queries';
 import { Product } from '@/entities/product/types/product.types';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 export type ModalState = {
   show: boolean;
