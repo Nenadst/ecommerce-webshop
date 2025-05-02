@@ -1,6 +1,6 @@
 'use client';
 
-import { useEditProductForm } from '@/features/admin/product/hooks/useEditProductForm';
+import { useEditProductForm } from '@/features/admin/products/hooks/useEditProductForm';
 import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 import Spinner from '@/shared/components/spinner/Spinner';
 import { X } from 'lucide-react';

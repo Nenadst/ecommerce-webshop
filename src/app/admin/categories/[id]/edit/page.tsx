@@ -1,5 +1,5 @@
 'use client';
-import AdminEditCategoryForm from '@/features/admin/category/ui/AdminEditCategoryForm';
+import AdminEditCategoryForm from '@/features/admin/categories/ui/AdminEditCategoryForm';
 
 export default function AdminEditCategoryPage() {
   return <AdminEditCategoryForm />;

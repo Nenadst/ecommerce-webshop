@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
-import { useAdminProducts } from '@/features/admin/product/hooks/useAminProducts';
+import { useAdminProducts } from '@/features/admin/products/hooks/useAminProducts';
 import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 
 export default function AdminProducts() {

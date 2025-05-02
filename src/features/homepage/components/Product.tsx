@@ -4,9 +4,19 @@ import DotSlide from '@/shared/components/elements/DotSlide';
 import Star from '@/shared/components/elements/Star';
 import { ButtonLoveIcon, EyeIcon, ShoppingCartIcon } from '@/shared/components/icons';
 import { PRODUCTS } from '@/data/products';
-import { IProduct } from '@/entities/product/types/product.types';
 import Link from 'next/link';
 import React from 'react';
+
+export type MockProduct = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  rating: number;
+  featured: boolean;
+};
 
 const featuredProducts = PRODUCTS.filter((product) => product.featured);
 const nonFeaturedProducts = PRODUCTS.filter((product) => !product.featured);
@@ -40,7 +50,7 @@ const Product = () => {
               </div>
             </Card>
           ))}
-          {randomNonFeaturedProducts.map((product: IProduct) => (
+          {randomNonFeaturedProducts.map((product: MockProduct) => (
             <Link href={`/products/${product.id}`} key={product.id}>
               <Card
                 key={product.id}

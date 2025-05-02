@@ -1,7 +1,7 @@
 'use client';
 
 import Spinner from '@/shared/components/spinner/Spinner';
-import { useEditCategoryForm } from '@/features/admin/category/hooks/useEditCategoryForm';
+import { useEditCategoryForm } from '@/features/admin/categories/hooks/useEditCategoryForm';
 
 export default function EditCategoryForm() {
   const { name, setName, handleSubmit, loadingCategory, router } = useEditCategoryForm();

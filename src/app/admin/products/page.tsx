@@ -1,5 +1,5 @@
 'use client';
-import AdminProducts from '@/features/admin/product/ui/AdminProducts';
+import AdminProducts from '@/features/admin/products/ui/AdminProducts';
 
 export default function AdminProductsPage() {
   return <AdminProducts />;
