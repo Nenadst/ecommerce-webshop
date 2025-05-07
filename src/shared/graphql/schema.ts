@@ -18,8 +18,32 @@ export const typeDefs = gql`
     name: String!
   }
 
+  input ProductFilterInput {
+    categoryId: ID
+    name: String
+    minPrice: Float
+    maxPrice: Float
+  }
+
+  input ProductSortInput {
+    field: String!
+    order: Int! # 1 for ascending, -1 for descending
+  }
+
+  type ProductPagination {
+    items: [Product!]!
+    total: Int!
+    page: Int!
+    totalPages: Int!
+  }
+
   type Query {
-    products: [Product!]
+    products(
+      page: Int
+      limit: Int
+      filter: ProductFilterInput
+      sort: ProductSortInput
+    ): ProductPagination!
     product(id: ID!): Product
     categories: [Category!]
     category(id: ID!): Category

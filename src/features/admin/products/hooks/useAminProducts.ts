@@ -1,5 +1,6 @@
+// ✅ useAdminProducts.ts
 import { useQuery, useMutation, Reference } from '@apollo/client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GET_PRODUCTS, DELETE_PRODUCT } from '@/entities/product/api/product.queries';
 import { Product } from '@/entities/product/types/product.types';
 import toast from 'react-hot-toast';
@@ -12,11 +13,78 @@ export type ModalState = {
   productId?: string;
 };
 
-export function useAdminProducts() {
+type ProductFilter = {
+  name?: string;
+  categoryId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+};
+
+type PaginatedProducts = {
+  products: {
+    items: Product[];
+    total: number;
+    page: number;
+    totalPages: number;
+  };
+};
+
+type UseAdminProductsResult = {
+  products: Product[];
+  total: number;
+  page: number;
+  totalPages: number;
+  productsLoading: boolean;
+  modal: ModalState;
+  setModal: React.Dispatch<React.SetStateAction<ModalState>>;
+  handleDeleteProduct: (id: string) => void;
+  deleteLoading: boolean;
+  handleAddProduct: () => void;
+  setPage: (page: number) => void;
+  setSort: (sort: { field: string; order: 1 | -1 }) => void;
+  // Controlled filter inputs:
+  search: string;
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  categoryId: string;
+  setCategoryId: React.Dispatch<React.SetStateAction<string>>;
+  minPrice: string;
+  setMinPrice: React.Dispatch<React.SetStateAction<string>>;
+  maxPrice: string;
+  setMaxPrice: React.Dispatch<React.SetStateAction<string>>;
+  limit: number;
+  setLimit: React.Dispatch<React.SetStateAction<number>>;
+};
+
+export function useAdminProducts(): UseAdminProductsResult {
   const router = useRouter();
-  const { data: productData, loading: productsLoading } = useQuery<{ products: Product[] }>(
-    GET_PRODUCTS
-  );
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [filter, setFilter] = useState<ProductFilter>({});
+  const [sort, setSort] = useState<{ field: string; order: 1 | -1 }>({
+    field: 'createdAt',
+    order: -1,
+  });
+
+  // Controlled filter inputs
+  const [search, setSearch] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+
+  useEffect(() => {
+    setFilter({
+      name: search || undefined,
+      categoryId: categoryId || undefined,
+      minPrice: minPrice ? parseFloat(minPrice) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+    });
+  }, [search, categoryId, minPrice, maxPrice]);
+
+  const { data, loading, refetch } = useQuery<PaginatedProducts>(GET_PRODUCTS, {
+    variables: { page, limit, filter, sort },
+    fetchPolicy: 'cache-and-network',
+  });
 
   const [modal, setModal] = useState<ModalState>({
     show: false,
@@ -29,10 +97,11 @@ export function useAdminProducts() {
       if (data?.deleteProduct) {
         cache.modify({
           fields: {
-            products(existingRefs: readonly Reference[] = [], { readField }) {
-              return existingRefs.filter(
+            products(existingRefs = {}, { readField }) {
+              const updatedItems = existingRefs.items?.filter(
                 (ref: Reference) => readField('id', ref) !== modal.productId
               );
+              return { ...existingRefs, items: updatedItems };
             },
           },
         });
@@ -51,13 +120,14 @@ export function useAdminProducts() {
         try {
           const { data } = await deleteProduct({ variables: { id } });
           if (data?.deleteProduct) {
+            await refetch();
             toast.success('Product deleted successfully!');
           } else {
             toast.error('Failed to delete product.');
           }
         } catch (err) {
           toast.error('An error occurred while deleting.');
-          console.log(err);
+          console.error(err);
         } finally {
           setModal((prev) => ({ ...prev, show: false }));
         }
@@ -66,12 +136,27 @@ export function useAdminProducts() {
   };
 
   return {
-    products: productData?.products || [],
-    productsLoading,
+    products: data?.products.items || [],
+    total: data?.products.total || 0,
+    page,
+    totalPages: data?.products.totalPages || 1,
+    productsLoading: loading,
     modal,
     setModal,
-    handleDeleteProduct,
     deleteLoading,
+    handleDeleteProduct,
     handleAddProduct,
+    setPage,
+    setSort,
+    search,
+    setSearch,
+    categoryId,
+    setCategoryId,
+    minPrice,
+    setMinPrice,
+    maxPrice,
+    setMaxPrice,
+    limit,
+    setLimit,
   };
 }

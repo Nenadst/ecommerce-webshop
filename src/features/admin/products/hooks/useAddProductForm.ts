@@ -23,8 +23,20 @@ export function useAddProductForm() {
     update(cache, { data: { createProduct } }) {
       cache.modify({
         fields: {
-          products(existing = []) {
-            return [...existing, createProduct];
+          products(existingProductsRef = {}, { toReference }) {
+            const oldItems = existingProductsRef.items ?? [];
+
+            return {
+              ...existingProductsRef,
+              items: [
+                ...oldItems,
+                toReference({
+                  __typename: 'Product',
+                  id: createProduct.id,
+                }),
+              ],
+              total: (existingProductsRef.total ?? 0) + 1,
+            };
           },
         },
       });

@@ -56,13 +56,21 @@ export function useEditProductForm() {
   const [updateProduct, { loading: updateLoading }] = useMutation(UPDATE_PRODUCT, {
     update(cache, { data }) {
       if (!data?.updateProduct) return;
+      const updated = data.updateProduct;
+
       cache.modify({
         fields: {
-          products(existingProducts: readonly (Reference | StoreObject)[] = [], { readField }) {
-            return existingProducts.map((prod) =>
-              readField('id', prod) === data.updateProduct.id
-                ? { ...prod, ...data.updateProduct }
-                : prod
+          products(existing, { readField, toReference }) {
+            // make sure we have an array
+            const list = Array.isArray(existing) ? existing : [];
+
+            return list.map((item: Reference) =>
+              readField('id', item) === updated.id
+                ? toReference({
+                    __typename: 'Product',
+                    id: updated.id,
+                  })
+                : item
             );
           },
         },
