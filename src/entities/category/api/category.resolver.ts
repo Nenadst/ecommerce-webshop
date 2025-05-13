@@ -1,5 +1,6 @@
 import { Category } from '@/entities/category/model/category.model';
 import { Product } from '@/entities/product/model/product.model';
+import { ApolloError } from 'apollo-server-errors';
 
 type CreateCategoryArgs = {
   input: {
@@ -26,8 +27,20 @@ const categoryResolvers = {
     },
 
     updateCategory: async (_: unknown, { id, input }: { id: string; input: { name: string } }) => {
-      const updated = await Category.findByIdAndUpdate(id, input, { new: true });
-      return updated;
+      try {
+        const existingCategory = await Category.findOne({ name: input.name });
+        if (existingCategory && existingCategory._id.toString() !== id) {
+          throw new ApolloError('Category name already exists', 'DUPLICATE_CATEGORY');
+        }
+
+        const updated = await Category.findByIdAndUpdate(id, input, { new: true });
+        return updated;
+      } catch (error) {
+        if (error instanceof ApolloError) {
+          throw error;
+        }
+        throw new ApolloError('Error updating category');
+      }
     },
 
     deleteCategory: async (_: unknown, { id }: DeleteCategoryArgs) => {

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client';
+import { ApolloError, useMutation, useQuery } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -36,8 +36,10 @@ export function useEditCategoryForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (submittingRef.current) return;
     submittingRef.current = true;
+
     if (!name.trim()) {
       toast.error('Name is required');
       submittingRef.current = false;
@@ -46,9 +48,23 @@ export function useEditCategoryForm() {
     try {
       await updateCategory({ variables: { id: categoryId, input: { name } } });
       router.push('/admin/categories');
-    } catch (error) {
-      toast.error('Failed to update category');
-      console.log(error);
+    } catch (err) {
+      if (err instanceof ApolloError) {
+        console.log('GraphQL Error:', err);
+        if (err.graphQLErrors) {
+          err.graphQLErrors.forEach((error) => {
+            if (error.extensions?.code === 'DUPLICATE_CATEGORY') {
+              toast.error('Category name already exists');
+            } else {
+              toast.error(error.message);
+            }
+          });
+        }
+      } else {
+        toast.error('An error occurred');
+        console.error(err);
+      }
+    } finally {
       submittingRef.current = false;
     }
   };
