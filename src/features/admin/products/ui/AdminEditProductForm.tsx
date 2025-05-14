@@ -44,6 +44,7 @@ export default function AdminEditProductForm() {
           value={form.name}
           onChange={handleChange('name')}
           required
+          autoFocus
         />
         <textarea
           placeholder="Description"

@@ -25,6 +25,7 @@ export default function EditCategoryForm() {
           onChange={(e) => setName(e.target.value)}
           className="w-full border p-2 rounded"
           required
+          autoFocus
         />
         <button
           type="submit"

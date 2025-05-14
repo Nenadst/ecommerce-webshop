@@ -42,6 +42,7 @@ export default function AdminAddProductForm() {
           value={form.name}
           onChange={handleInputChange}
           required
+          autoFocus
         />
 
         <textarea
