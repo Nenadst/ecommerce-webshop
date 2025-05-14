@@ -122,14 +122,24 @@ export default function AdminEditProductForm() {
             </option>
           ))}
         </select>
-        <button
-          type="submit"
-          className="w-full bg-sky-900 text-white py-2 px-4 rounded flex items-center justify-center"
-          disabled={updateLoading}
-        >
-          {updateLoading && <Spinner className="mr-2 text-white" />}
-          {updateLoading ? 'Updating...' : 'Update Product'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex-1 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded hover:bg-gray-200"
+            disabled={updateLoading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="w-full bg-sky-900 text-white py-2 px-4 rounded flex items-center justify-center"
+            disabled={updateLoading}
+          >
+            {updateLoading && <Spinner className="mr-2 text-white" />}
+            {updateLoading ? 'Updating...' : 'Update Product'}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -27,14 +27,24 @@ export default function EditCategoryForm() {
           required
           autoFocus
         />
-        <button
-          type="submit"
-          className="w-full bg-sky-900 text-white py-2 px-4 rounded flex items-center justify-center"
-          disabled={loadingCategory}
-        >
-          {loadingCategory && <Spinner className="mr-2 text-white" />}
-          {loadingCategory ? 'Updating...' : 'Update Category'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex-1 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded hover:bg-gray-200"
+            disabled={loadingCategory}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="w-full bg-sky-900 text-white py-2 px-4 rounded flex items-center justify-center"
+            disabled={loadingCategory}
+          >
+            {loadingCategory && <Spinner className="mr-2 text-white" />}
+            {loadingCategory ? 'Updating...' : 'Update Category'}
+          </button>
+        </div>
       </form>
     </div>
   );

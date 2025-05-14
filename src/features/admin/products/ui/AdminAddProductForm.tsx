@@ -114,14 +114,24 @@ export default function AdminAddProductForm() {
           onChange={handleFileChange}
         />
 
-        <button
-          type="submit"
-          className="w-full bg-sky-900 text-white font-semibold py-2 px-4 rounded hover:bg-sky-800 flex items-center justify-center gap-2"
-          disabled={loading || loadingUpload}
-        >
-          {loading && <Spinner className="mr-2 text-white" />}
-          {loading ? 'Creating...' : 'Create Product'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="flex-1 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded hover:bg-gray-200"
+            disabled={loading || loadingUpload}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="w-full bg-sky-900 text-white font-semibold py-2 px-4 rounded hover:bg-sky-800 flex items-center justify-center gap-2"
+            disabled={loading || loadingUpload}
+          >
+            {loading && <Spinner className="mr-2 text-white" />}
+            {loading ? 'Creating...' : 'Create Product'}
+          </button>
+        </div>
       </form>
     </div>
   );
