@@ -23,7 +23,24 @@ const categoryResolvers = {
 
   Mutation: {
     createCategory: async (_: unknown, args: CreateCategoryArgs) => {
-      return Category.create(args.input);
+      try {
+        const existingCategory = await Category.findOne({ name: args.input.name });
+
+        if (existingCategory) {
+          throw new ApolloError('Category name already exists', 'DUPLICATE_CATEGORY');
+        }
+
+        const newCategory = await Category.create(args.input);
+        return newCategory;
+      } catch (error) {
+        console.error('Error creating category:', error);
+
+        if (error instanceof ApolloError) {
+          throw error;
+        }
+
+        throw new ApolloError('Error creating category');
+      }
     },
 
     updateCategory: async (_: unknown, { id, input }: { id: string; input: { name: string } }) => {
