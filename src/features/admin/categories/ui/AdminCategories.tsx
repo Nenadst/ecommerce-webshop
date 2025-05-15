@@ -11,6 +11,7 @@ import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';
 import { DataTable } from '@/shared/components/table/DataTable';
 
 import type { ColumnDef } from '@tanstack/react-table';
+import NoData from '@/shared/components/no-data/NoData';
 
 export function AdminCategories() {
   const {
@@ -73,15 +74,21 @@ export function AdminCategories() {
 
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-sky-900">Categories</h2>
-        <button
-          onClick={() => handleAddCategory()}
-          className="bg-sky-900 text-white px-4 py-2 rounded hover:bg-sky-800"
-        >
-          + Add New Category
-        </button>
+        {!!categories.length && (
+          <button
+            onClick={() => handleAddCategory()}
+            className="bg-sky-900 text-white px-4 py-2 rounded hover:bg-sky-800"
+          >
+            + Add New Category
+          </button>
+        )}
       </div>
 
-      <DataTable data={categories} columns={columns} />
+      {!!categories.length ? (
+        <DataTable data={categories} columns={columns} />
+      ) : (
+        <NoData name="category" handleOnClick={handleAddCategory} />
+      )}
     </div>
   );
 }

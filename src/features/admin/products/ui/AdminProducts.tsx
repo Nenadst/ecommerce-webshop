@@ -10,6 +10,7 @@ import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { Category } from '@/entities/category/types/category.types';
 import { Product } from '@/entities/product/types/product.types';
 import { useAdminProducts } from '../hooks/useAminProducts';
+import NoData from '@/shared/components/no-data/NoData';
 
 export default function AdminProducts() {
   const {
@@ -44,12 +45,14 @@ export default function AdminProducts() {
       <div className="p-6 space-y-10">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-sky-900">Products</h2>
-          <button
-            onClick={handleAddProduct}
-            className="bg-sky-900 text-white px-4 py-2 rounded hover:bg-sky-800"
-          >
-            + Add New Product
-          </button>
+          {!!products.length && (
+            <button
+              onClick={handleAddProduct}
+              className="bg-sky-900 text-white px-4 py-2 rounded hover:bg-sky-800"
+            >
+              + Add New Product
+            </button>
+          )}
         </div>
 
         {/* Filters */}
@@ -155,7 +158,11 @@ export default function AdminProducts() {
                   </div>
                 ))
               ) : (
-                <p>No products found.</p>
+                <>
+                  <div></div>
+                  <div></div>
+                  <NoData name="product" handleOnClick={handleAddProduct} />
+                </>
               )}
             </>
           )}
