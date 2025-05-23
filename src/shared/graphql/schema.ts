@@ -62,6 +62,37 @@ export const typeDefs = gql`
     name: String!
   }
 
+  type User {
+    _id: ID!
+    email: String!
+    name: String
+    emailVerified: Boolean!
+    twoFactorEnabled: Boolean!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type AuthPayload {
+    accessToken: String!
+    refreshToken: String!
+    user: User!
+  }
+
+  type TwoFactorSecretKey {
+    base32: String!
+    otpauthUrl: String!
+  }
+
+  input RegisterInput {
+    email: String!
+    password: String!
+    name: String
+  }
+
+  type Query {
+    me: User!
+  }
+
   type Mutation {
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
@@ -70,6 +101,13 @@ export const typeDefs = gql`
     createCategory(input: CategoryInput!): Category!
     updateCategory(id: ID!, input: CategoryInput!): Category!
     deleteCategory(id: ID!): Boolean!
+
+    registerUser(input: RegisterInput!): Boolean!
+    verifyEmail(token: String!): Boolean!
+    login(email: String!, password: String!, otp: String): AuthPayload!
+    refreshToken(token: String!): AuthPayload!
+    generateTwoFactorSecret: TwoFactorSecretKey!
+    verifyTwoFactor(code: String!): Boolean!
   }
 `;
 
