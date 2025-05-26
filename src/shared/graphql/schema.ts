@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 import productResolvers from '../../entities/product/api/product.resolver';
 import categoryResolvers from '../../entities/category/api/category.resolver';
+import { authResolvers } from '@/entities/user/api/auth.resolver';
 
 export const typeDefs = gql`
   type Product {
@@ -37,18 +38,6 @@ export const typeDefs = gql`
     totalPages: Int!
   }
 
-  type Query {
-    products(
-      page: Int
-      limit: Int
-      filter: ProductFilterInput
-      sort: ProductSortInput
-    ): ProductPagination!
-    product(id: ID!): Product
-    categories: [Category!]
-    category(id: ID!): Category
-  }
-
   input ProductInput {
     name: String!
     description: String
@@ -62,6 +51,29 @@ export const typeDefs = gql`
     name: String!
   }
 
+  type User {
+    _id: ID!
+    email: String!
+  }
+
+  type AuthPayload {
+    user: User!
+    token: String!
+  }
+
+  type Query {
+    products(
+      page: Int
+      limit: Int
+      filter: ProductFilterInput
+      sort: ProductSortInput
+    ): ProductPagination!
+    product(id: ID!): Product
+    categories: [Category!]
+    category(id: ID!): Category
+    me: User
+  }
+
   type Mutation {
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
@@ -70,6 +82,10 @@ export const typeDefs = gql`
     createCategory(input: CategoryInput!): Category!
     updateCategory(id: ID!, input: CategoryInput!): Category!
     deleteCategory(id: ID!): Boolean!
+
+    register(email: String!, password: String!): User!
+    login(email: String!, password: String!): User!
+    logout: Boolean!
   }
 `;
 
@@ -77,9 +93,11 @@ export const resolvers = {
   Query: {
     ...productResolvers.Query,
     ...categoryResolvers.Query,
+    ...authResolvers.Query,
   },
   Mutation: {
     ...productResolvers.Mutation,
     ...categoryResolvers.Mutation,
+    ...authResolvers.Mutation,
   },
 };

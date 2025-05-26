@@ -1,14 +1,44 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation, gql } from '@apollo/client';
+import { useRouter, useSearchParams } from 'next/navigation';
+import toast from 'react-hot-toast';
+
+const LOGIN_MUTATION = gql`
+  mutation Login($email: String!, $password: String!) {
+    login(email: $email, password: $password) {
+      _id
+      email
+    }
+  }
+`;
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [login, { loading }] = useMutation(LOGIN_MUTATION);
+  const searchParams = useSearchParams();
+  const from = searchParams.get('from') || '/';
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('eeeee', e);
+    try {
+      const { data } = await login({
+        variables: { email, password },
+        fetchPolicy: 'no-cache',
+      });
+      if (data?.login?.email) {
+        router.push(from);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('Login failed');
+      }
+    }
   };
 
   return (
@@ -23,6 +53,7 @@ export default function LoginPage() {
             className="w-full border p-2 rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoFocus
           />
           <input
             type="password"
@@ -34,8 +65,9 @@ export default function LoginPage() {
           <button
             type="submit"
             className="w-full bg-sky-900 text-white font-semibold py-2 px-4 rounded hover:bg-sky-800 transition"
+            disabled={loading}
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 

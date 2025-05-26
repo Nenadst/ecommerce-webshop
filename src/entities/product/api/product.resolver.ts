@@ -47,7 +47,7 @@ const productResolvers = {
         sort?: { field: string; order: 1 | -1 };
       }
     ) => {
-      const query: any = {};
+      const query: Record<string, unknown> = {};
 
       if (filter.name) {
         query.name = { $regex: filter.name, $options: 'i' };
@@ -58,9 +58,10 @@ const productResolvers = {
       }
 
       if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
-        query.price = {};
-        if (filter.minPrice !== undefined) query.price.$gte = filter.minPrice;
-        if (filter.maxPrice !== undefined) query.price.$lte = filter.maxPrice;
+        const priceQuery: { $gte?: number; $lte?: number } = {};
+        query.price = priceQuery;
+        if (filter.minPrice !== undefined) priceQuery.$gte = filter.minPrice;
+        if (filter.maxPrice !== undefined) priceQuery.$lte = filter.maxPrice;
       }
 
       const skip = (page - 1) * limit;
