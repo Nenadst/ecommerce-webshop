@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import SideCategories from './SideCategories';
 import { Separator } from '@/shared/components/elements/Separator';
 import SideAvaliability from './SideAvaliability';
@@ -38,7 +39,14 @@ const Products = () => {
                 key={index}
                 className="w-80 h-80 justify-center flex relative cursor-pointer hover:bg-slate-100"
               >
-                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="img" />
+                <Image 
+                  src={product.image} 
+                  alt={product.name}
+                  width={192} 
+                  height={176}
+                  className="mt-7 rounded-lg object-cover"
+                  priority={index < 4}
+                />
                 <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
                   <div className="text-sky-900 text-lg font-medium">{product.name}</div>

@@ -2,6 +2,7 @@ import { Card } from '@/shared/components/elements/Card';
 import { Separator } from '@/shared/components/elements/Separator';
 import Star from '@/shared/components/elements/Star';
 import { HeartIconBig } from '@/shared/components/icons';
+import Image from 'next/image';
 import React from 'react';
 
 const ProductDetails = () => {
@@ -10,14 +11,33 @@ const ProductDetails = () => {
       <div className="min-h-full flex flex-col lg:flex-row py-14">
         <div className="w-full lg:w-[50%] h-full justify-center items-center gap-5 flex flex-col">
           <Card className="w-[500px] h-96 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-            <img className="p-5" src="/assets/img/cr1.jpg" alt="" />
+            <Image 
+              src="/assets/img/cr1.jpg" 
+              alt="Product main image"
+              width={450}
+              height={350}
+              className="p-5 object-contain"
+              priority
+            />
           </Card>
           <div className="flex m-auto flex-wrap gap-5 group">
             <Card className="w-60 h-32 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-              <img src="/assets/img/ps4c.png" alt="" />
+              <Image 
+                src="/assets/img/ps4c.png" 
+                alt="Product thumbnail"
+                width={200}
+                height={100}
+                className="object-contain"
+              />
             </Card>
             <Card className="w-60 h-32 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-              <img src="/assets/img/ps4c.png" alt="" />
+              <Image 
+                src="/assets/img/ps4c.png" 
+                alt="Product thumbnail"
+                width={200}
+                height={100}
+                className="object-contain"
+              />
             </Card>
           </div>
         </div>
