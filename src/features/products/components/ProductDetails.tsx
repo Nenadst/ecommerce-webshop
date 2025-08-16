@@ -11,8 +11,8 @@ const ProductDetails = () => {
       <div className="min-h-full flex flex-col lg:flex-row py-14">
         <div className="w-full lg:w-[50%] h-full justify-center items-center gap-5 flex flex-col">
           <Card className="w-[500px] h-96 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-            <Image 
-              src="/assets/img/cr1.jpg" 
+            <Image
+              src="/assets/img/cr1.jpg"
               alt="Product main image"
               width={450}
               height={350}
@@ -22,8 +22,8 @@ const ProductDetails = () => {
           </Card>
           <div className="flex m-auto flex-wrap gap-5 group">
             <Card className="w-60 h-32 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-              <Image 
-                src="/assets/img/ps4c.png" 
+              <Image
+                src="/assets/img/ps4c.png"
                 alt="Product thumbnail"
                 width={200}
                 height={100}
@@ -31,8 +31,8 @@ const ProductDetails = () => {
               />
             </Card>
             <Card className="w-60 h-32 justify-center items-center gap-5 flex relative cursor-pointer hover:bg-slate-100">
-              <Image 
-                src="/assets/img/ps4c.png" 
+              <Image
+                src="/assets/img/ps4c.png"
                 alt="Product thumbnail"
                 width={200}
                 height={100}

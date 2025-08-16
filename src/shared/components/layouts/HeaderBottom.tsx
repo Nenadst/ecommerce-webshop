@@ -10,8 +10,8 @@ const HeaderBottom = () => {
     <>
       <div className="w-full h-16 bg-sky-900 items-center gap-20 inline-flex sticky top-0 z-50">
         <Link href="/" className="cursor-pointer">
-          <Image 
-            src="/assets/img/logo.png" 
+          <Image
+            src="/assets/img/logo.png"
             alt="WebShop Logo"
             width={120}
             height={40}

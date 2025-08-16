@@ -41,9 +41,7 @@ export default function AdminProductsFilters({
         <div className="flex items-center gap-3">
           <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
           {hasActiveFilters && (
-            <span className="bg-sky-900 text-white text-xs px-2 py-1 rounded-full">
-              Active
-            </span>
+            <span className="bg-sky-900 text-white text-xs px-2 py-1 rounded-full">Active</span>
           )}
         </div>
         {isOpen ? (
@@ -52,8 +50,10 @@ export default function AdminProductsFilters({
           <ChevronDown className="w-5 h-5 text-gray-500" />
         )}
       </button>
-      
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+      >
         <div className="px-4 pb-4 border-t border-gray-100">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <div>
@@ -70,9 +70,7 @@ export default function AdminProductsFilters({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <select
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
@@ -89,9 +87,7 @@ export default function AdminProductsFilters({
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Min Price
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Min Price</label>
                 <input
                   type="number"
                   value={minPrice}
@@ -101,9 +97,7 @@ export default function AdminProductsFilters({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Max Price
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Max Price</label>
                 <input
                   type="number"
                   value={maxPrice}

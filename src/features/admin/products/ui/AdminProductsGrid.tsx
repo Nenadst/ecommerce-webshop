@@ -71,23 +71,13 @@ export default function AdminProductsGrid({
             />
           </div>
 
-          <h3 className="text-lg font-semibold text-sky-900 line-clamp-2">
-            {product.name}
-          </h3>
-          <p className="text-gray-700 text-sm line-clamp-3">
-            {product.description}
-          </p>
-          
+          <h3 className="text-lg font-semibold text-sky-900 line-clamp-2">{product.name}</h3>
+          <p className="text-gray-700 text-sm line-clamp-3">{product.description}</p>
+
           <div className="mt-auto space-y-1">
-            <p className="text-sm font-medium text-green-600">
-              💰 ${product.price}
-            </p>
-            <p className="text-sm text-gray-600">
-              📦 {product.quantity} in stock
-            </p>
-            <p className="text-sm text-blue-600">
-              🏷️ {product.category?.name}
-            </p>
+            <p className="text-sm font-medium text-green-600">💰 ${product.price}</p>
+            <p className="text-sm text-gray-600">📦 {product.quantity} in stock</p>
+            <p className="text-sm text-blue-600">🏷️ {product.category?.name}</p>
           </div>
         </div>
       ))}

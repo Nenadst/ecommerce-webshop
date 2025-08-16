@@ -39,10 +39,10 @@ const Products = () => {
                 key={index}
                 className="w-80 h-80 justify-center flex relative cursor-pointer hover:bg-slate-100"
               >
-                <Image 
-                  src={product.image} 
+                <Image
+                  src={product.image}
                   alt={product.name}
-                  width={192} 
+                  width={192}
                   height={176}
                   className="mt-7 rounded-lg object-cover"
                   priority={index < 4}

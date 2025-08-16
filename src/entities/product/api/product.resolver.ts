@@ -47,7 +47,7 @@ const productResolvers = {
         sort?: { field: string; order: 1 | -1 };
       }
     ) => {
-      const query: any = {};
+      const query: Record<string, unknown> = {};
 
       if (filter.name) {
         query.name = { $regex: filter.name, $options: 'i' };

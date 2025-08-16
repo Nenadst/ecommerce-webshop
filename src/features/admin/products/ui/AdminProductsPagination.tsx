@@ -68,11 +68,11 @@ export default function AdminProductsPagination({
         >
           Previous
         </button>
-        
+
         <span className="px-3 py-1 text-sm font-medium">
           Page {page} of {totalPages}
         </span>
-        
+
         <button
           onClick={() => onPageChange(page + 1)}
           disabled={page === totalPages}
