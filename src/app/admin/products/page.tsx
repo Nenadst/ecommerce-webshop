@@ -1,4 +1,4 @@
-import AdminProducts from '@/features/admin/products/ui/AdminProducts';
+import AdminProducts from '@/features/admin/products/components/AdminProducts';
 
 export default function AdminProductsPage() {
   return <AdminProducts />;
