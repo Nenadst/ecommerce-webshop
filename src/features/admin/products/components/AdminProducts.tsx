@@ -1,13 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
 import { useAdminProducts } from '../hooks/useAminProducts';
 import AdminProductsFilters from './AdminProductsFilters';
 import AdminProductsGrid from './AdminProductsGrid';
+import AdminProductsList from './AdminProductsList';
 import AdminProductsHeader from './AdminProductsHeader';
 import AdminProductsPagination from './AdminProductsPagination';
+import AdminProductsViewControls from './AdminProductsViewControls';
+import { ViewType } from './AdminProductsViewToggle';
 
 export default function AdminProducts() {
+  const [currentView, setCurrentView] = useState<ViewType>('grid');
+
   const {
     products,
     totalPages,
@@ -35,7 +41,11 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <AdminProductsHeader totalProducts={total} onAddProduct={handleAddProduct} onSort={setSort} />
+      <AdminProductsHeader
+        totalProducts={total}
+        onAddProduct={handleAddProduct}
+        onSort={setSort}
+      />
 
       <AdminProductsFilters
         search={search}
@@ -48,13 +58,29 @@ export default function AdminProducts() {
         setMaxPrice={setMaxPrice}
       />
 
-      <AdminProductsGrid
-        products={products}
-        loading={productsLoading}
-        deleteLoading={deleteLoading}
-        onDeleteProduct={handleDeleteProduct}
-        onAddProduct={handleAddProduct}
+      <AdminProductsViewControls
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        totalProducts={total}
       />
+
+      {currentView === 'grid' ? (
+        <AdminProductsGrid
+          products={products}
+          loading={productsLoading}
+          deleteLoading={deleteLoading}
+          onDeleteProduct={handleDeleteProduct}
+          onAddProduct={handleAddProduct}
+        />
+      ) : (
+        <AdminProductsList
+          products={products}
+          loading={productsLoading}
+          deleteLoading={deleteLoading}
+          onDeleteProduct={handleDeleteProduct}
+          onAddProduct={handleAddProduct}
+        />
+      )}
 
       {total > 0 && (
         <AdminProductsPagination
