@@ -1,22 +1,41 @@
+'use client';
+
 import React from 'react';
 import { CartIcon, HeartIcon, UserIcon } from '../icons';
 import Link from 'next/link';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CartSection = () => {
+  const { isAuthenticated, user, logout } = useAuth();
   return (
     <div className="ml-auto mr-24 h-10 hidden md:hidden lg:flex">
-      <Link
-        href="/admin"
-        className="justify-center items-center flex text-white text-sm font-normal"
-      >
-        Admin Panel
-      </Link>
-      <div className="w-28 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg">
-        <div className="justify-center items-center flex">
-          <UserIcon />
-        </div>
-        <div className="text-white text-sm font-normal">Sign in</div>
-      </div>
+      {isAuthenticated && (
+        <Link
+          href="/admin"
+          className="justify-center items-center flex text-white text-sm font-normal mr-4"
+        >
+          Admin Panel
+        </Link>
+      )}
+
+      {isAuthenticated ? (
+        <button
+          onClick={logout}
+          className="w-24 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg"
+        >
+          <div className="text-white text-sm font-normal">Logout</div>
+        </button>
+      ) : (
+        <Link
+          href="/login"
+          className="w-28 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg"
+        >
+          <div className="justify-center items-center flex">
+            <UserIcon />
+          </div>
+          <div className="text-white text-sm font-normal">Sign in</div>
+        </Link>
+      )}
       <div className="w-32 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg">
         <div className="justify-center items-center flex">
           <HeartIcon />
