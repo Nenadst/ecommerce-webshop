@@ -1,7 +1,35 @@
-import { ArrowLeft } from 'lucide-react';
+'use client';
+
+import { ArrowLeft, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/shared/contexts/AuthContext';
+import { useEffect, useRef } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user, logout } = useAuth();
+  const router = useRouter();
+  const isLoggingOut = useRef(false);
+
+  useEffect(() => {
+    if (!isAuthenticated && !isLoggingOut.current) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-sky-900 text-lg">Redirecting to login...</div>
+      </div>
+    );
+  }
+
+  const handleLogout = () => {
+    isLoggingOut.current = true;
+    logout();
+    router.push('/');
+  };
   return (
     <div className="min-h-screen flex">
       <aside className="w-64 bg-sky-900 text-white p-6">
@@ -10,7 +38,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <span>Back to Home</span>
         </Link>
         <h2 className="text-2xl font-bold mb-10">Admin Panel</h2>
-        <nav className="space-y-2">
+
+        <nav className="space-y-2 mb-8">
           <Link href="/admin" className="block hover:underline">
             Dashboard
           </Link>
@@ -24,6 +53,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Categories
           </Link>
         </nav>
+
+        <button
+          onClick={handleLogout}
+          className="flex items-center space-x-2 text-sky-200 hover:text-white transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Logout</span>
+        </button>
       </aside>
       <main className="flex-1 bg-gray-50 p-8">{children}</main>
     </div>

@@ -41,11 +41,7 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6">
-      <AdminProductsHeader
-        totalProducts={total}
-        onAddProduct={handleAddProduct}
-        onSort={setSort}
-      />
+      <AdminProductsHeader totalProducts={total} onAddProduct={handleAddProduct} onSort={setSort} />
 
       <AdminProductsFilters
         search={search}

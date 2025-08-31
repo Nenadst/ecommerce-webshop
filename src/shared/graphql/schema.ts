@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 import productResolvers from '../../entities/product/api/product.resolver';
 import categoryResolvers from '../../entities/category/api/category.resolver';
+import userResolvers from '../../entities/user/api/user.resolver';
 
 export const typeDefs = gql`
   type Product {
@@ -16,6 +17,18 @@ export const typeDefs = gql`
   type Category {
     id: ID!
     name: String!
+  }
+
+  type User {
+    id: ID!
+    email: String!
+    name: String
+    role: String!
+  }
+
+  type AuthResponse {
+    user: User!
+    token: String!
   }
 
   input ProductFilterInput {
@@ -62,6 +75,17 @@ export const typeDefs = gql`
     name: String!
   }
 
+  input RegisterInput {
+    email: String!
+    password: String!
+    name: String!
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
   type Mutation {
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
@@ -70,6 +94,9 @@ export const typeDefs = gql`
     createCategory(input: CategoryInput!): Category!
     updateCategory(id: ID!, input: CategoryInput!): Category!
     deleteCategory(id: ID!): Boolean!
+
+    register(input: RegisterInput!): AuthResponse!
+    login(input: LoginInput!): AuthResponse!
   }
 `;
 
@@ -81,5 +108,6 @@ export const resolvers = {
   Mutation: {
     ...productResolvers.Mutation,
     ...categoryResolvers.Mutation,
+    ...userResolvers.Mutation,
   },
 };
