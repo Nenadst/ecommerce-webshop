@@ -61,12 +61,12 @@ export default function AdminProductsGrid({
             </button>
           </div>
 
-          <div className="relative w-full h-48 mb-3">
+          <div className="relative w-full h-48 mb-3 bg-white">
             <Image
               src={product.image || '/assets/img/no-product.png'}
               alt={product.name}
               fill
-              className="rounded object-cover"
+              className="rounded object-contain"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </div>
@@ -75,7 +75,7 @@ export default function AdminProductsGrid({
           <p className="text-gray-700 text-sm line-clamp-3">{product.description}</p>
 
           <div className="mt-auto space-y-1">
-            <p className="text-sm font-medium text-green-600">💰 ${product.price}</p>
+            <p className="text-sm font-medium text-green-600">💰 €{product.price}</p>
             <p className="text-sm text-gray-600">📦 {product.quantity} in stock</p>
             <p className="text-sm text-blue-600">🏷️ {product.category?.name}</p>
           </div>
