@@ -8,7 +8,7 @@ import Navigation from '@/shared/components/layouts/Navigation';
 const HeaderBottom = () => {
   return (
     <>
-      <div className="w-full h-16 bg-sky-900 items-center gap-20 inline-flex sticky top-0 z-50">
+      <div className="w-full h-16 bg-sky-900 items-center gap-20 inline-flex sticky top-0 z-[60]">
         <Link href="/" className="cursor-pointer">
           <Image
             src="/assets/img/logo.png"

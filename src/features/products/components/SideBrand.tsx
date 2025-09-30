@@ -18,8 +18,6 @@ const SideBrand = () => {
             id="ins"
             type="checkbox"
             className="h-6 w-6 rounded-md bg-slate-300 checked:bg-slate-700 focus:ring-0"
-            // checked={}
-            // onChange={}
           />
           <label htmlFor="ins" className="ml-0 text-gray-800">
             In stock
@@ -34,8 +32,6 @@ const SideBrand = () => {
             type="checkbox"
             className="h-6 w-6 rounded-md bg-slate-100"
             disabled
-            // checked={}
-            // onChange={}
           />
           <label htmlFor="oos" className="ml-0 text-gray-300">
             Out of stock

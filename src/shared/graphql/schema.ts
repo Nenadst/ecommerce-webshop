@@ -86,6 +86,11 @@ export const typeDefs = gql`
     password: String!
   }
 
+  input UpdateUserInput {
+    name: String
+    email: String
+  }
+
   type Mutation {
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
@@ -97,6 +102,7 @@ export const typeDefs = gql`
 
     register(input: RegisterInput!): AuthResponse!
     login(input: LoginInput!): AuthResponse!
+    updateUser(id: ID!, input: UpdateUserInput!): AuthResponse!
   }
 `;
 

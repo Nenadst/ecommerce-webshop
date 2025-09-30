@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/shared/contexts/AuthContext';
@@ -9,6 +9,8 @@ import { useAuthMutations } from '@/shared/hooks/useAuthMutations';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
   const { isAuthenticated } = useAuth();
   const { login, error, setError, isLoading } = useAuthMutations();
 
@@ -17,9 +19,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push(returnUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

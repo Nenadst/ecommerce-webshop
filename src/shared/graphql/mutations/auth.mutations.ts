@@ -27,3 +27,17 @@ export const REGISTER_MUTATION = gql`
     }
   }
 `;
+
+export const UPDATE_USER_MUTATION = gql`
+  mutation UpdateUser($id: ID!, $input: UpdateUserInput!) {
+    updateUser(id: $id, input: $input) {
+      user {
+        id
+        email
+        name
+        role
+      }
+      token
+    }
+  }
+`;

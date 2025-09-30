@@ -101,7 +101,6 @@ export default function AdminEditProductForm() {
           </div>
         ) : null}
 
-        {/* Upload new image */}
         <input
           type="file"
           accept="image/*"

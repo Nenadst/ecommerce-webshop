@@ -20,8 +20,6 @@ export const SideSize = () => {
               id={size.name}
               type="checkbox"
               className="h-6 w-6 rounded-md bg-slate-300 checked:bg-slate-700 focus:ring-0"
-              // checked={}
-              // onChange={}
             />
             <label htmlFor={size.name} className="ml-0 text-gray-800">
               {size.name}

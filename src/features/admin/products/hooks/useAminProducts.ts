@@ -1,4 +1,3 @@
-// ✅ useAdminProducts.ts
 import { useQuery, useMutation, Reference } from '@apollo/client';
 import { useState, useEffect } from 'react';
 import { GET_PRODUCTS, DELETE_PRODUCT } from '@/entities/product/api/product.queries';
@@ -42,7 +41,6 @@ type UseAdminProductsResult = {
   handleAddProduct: () => void;
   setPage: (page: number) => void;
   setSort: (sort: { field: string; order: 1 | -1 }) => void;
-  // Controlled filter inputs:
   search: string;
   setSearch: React.Dispatch<React.SetStateAction<string>>;
   categoryId: string;
@@ -66,7 +64,6 @@ export function useAdminProducts(): UseAdminProductsResult {
     order: -1,
   });
 
-  // Controlled filter inputs
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [minPrice, setMinPrice] = useState('');

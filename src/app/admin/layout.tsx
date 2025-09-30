@@ -2,22 +2,23 @@
 
 import { ArrowLeft, LogOut } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { useEffect, useRef } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const isLoggingOut = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoggingOut.current) {
-      router.push('/login');
+      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
     } else if (isAuthenticated && !isAdmin) {
       router.push('/');
     }
-  }, [isAuthenticated, isAdmin, router]);
+  }, [isAuthenticated, isAdmin, router, pathname]);
 
   if (!isAuthenticated) {
     return (

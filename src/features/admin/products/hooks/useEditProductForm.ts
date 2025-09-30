@@ -61,7 +61,6 @@ export function useEditProductForm() {
       cache.modify({
         fields: {
           products(existing, { readField, toReference }) {
-            // make sure we have an array
             const list = Array.isArray(existing) ? existing : [];
 
             return list.map((item: Reference) =>

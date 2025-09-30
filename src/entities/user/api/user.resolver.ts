@@ -76,6 +76,47 @@ const userResolvers = {
         token,
       };
     },
+
+    updateUser: async (
+      _: never,
+      { id, input }: { id: string; input: { name?: string; email?: string } }
+    ) => {
+      const { name, email } = input;
+
+      if (email) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email }
+        });
+
+        if (existingUser && existingUser.id !== id) {
+          throw new Error('Email is already taken');
+        }
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: {
+          ...(name !== undefined && { name }),
+          ...(email !== undefined && { email }),
+        }
+      });
+
+      const token = jwt.sign(
+        { userId: updatedUser.id, email: updatedUser.email, role: updatedUser.role },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      return {
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          name: updatedUser.name,
+          role: updatedUser.role.toLowerCase(),
+        },
+        token,
+      };
+    },
   },
 };
 

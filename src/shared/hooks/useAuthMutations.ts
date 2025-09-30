@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { useAuth } from '../contexts/AuthContext';
 import { LOGIN_MUTATION, REGISTER_MUTATION } from '../graphql/mutations/auth.mutations';
+import toast from 'react-hot-toast';
 
 interface LoginInput {
   email: string;
@@ -21,6 +22,7 @@ export function useAuthMutations() {
   const [loginMutation, { loading: loginLoading }] = useMutation(LOGIN_MUTATION, {
     onCompleted: (data) => {
       authLogin(data.login.token, data.login.user);
+      toast.success('Logged in successfully!');
     },
     onError: (error) => {
       setError(error.message);
@@ -30,6 +32,7 @@ export function useAuthMutations() {
   const [registerMutation, { loading: registerLoading }] = useMutation(REGISTER_MUTATION, {
     onCompleted: (data) => {
       authLogin(data.register.token, data.register.user);
+      toast.success('Registration successful!');
     },
     onError: (error) => {
       setError(error.message);
