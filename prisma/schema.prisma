@@ -40,7 +40,6 @@ model Product {
   price       Float
   quantity    Int
   image       String?
-  inStock     Boolean        @default(true)
   categoryId  String
   category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   favorites   UserFavorite[]
