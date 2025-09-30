@@ -13,7 +13,7 @@ const userResolvers = {
       const { email, password, name } = input;
 
       const existingUser = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
       });
 
       if (existingUser) {
@@ -28,7 +28,7 @@ const userResolvers = {
           password: hashedPassword,
           name,
           role: 'USER',
-        }
+        },
       });
 
       const token = jwt.sign({ userId: user.id, email: user.email, role: user.role }, JWT_SECRET, {
@@ -50,7 +50,7 @@ const userResolvers = {
       const { email, password } = input;
 
       const user = await prisma.user.findUnique({
-        where: { email }
+        where: { email },
       });
 
       if (!user) {
@@ -85,7 +85,7 @@ const userResolvers = {
 
       if (email) {
         const existingUser = await prisma.user.findUnique({
-          where: { email }
+          where: { email },
         });
 
         if (existingUser && existingUser.id !== id) {
@@ -98,7 +98,7 @@ const userResolvers = {
         data: {
           ...(name !== undefined && { name }),
           ...(email !== undefined && { email }),
-        }
+        },
       });
 
       const token = jwt.sign(

@@ -7,7 +7,7 @@ import { useAuth } from '@/shared/contexts/AuthContext';
 import { useEffect, useRef } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isLoggingOut = useRef(false);

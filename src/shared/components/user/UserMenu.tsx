@@ -41,7 +41,7 @@ export default function UserMenu() {
 
   const handleLogout = () => {
     const protectedRoutes = ['/profile', '/admin'];
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 
     logout();
     setIsOpen(false);

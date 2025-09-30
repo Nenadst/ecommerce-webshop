@@ -16,14 +16,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
   loading = false,
   emptyMessage = 'No items available',
   openOnHover = false,
-  showSearch = false
+  showSearch = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const filteredItems = items.filter(item =>
+  const filteredItems = items.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -108,8 +108,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
   };
 
   return (
-    <div 
-      className={cn('relative inline-block', className)} 
+    <div
+      className={cn('relative inline-block', className)}
       ref={dropdownRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -151,8 +151,18 @@ export const Dropdown: React.FC<DropdownProps> = ({
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="h-4 w-4 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
               </div>
@@ -163,8 +173,14 @@ export const Dropdown: React.FC<DropdownProps> = ({
             <div className="px-4 py-8">
               <div className="flex items-center justify-center space-x-2">
                 <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-3 h-3 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div
+                  className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.1s' }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-amber-500 rounded-full animate-bounce"
+                  style={{ animationDelay: '0.2s' }}
+                ></div>
               </div>
               <p className="text-center text-gray-500 text-sm mt-2">Loading categories...</p>
             </div>
@@ -173,13 +189,18 @@ export const Dropdown: React.FC<DropdownProps> = ({
               {searchTerm ? `No categories found for "${searchTerm}"` : emptyMessage}
             </div>
           ) : (
-            <div className={cn('py-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent', maxHeight)}>
+            <div
+              className={cn(
+                'py-2 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent',
+                maxHeight
+              )}
+            >
               {showSearch && searchTerm && (
                 <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-50">
                   {filteredItems.length} categories found
                 </div>
               )}
-              
+
               {filteredItems.map((item, index) => (
                 <button
                   key={item.id || index}
@@ -205,7 +226,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
               ))}
             </div>
           )}
-          
+
           {!loading && filteredItems.length > 10 && !showSearch && (
             <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 text-xs text-gray-500 text-center">
               Showing {Math.min(filteredItems.length, 50)} of {items.length} categories

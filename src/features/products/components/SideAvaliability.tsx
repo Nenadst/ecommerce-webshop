@@ -27,12 +27,7 @@ const SideAvaliability = () => {
       </div>
       <div className="flex justify-between items-center mb-3">
         <label className="flex items-center space-x-2">
-          <input
-            id="oos"
-            type="checkbox"
-            className="h-6 w-6 rounded-md bg-slate-100"
-            disabled
-          />
+          <input id="oos" type="checkbox" className="h-6 w-6 rounded-md bg-slate-100" disabled />
           <label htmlFor="oos" className="ml-0 text-gray-300">
             Out of stock
           </label>

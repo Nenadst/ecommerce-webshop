@@ -52,7 +52,7 @@ const productResolvers = {
       if (filter.name) {
         where.name = {
           contains: filter.name,
-          mode: 'insensitive'
+          mode: 'insensitive',
         };
       }
 
@@ -68,7 +68,7 @@ const productResolvers = {
 
       const skip = (page - 1) * limit;
       const orderBy = {
-        [sort.field]: sort.order === 1 ? 'asc' : 'desc'
+        [sort.field]: sort.order === 1 ? 'asc' : 'desc',
       };
 
       const [items, total] = await Promise.all([
@@ -78,8 +78,8 @@ const productResolvers = {
           skip,
           take: limit,
           include: {
-            category: true
-          }
+            category: true,
+          },
         }),
         prisma.product.count({ where }),
       ]);
@@ -96,8 +96,8 @@ const productResolvers = {
       return await prisma.product.findUnique({
         where: { id },
         include: {
-          category: true
-        }
+          category: true,
+        },
       });
     },
   },
@@ -107,8 +107,8 @@ const productResolvers = {
       const product = await prisma.product.create({
         data: args.input,
         include: {
-          category: true
-        }
+          category: true,
+        },
       });
 
       return product;
@@ -117,7 +117,7 @@ const productResolvers = {
     deleteProduct: async (_: unknown, { id }: DeleteProductArgs) => {
       try {
         await prisma.product.delete({
-          where: { id }
+          where: { id },
         });
         return true;
       } catch (error) {
@@ -131,8 +131,8 @@ const productResolvers = {
         where: { id },
         data: input,
         include: {
-          category: true
-        }
+          category: true,
+        },
       });
 
       return updated;

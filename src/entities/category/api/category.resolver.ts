@@ -16,14 +16,14 @@ const categoryResolvers = {
     categories: async () => {
       return await prisma.category.findMany({
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
     },
 
     category: async (_: unknown, { id }: { id: string }) => {
       return await prisma.category.findUnique({
-        where: { id }
+        where: { id },
       });
     },
   },
@@ -32,7 +32,7 @@ const categoryResolvers = {
     createCategory: async (_: unknown, args: CreateCategoryArgs) => {
       try {
         const existingCategory = await prisma.category.findUnique({
-          where: { name: args.input.name }
+          where: { name: args.input.name },
         });
 
         if (existingCategory) {
@@ -40,7 +40,7 @@ const categoryResolvers = {
         }
 
         const newCategory = await prisma.category.create({
-          data: args.input
+          data: args.input,
         });
 
         return newCategory;
@@ -58,7 +58,7 @@ const categoryResolvers = {
     updateCategory: async (_: unknown, { id, input }: { id: string; input: { name: string } }) => {
       try {
         const existingCategory = await prisma.category.findUnique({
-          where: { name: input.name }
+          where: { name: input.name },
         });
 
         if (existingCategory && existingCategory.id !== id) {
@@ -67,7 +67,7 @@ const categoryResolvers = {
 
         const updated = await prisma.category.update({
           where: { id },
-          data: input
+          data: input,
         });
 
         return updated;
@@ -82,7 +82,7 @@ const categoryResolvers = {
     deleteCategory: async (_: unknown, { id }: DeleteCategoryArgs) => {
       try {
         const productUsingCategory = await prisma.product.findFirst({
-          where: { categoryId: id }
+          where: { categoryId: id },
         });
 
         if (productUsingCategory) {
@@ -91,7 +91,7 @@ const categoryResolvers = {
         }
 
         await prisma.category.delete({
-          where: { id }
+          where: { id },
         });
 
         return true;
