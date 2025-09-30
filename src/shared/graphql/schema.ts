@@ -33,6 +33,7 @@ export const typeDefs = gql`
 
   input ProductFilterInput {
     categoryId: ID
+    categoryIds: [ID!]
     name: String
     minPrice: Float
     maxPrice: Float

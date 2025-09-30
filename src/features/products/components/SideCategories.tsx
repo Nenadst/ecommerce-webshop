@@ -10,25 +10,25 @@ interface Category {
 }
 
 interface SideCategoriesProps {
-  selectedCategory?: string;
-  onCategoryChange: (categoryId: string | undefined) => void;
+  selectedCategories: string[];
+  onCategoriesChange: (categoryIds: string[]) => void;
 }
 
-const SideCategories = ({ selectedCategory, onCategoryChange }: SideCategoriesProps) => {
+const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategoriesProps) => {
   const { data, loading } = useQuery(GET_CATEGORIES);
 
   const categories = data?.categories || [];
 
   const handleCategoryClick = (categoryId: string) => {
-    if (selectedCategory === categoryId) {
-      onCategoryChange(undefined);
+    if (selectedCategories.includes(categoryId)) {
+      onCategoriesChange(selectedCategories.filter((id) => id !== categoryId));
     } else {
-      onCategoryChange(categoryId);
+      onCategoriesChange([...selectedCategories, categoryId]);
     }
   };
 
   const handleReset = () => {
-    onCategoryChange(undefined);
+    onCategoriesChange([]);
   };
 
   return (
@@ -45,8 +45,8 @@ const SideCategories = ({ selectedCategory, onCategoryChange }: SideCategoriesPr
             id="allCategories"
             type="checkbox"
             className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0"
-            checked={!selectedCategory}
-            onChange={() => onCategoryChange(undefined)}
+            checked={selectedCategories.length === 0}
+            onChange={() => onCategoriesChange([])}
           />
           <label htmlFor="allCategories" className="ml-0 text-gray-800 cursor-pointer">
             All Categories
@@ -63,7 +63,7 @@ const SideCategories = ({ selectedCategory, onCategoryChange }: SideCategoriesPr
                 id={category.id}
                 type="checkbox"
                 className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0"
-                checked={selectedCategory === category.id}
+                checked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryClick(category.id)}
               />
               <label htmlFor={category.id} className="ml-0 text-gray-800 cursor-pointer">

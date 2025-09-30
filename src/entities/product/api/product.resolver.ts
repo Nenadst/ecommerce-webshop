@@ -43,6 +43,7 @@ type DeleteProductArgs = {
 
 type ProductFilter = {
   categoryId?: string;
+  categoryIds?: string[];
   name?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -87,7 +88,11 @@ const productResolvers = {
         };
       }
 
-      if (filter.categoryId) {
+      if (filter.categoryIds && filter.categoryIds.length > 0) {
+        where.categoryId = {
+          in: filter.categoryIds,
+        };
+      } else if (filter.categoryId) {
         where.categoryId = filter.categoryId;
       }
 
