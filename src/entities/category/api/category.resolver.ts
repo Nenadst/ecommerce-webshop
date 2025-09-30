@@ -1,5 +1,4 @@
-import { Category } from '@/entities/category/model/category.model';
-import { Product } from '@/entities/product/model/product.model';
+import { prisma } from '@/shared/lib/prisma';
 import { ApolloError } from 'apollo-server-errors';
 
 type CreateCategoryArgs = {
@@ -14,23 +13,36 @@ type DeleteCategoryArgs = {
 
 const categoryResolvers = {
   Query: {
-    categories: async () => Category.find(),
+    categories: async () => {
+      return await prisma.category.findMany({
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    },
 
     category: async (_: unknown, { id }: { id: string }) => {
-      return await Category.findById(id);
+      return await prisma.category.findUnique({
+        where: { id }
+      });
     },
   },
 
   Mutation: {
     createCategory: async (_: unknown, args: CreateCategoryArgs) => {
       try {
-        const existingCategory = await Category.findOne({ name: args.input.name });
+        const existingCategory = await prisma.category.findUnique({
+          where: { name: args.input.name }
+        });
 
         if (existingCategory) {
           throw new ApolloError('Category name already exists', 'DUPLICATE_CATEGORY');
         }
 
-        const newCategory = await Category.create(args.input);
+        const newCategory = await prisma.category.create({
+          data: args.input
+        });
+
         return newCategory;
       } catch (error) {
         console.error('Error creating category:', error);
@@ -45,12 +57,19 @@ const categoryResolvers = {
 
     updateCategory: async (_: unknown, { id, input }: { id: string; input: { name: string } }) => {
       try {
-        const existingCategory = await Category.findOne({ name: input.name });
-        if (existingCategory && existingCategory._id.toString() !== id) {
+        const existingCategory = await prisma.category.findUnique({
+          where: { name: input.name }
+        });
+
+        if (existingCategory && existingCategory.id !== id) {
           throw new ApolloError('Category name already exists', 'DUPLICATE_CATEGORY');
         }
 
-        const updated = await Category.findByIdAndUpdate(id, input, { new: true });
+        const updated = await prisma.category.update({
+          where: { id },
+          data: input
+        });
+
         return updated;
       } catch (error) {
         if (error instanceof ApolloError) {
@@ -62,15 +81,20 @@ const categoryResolvers = {
 
     deleteCategory: async (_: unknown, { id }: DeleteCategoryArgs) => {
       try {
-        const productUsingCategory = await Product.findOne({ category: id });
+        const productUsingCategory = await prisma.product.findFirst({
+          where: { categoryId: id }
+        });
 
         if (productUsingCategory) {
           console.warn(`Cannot delete category ${id} - in use by a product`);
           return false;
         }
 
-        const result = await Category.findByIdAndDelete(id);
-        return !!result;
+        await prisma.category.delete({
+          where: { id }
+        });
+
+        return true;
       } catch (error) {
         console.error('Failed to delete category:', error);
         return false;

@@ -1,4 +1,4 @@
-import { Product } from '@/entities/product/model/product.model';
+import { prisma } from '@/shared/lib/prisma';
 
 type CreateProductInput = {
   input: {
@@ -47,28 +47,41 @@ const productResolvers = {
         sort?: { field: string; order: 1 | -1 };
       }
     ) => {
-      const query: Record<string, unknown> = {};
+      const where: Record<string, unknown> = {};
 
       if (filter.name) {
-        query.name = { $regex: filter.name, $options: 'i' };
+        where.name = {
+          contains: filter.name,
+          mode: 'insensitive'
+        };
       }
 
       if (filter.categoryId) {
-        query.category = filter.categoryId;
+        where.categoryId = filter.categoryId;
       }
 
       if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
-        query.price = {};
-        if (filter.minPrice !== undefined) query.price.$gte = filter.minPrice;
-        if (filter.maxPrice !== undefined) query.price.$lte = filter.maxPrice;
+        where.price = {};
+        if (filter.minPrice !== undefined) where.price.gte = filter.minPrice;
+        if (filter.maxPrice !== undefined) where.price.lte = filter.maxPrice;
       }
 
       const skip = (page - 1) * limit;
-      const sortQuery = { [sort.field]: sort.order };
+      const orderBy = {
+        [sort.field]: sort.order === 1 ? 'asc' : 'desc'
+      };
 
       const [items, total] = await Promise.all([
-        Product.find(query).sort(sortQuery).skip(skip).limit(limit).populate('category'),
-        Product.countDocuments(query),
+        prisma.product.findMany({
+          where,
+          orderBy,
+          skip,
+          take: limit,
+          include: {
+            category: true
+          }
+        }),
+        prisma.product.count({ where }),
       ]);
 
       return {
@@ -78,31 +91,49 @@ const productResolvers = {
         totalPages: Math.ceil(total / limit),
       };
     },
-    product: async (_: unknown, { id }: { id: string }) =>
-      Product.findById(id).populate('category'),
+
+    product: async (_: unknown, { id }: { id: string }) => {
+      return await prisma.product.findUnique({
+        where: { id },
+        include: {
+          category: true
+        }
+      });
+    },
   },
+
   Mutation: {
     createProduct: async (_: unknown, args: CreateProductInput) => {
-      const product = await Product.create({
-        ...args.input,
-        category: args.input.categoryId,
+      const product = await prisma.product.create({
+        data: args.input,
+        include: {
+          category: true
+        }
       });
-      return product.populate('category');
+
+      return product;
     },
 
     deleteProduct: async (_: unknown, { id }: DeleteProductArgs) => {
-      const result = await Product.findByIdAndDelete(id);
-      return !!result;
+      try {
+        await prisma.product.delete({
+          where: { id }
+        });
+        return true;
+      } catch (error) {
+        console.error('Failed to delete product:', error);
+        return false;
+      }
     },
+
     updateProduct: async (_: unknown, { id, input }: { id: string; input: UpdateProductInput }) => {
-      const updated = await Product.findByIdAndUpdate(
-        id,
-        {
-          ...input,
-          category: input.categoryId,
-        },
-        { new: true }
-      ).populate('category');
+      const updated = await prisma.product.update({
+        where: { id },
+        data: input,
+        include: {
+          category: true
+        }
+      });
 
       return updated;
     },

@@ -1,25 +1,23 @@
-import mongoose from 'mongoose';
+import { prisma } from './prisma';
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
+export { prisma };
 
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+export async function connectDB() {
+  try {
+    await prisma.$connect();
+    console.log('Connected to PostgreSQL database');
+  } catch (error) {
+    console.error('Failed to connect to database:', error);
+    throw error;
+  }
 }
 
-declare global {
-  // eslint-disable-next-line no-var
-  var mongooseConnection: Promise<typeof mongoose> | null;
-}
-
-let cached = global.mongooseConnection;
-
-if (!cached) {
-  cached = global.mongooseConnection = mongoose.connect(MONGODB_URI, {
-    dbName: 'ecommerce-webshop-db',
-    bufferCommands: false,
-  });
-}
-
-export async function connectToDatabase() {
-  return cached;
+export async function disconnectDB() {
+  try {
+    await prisma.$disconnect();
+    console.log('Disconnected from PostgreSQL database');
+  } catch (error) {
+    console.error('Failed to disconnect from database:', error);
+    throw error;
+  }
 }
