@@ -60,6 +60,7 @@ export const typeDefs = gql`
     product(id: ID!): Product
     categories: [Category!]
     category(id: ID!): Category
+    userFavorites: [ID!]!
   }
 
   input ProductInput {
@@ -95,6 +96,7 @@ export const typeDefs = gql`
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
     deleteProduct(id: ID!): Boolean!
+    toggleFavorite(productId: ID!): Boolean!
 
     createCategory(input: CategoryInput!): Category!
     updateCategory(id: ID!, input: CategoryInput!): Category!

@@ -1,4 +1,21 @@
 import { prisma } from '@/shared/lib/prisma';
+import jwt from 'jsonwebtoken';
+import { NextRequest } from 'next/server';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+const getUserFromToken = (req: NextRequest): string | null => {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) return null;
+
+  const token = authHeader.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
+    return decoded.userId;
+  } catch {
+    return null;
+  }
+};
 
 type CreateProductInput = {
   input: {
@@ -33,6 +50,20 @@ type ProductFilter = {
 
 const productResolvers = {
   Query: {
+    userFavorites: async (_: unknown, __: unknown, context: { req: NextRequest }) => {
+      const userId = getUserFromToken(context.req);
+      if (!userId) {
+        return [];
+      }
+
+      const favorites = await prisma.userFavorite.findMany({
+        where: { userId },
+        select: { productId: true },
+      });
+
+      return favorites.map((fav) => fav.productId);
+    },
+
     products: async (
       _: unknown,
       {
@@ -136,6 +167,41 @@ const productResolvers = {
       });
 
       return updated;
+    },
+
+    toggleFavorite: async (
+      _: unknown,
+      { productId }: { productId: string },
+      context: { req: NextRequest }
+    ) => {
+      const userId = getUserFromToken(context.req);
+      if (!userId) {
+        throw new Error('Authentication required');
+      }
+
+      const existing = await prisma.userFavorite.findUnique({
+        where: {
+          userId_productId: {
+            userId,
+            productId,
+          },
+        },
+      });
+
+      if (existing) {
+        await prisma.userFavorite.delete({
+          where: { id: existing.id },
+        });
+        return false;
+      } else {
+        await prisma.userFavorite.create({
+          data: {
+            userId,
+            productId,
+          },
+        });
+        return true;
+      }
     },
   },
 };
