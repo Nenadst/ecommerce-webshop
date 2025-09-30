@@ -3,6 +3,7 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
 import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
+import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 
 interface Category {
   id: string;
@@ -16,8 +17,22 @@ interface SideCategoriesProps {
 
 const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategoriesProps) => {
   const { data, loading } = useQuery(GET_CATEGORIES);
+  const { data: productsData } = useQuery(GET_PRODUCTS, {
+    variables: {
+      page: 1,
+      limit: 1000,
+      filter: {},
+      sort: { field: 'createdAt', order: -1 },
+    },
+  });
 
   const categories = data?.categories || [];
+  const allProducts = productsData?.products?.items || [];
+
+  const getCategoryCount = (categoryId: string) => {
+    return allProducts.filter((p: { category: { id: string } }) => p.category.id === categoryId)
+      .length;
+  };
 
   const handleCategoryClick = (categoryId: string) => {
     if (selectedCategories.includes(categoryId)) {
@@ -52,6 +67,7 @@ const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategori
             All Categories
           </label>
         </label>
+        <div className="text-sky-900">({allProducts.length})</div>
       </div>
       {loading ? (
         <div className="text-gray-500 text-sm">Loading...</div>
@@ -70,6 +86,7 @@ const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategori
                 {category.name}
               </label>
             </label>
+            <div className="text-sky-900">({getCategoryCount(category.id)})</div>
           </div>
         ))
       )}

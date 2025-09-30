@@ -28,8 +28,6 @@ const SideAvaliability = ({
   const inStockCount = allProducts.filter((p: { quantity: number }) => p.quantity > 0).length;
   const outOfStockCount = allProducts.filter((p: { quantity: number }) => p.quantity === 0).length;
 
-  const selectedCount = (inStockSelected ? 1 : 0) + (outOfStockSelected ? 1 : 0);
-
   const handleInStockChange = () => {
     onAvailabilityChange(!inStockSelected, outOfStockSelected);
   };
@@ -46,9 +44,6 @@ const SideAvaliability = ({
     <>
       <div className="flex justify-between mb-3">
         <div className="text-sky-900 font-semibold">Availability</div>
-      </div>
-      <div className="flex justify-between mb-3">
-        <div className="text-sky-900">{selectedCount} selected</div>
         <button onClick={handleReset} className="text-sky-900 text-sm hover:underline">
           Reset
         </button>
@@ -66,7 +61,7 @@ const SideAvaliability = ({
             In stock
           </label>
         </label>
-        <div className="text-sky-900">{inStockCount}</div>
+        <div className="text-sky-900">({inStockCount})</div>
       </div>
       <div className="flex justify-between items-center mb-3">
         <label className="flex items-center space-x-2 cursor-pointer">
@@ -81,7 +76,7 @@ const SideAvaliability = ({
             Out of stock
           </label>
         </label>
-        <div className="text-sky-900">{outOfStockCount}</div>
+        <div className="text-sky-900">({outOfStockCount})</div>
       </div>
     </>
   );
