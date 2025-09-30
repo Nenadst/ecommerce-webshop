@@ -21,7 +21,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login?returnUrl=%2Fprofile');
+      router.push('/');
     }
   }, [isAuthenticated, router]);
 
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="text-sky-900 text-lg">Redirecting to login...</div>
+        <div className="text-sky-900 text-lg">Redirecting...</div>
       </div>
     );
   }

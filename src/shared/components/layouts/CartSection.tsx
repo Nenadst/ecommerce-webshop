@@ -16,7 +16,7 @@ const CartSection = () => {
       {isAdmin && (
         <Link
           href="/admin"
-          className="justify-center items-center flex text-white text-sm font-normal mr-4"
+          className="w-32 h-10 justify-center items-center flex text-white text-sm font-normal mr-4 hover:bg-amber-600 cursor-pointer rounded-lg"
         >
           Admin Panel
         </Link>
