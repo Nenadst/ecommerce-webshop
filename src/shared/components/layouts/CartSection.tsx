@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 
 const CartSection = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
+  console.log('is adminnnn', isAdmin);
   return (
     <div className="ml-auto mr-24 h-10 hidden md:hidden lg:flex">
-      {isAuthenticated && (
+      {isAdmin && (
         <Link
           href="/admin"
           className="justify-center items-center flex text-white text-sm font-normal mr-4"

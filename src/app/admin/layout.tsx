@@ -7,20 +7,30 @@ import { useAuth } from '@/shared/contexts/AuthContext';
 import { useEffect, useRef } from 'react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, user, logout } = useAuth();
   const router = useRouter();
   const isLoggingOut = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoggingOut.current) {
       router.push('/login');
+    } else if (isAuthenticated && !isAdmin) {
+      router.push('/');
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAdmin, router]);
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-sky-900 text-lg">Redirecting to login...</div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-red-600 text-lg">Access Forbidden: Admin only</div>
       </div>
     );
   }
