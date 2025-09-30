@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import SideCategories from './SideCategories';
 import { Separator } from '@/shared/components/elements/Separator';
 import SideAvaliability from './SideAvaliability';
@@ -28,10 +29,19 @@ interface Product {
 }
 
 const Products = () => {
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get('category');
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [inStockSelected, setInStockSelected] = useState(false);
   const [outOfStockSelected, setOutOfStockSelected] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
+
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategories([categoryFromUrl]);
+    }
+  }, [categoryFromUrl]);
 
   const { data, loading } = useQuery(GET_PRODUCTS, {
     variables: {
