@@ -59,7 +59,7 @@ const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategori
           <input
             id="allCategories"
             type="checkbox"
-            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0"
+            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
             checked={selectedCategories.length === 0}
             onChange={() => onCategoriesChange([])}
           />
@@ -78,7 +78,7 @@ const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategori
               <input
                 id={category.id}
                 type="checkbox"
-                className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0"
+                className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
                 checked={selectedCategories.includes(category.id)}
                 onChange={() => handleCategoryClick(category.id)}
               />

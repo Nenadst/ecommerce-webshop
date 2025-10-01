@@ -28,6 +28,14 @@ const Navigation = () => {
             </div>
             <ChevronDownIcon />
           </Link>
+          <Link
+            href="/wishlist"
+            className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group"
+          >
+            <div className="text-slate-500 font-semibold text-base group-hover:text-white">
+              Wishlist
+            </div>
+          </Link>
           <div className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group">
             <div className="text-slate-500 font-semibold text-base group-hover:text-white">
               Blog

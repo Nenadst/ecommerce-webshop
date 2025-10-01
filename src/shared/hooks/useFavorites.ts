@@ -20,6 +20,7 @@ const LOCAL_STORAGE_KEY = 'guest_favorites';
 export function useFavorites() {
   const { isAuthenticated } = useAuth();
   const [localFavorites, setLocalFavorites] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
 
   const { data, refetch } = useQuery(GET_USER_FAVORITES, {
     skip: !isAuthenticated,
@@ -29,6 +30,7 @@ export function useFavorites() {
   const [toggleFavoriteMutation] = useMutation(TOGGLE_FAVORITE_MUTATION);
 
   useEffect(() => {
+    setMounted(true);
     if (!isAuthenticated) {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) {
@@ -71,5 +73,6 @@ export function useFavorites() {
     favorites,
     isFavorite,
     toggleFavorite,
+    mounted,
   };
 }

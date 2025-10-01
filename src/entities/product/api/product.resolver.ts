@@ -65,6 +65,38 @@ const productResolvers = {
       return favorites.map((fav) => fav.productId);
     },
 
+    favoriteProducts: async (_: unknown, __: unknown, context: { req: NextRequest }) => {
+      const userId = getUserFromToken(context.req);
+      if (!userId) {
+        return [];
+      }
+
+      const favorites = await prisma.userFavorite.findMany({
+        where: { userId },
+        select: { productId: true },
+      });
+
+      const productIds = favorites.map((fav) => fav.productId);
+
+      if (productIds.length === 0) {
+        return [];
+      }
+
+      const products = await prisma.product.findMany({
+        where: {
+          id: { in: productIds },
+        },
+        include: {
+          category: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      return products;
+    },
+
     products: async (
       _: unknown,
       {
