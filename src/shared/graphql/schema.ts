@@ -74,6 +74,7 @@ export const typeDefs = gql`
       sort: ProductSortInput
     ): ProductPagination!
     product(id: ID!): Product
+    productsByIds(ids: [ID!]!): [Product!]!
     categories: [Category!]
     category(id: ID!): Category
     userFavorites: [ID!]!

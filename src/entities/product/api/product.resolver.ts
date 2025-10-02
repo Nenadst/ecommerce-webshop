@@ -168,6 +168,21 @@ const productResolvers = {
         },
       });
     },
+
+    productsByIds: async (_: unknown, { ids }: { ids: string[] }) => {
+      if (!ids || ids.length === 0) {
+        return [];
+      }
+
+      return await prisma.product.findMany({
+        where: {
+          id: { in: ids },
+        },
+        include: {
+          category: true,
+        },
+      });
+    },
   },
 
   Mutation: {

@@ -61,48 +61,45 @@ const cartResolvers = {
         throw new Error('Authentication required');
       }
 
-      // Check if product exists and has enough stock
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
-      });
+      // Use transaction to prevent race conditions
+      const cartItem = await prisma.$transaction(async (tx) => {
+        // Check if product exists and has enough stock
+        const product = await tx.product.findUnique({
+          where: { id: productId },
+        });
 
-      if (!product) {
-        throw new Error('Product not found');
-      }
+        if (!product) {
+          throw new Error('Product not found');
+        }
 
-      if (product.quantity < quantity) {
-        throw new Error('Not enough stock available');
-      }
-
-      // Check if item already in cart
-      const existingItem = await prisma.cartItem.findUnique({
-        where: {
-          userId_productId: {
-            userId,
-            productId,
-          },
-        },
-      });
-
-      let cartItem;
-
-      if (existingItem) {
-        // Update quantity
-        cartItem = await prisma.cartItem.update({
-          where: { id: existingItem.id },
-          data: { quantity: existingItem.quantity + quantity },
-          include: {
-            product: {
-              include: {
-                category: true,
-              },
+        // Check if item already in cart
+        const existingItem = await tx.cartItem.findUnique({
+          where: {
+            userId_productId: {
+              userId,
+              productId,
             },
           },
         });
-      } else {
-        // Create new cart item
-        cartItem = await prisma.cartItem.create({
-          data: {
+
+        const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity;
+
+        if (product.quantity < totalQuantity) {
+          throw new Error('Not enough stock available');
+        }
+
+        // Upsert cart item
+        const item = await tx.cartItem.upsert({
+          where: {
+            userId_productId: {
+              userId,
+              productId,
+            },
+          },
+          update: {
+            quantity: { increment: quantity },
+          },
+          create: {
             userId,
             productId,
             quantity,
@@ -115,7 +112,9 @@ const cartResolvers = {
             },
           },
         });
-      }
+
+        return item;
+      });
 
       return cartItem;
     },
@@ -164,42 +163,47 @@ const cartResolvers = {
         throw new Error('Quantity must be greater than 0');
       }
 
-      // Check product stock
-      const product = await prisma.product.findUnique({
-        where: { id: productId },
-      });
+      // Use transaction to prevent race conditions
+      const updatedItem = await prisma.$transaction(async (tx) => {
+        // Check product stock
+        const product = await tx.product.findUnique({
+          where: { id: productId },
+        });
 
-      if (!product) {
-        throw new Error('Product not found');
-      }
+        if (!product) {
+          throw new Error('Product not found');
+        }
 
-      if (product.quantity < quantity) {
-        throw new Error('Not enough stock available');
-      }
+        if (product.quantity < quantity) {
+          throw new Error('Not enough stock available');
+        }
 
-      const cartItem = await prisma.cartItem.findUnique({
-        where: {
-          userId_productId: {
-            userId,
-            productId,
-          },
-        },
-      });
-
-      if (!cartItem) {
-        throw new Error('Cart item not found');
-      }
-
-      const updatedItem = await prisma.cartItem.update({
-        where: { id: cartItem.id },
-        data: { quantity },
-        include: {
-          product: {
-            include: {
-              category: true,
+        const cartItem = await tx.cartItem.findUnique({
+          where: {
+            userId_productId: {
+              userId,
+              productId,
             },
           },
-        },
+        });
+
+        if (!cartItem) {
+          throw new Error('Cart item not found');
+        }
+
+        const item = await tx.cartItem.update({
+          where: { id: cartItem.id },
+          data: { quantity },
+          include: {
+            product: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        });
+
+        return item;
       });
 
       return updatedItem;

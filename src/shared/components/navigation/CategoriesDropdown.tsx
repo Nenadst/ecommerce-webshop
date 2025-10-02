@@ -6,13 +6,30 @@ import { ChevronDownIcon } from '../icons';
 import { Dropdown } from '../elements/Dropdown';
 import { DropdownItem } from '../elements/types/dropdown.types';
 import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
+import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 import { Category } from '@/entities/category/types/category.types';
 import { CategoriesDropdownProps } from './types/categories-dropdown.types';
 
 export const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ className = '' }) => {
   const { data, loading, error } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
+  const { data: productsData } = useQuery(GET_PRODUCTS, {
+    variables: {
+      page: 1,
+      limit: 1000,
+      filter: {},
+      sort: { field: 'createdAt', order: -1 },
+    },
+  });
 
   const categories = data?.categories || [];
+  const allProducts = productsData?.products?.items || [];
+
+  const getCategoryCount = (categoryId: string) => {
+    return allProducts.filter((p: { category: { id: string } }) => p.category.id === categoryId)
+      .length;
+  };
+
+  const categoriesWithProducts = categories.filter((category) => getCategoryCount(category.id) > 0);
 
   const categoryItems: DropdownItem[] = [
     {
@@ -31,7 +48,7 @@ export const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ classNam
         </svg>
       ),
     },
-    ...categories.map((category) => ({
+    ...categoriesWithProducts.map((category) => ({
       id: category.id,
       label: category.name,
       href: `/products?category=${category.id}`,
@@ -67,7 +84,7 @@ export const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ classNam
         maxHeight="max-h-96"
         placement="bottom-left"
         openOnHover={true}
-        showSearch={categories.length > 8} // Only show search if more than 8 categories
+        showSearch={categoriesWithProducts.length > 8}
       />
     </div>
   );

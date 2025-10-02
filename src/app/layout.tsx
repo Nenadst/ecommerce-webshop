@@ -3,7 +3,7 @@ import './globals.css';
 import { METADATA } from '../data/metadata';
 import { poppins } from '@/shared/lib/fonts';
 import { Toaster } from 'react-hot-toast';
-import ClientProviders from '@/shared/lib/ClientProvidrs';
+import ClientProviders from '@/shared/lib/ClientProviders';
 
 export const metadata: Metadata = {
   title: METADATA.title + METADATA.bTitle,

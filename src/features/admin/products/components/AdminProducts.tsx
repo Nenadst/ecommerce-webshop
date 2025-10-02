@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
+import ConfirmModal from '@/shared/components/modals/ConfirmModal';
 import { useAdminProducts } from '../hooks/useAminProducts';
 import AdminProductsFilters from './AdminProductsFilters';
 import AdminProductsGrid from './AdminProductsGrid';
@@ -94,14 +94,17 @@ export default function AdminProducts() {
 
       {modal.show && (
         <ConfirmModal
-          show={modal.show}
+          isOpen={modal.show}
+          title="Confirm Delete"
           message={modal.message}
           onConfirm={() => {
             modal.onConfirm();
             setModal((prev) => ({ ...prev, show: false }));
           }}
-          onCancel={() => setModal((prev) => ({ ...prev, show: false }))}
-          deleteLoading={deleteLoading}
+          onClose={() => setModal((prev) => ({ ...prev, show: false }))}
+          confirmText="Delete"
+          cancelText="Cancel"
+          isLoading={deleteLoading}
         />
       )}
     </div>

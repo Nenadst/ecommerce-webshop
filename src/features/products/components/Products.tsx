@@ -15,6 +15,10 @@ import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 import Spinner from '@/shared/components/spinner/Spinner';
 import { HeartIconBig } from '@/shared/components/icons';
 import { useFavorites } from '@/shared/hooks/useFavorites';
+import { useCart } from '@/shared/hooks/useCart';
+import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
+import Button from '@/shared/components/elements/Button';
+import toast from 'react-hot-toast';
 
 interface Product {
   id: string;
@@ -34,13 +38,17 @@ const Products = () => {
   const categoryFromUrl = searchParams.get('category');
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [inStockSelected, setInStockSelected] = useState(false);
+  const [inStockSelected, setInStockSelected] = useState(true);
   const [outOfStockSelected, setOutOfStockSelected] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<1 | -1>(-1);
   const [productsPerPage, setProductsPerPage] = useState(12);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+  const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addToCart } = useCart();
+  const { openDrawer } = useCartDrawer();
 
   useEffect(() => {
     if (categoryFromUrl) {
@@ -51,12 +59,12 @@ const Products = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategories]);
+  }, [selectedCategories, inStockSelected, outOfStockSelected]);
 
   const { data, loading } = useQuery(GET_PRODUCTS, {
     variables: {
-      page: currentPage,
-      limit: productsPerPage,
+      page: 1,
+      limit: 1000,
       filter: selectedCategories.length > 0 ? { categoryIds: selectedCategories } : {},
       sort: { field: sortField, order: sortOrder },
     },
@@ -64,16 +72,21 @@ const Products = () => {
   });
 
   const allProducts = data?.products?.items || [];
-  const totalPages = data?.products?.totalPages || 1;
-  const total = data?.products?.total || 0;
 
-  const products = allProducts.filter((product: Product) => {
+  const filteredProducts = allProducts.filter((product: Product) => {
     if (!inStockSelected && !outOfStockSelected) return true;
     if (inStockSelected && outOfStockSelected) return true;
     if (inStockSelected && product.quantity > 0) return true;
     if (outOfStockSelected && product.quantity === 0) return true;
     return false;
   });
+
+  const filteredTotal = filteredProducts.length;
+  const totalPages = Math.ceil(filteredTotal / productsPerPage);
+
+  const startIndex = (currentPage - 1) * productsPerPage;
+  const endIndex = startIndex + productsPerPage;
+  const products = filteredProducts.slice(startIndex, endIndex);
 
   const handleAvailabilityChange = (inStock: boolean, outOfStock: boolean) => {
     setInStockSelected(inStock);
@@ -136,6 +149,46 @@ const Products = () => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
+  const getSelectedQuantity = (productId: string): number => {
+    return quantities[productId] || 1;
+  };
+
+  const updateQuantity = (productId: string, delta: number, maxStock: number) => {
+    setQuantities((prev) => {
+      const current = prev[productId] || 1;
+      const newQty = Math.max(1, Math.min(maxStock, current + delta));
+      return { ...prev, [productId]: newQty };
+    });
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (product.quantity === 0) {
+      toast.error('This product is out of stock');
+      return;
+    }
+
+    const selectedQty = getSelectedQuantity(product.id);
+
+    if (selectedQty > product.quantity) {
+      toast.error(`Only ${product.quantity} items available in stock`);
+      return;
+    }
+
+    setAddingToCart(product.id);
+    try {
+      await addToCart(product.id, selectedQty);
+      setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
+      openDrawer();
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setAddingToCart(null);
+    }
+  };
+
   return (
     <>
       <div className="mx-auto min-h-full container mt-20 p-16 flex md:p-4">
@@ -149,12 +202,13 @@ const Products = () => {
             inStockSelected={inStockSelected}
             outOfStockSelected={outOfStockSelected}
             onAvailabilityChange={handleAvailabilityChange}
+            selectedCategories={selectedCategories}
           />
         </div>
         <div className="flex-1 ml-8">
           <div className="flex justify-between items-center mb-6">
             <div className="text-gray-600">
-              Showing {products.length} of {total} products
+              Showing {products.length} of {filteredTotal} products
             </div>
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-gray-700 font-medium">
@@ -184,7 +238,7 @@ const Products = () => {
             ) : (
               products.map((product: Product, index: number) => (
                 <Link href={`/products/${product.id}`} key={product.id}>
-                  <Card className="w-full h-[440px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
+                  <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
                     <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
                       <Image
                         src={product.image || '/assets/img/no-product.png'}
@@ -229,12 +283,88 @@ const Products = () => {
                           ? truncateText(product.description, 80)
                           : 'No description available'}
                       </p>
-                      <div className="flex items-center justify-between mt-auto">
+                      <div className="flex items-center justify-between mt-auto mb-3">
                         <div className="flex flex-col">
                           <span className="text-2xl font-bold text-sky-900">€{product.price}</span>
                         </div>
                         <Star count={5} />
                       </div>
+
+                      <div className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                        <span className="text-sm text-gray-700 font-medium">Quantity:</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              updateQuantity(product.id, -1, product.quantity);
+                            }}
+                            disabled={
+                              product.quantity === 0 || getSelectedQuantity(product.id) <= 1
+                            }
+                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M20 12H4"
+                              />
+                            </svg>
+                          </button>
+                          <span className="w-10 text-center font-bold text-gray-900">
+                            {product.quantity === 0 ? 0 : getSelectedQuantity(product.id)}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              updateQuantity(product.id, 1, product.quantity);
+                            }}
+                            disabled={
+                              product.quantity === 0 ||
+                              getSelectedQuantity(product.id) >= product.quantity
+                            }
+                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={(e) => handleAddToCart(e, product)}
+                        disabled={product.quantity === 0 || addingToCart === product.id}
+                        className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
+                          product.quantity > 0
+                            ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        } disabled:opacity-50`}
+                      >
+                        {addingToCart === product.id
+                          ? 'Adding...'
+                          : product.quantity > 0
+                            ? 'Add to Cart'
+                            : 'Out of Stock'}
+                      </Button>
                     </div>
                   </Card>
                 </Link>

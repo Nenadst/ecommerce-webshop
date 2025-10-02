@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Pencil, Trash2 } from 'lucide-react';
 
-import { ConfirmModal } from '@/shared/components/modals/ConfirmModal';
+import ConfirmModal from '@/shared/components/modals/ConfirmModal';
 import { Category } from '@/entities/category/types/category.types';
 import { useAdminCategories } from '../hooks/useAdminCategories';
 import FullScreenSpinner from '@/shared/components/spinner/FullScreenSpinner';

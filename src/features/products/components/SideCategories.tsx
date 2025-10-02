@@ -72,23 +72,25 @@ const SideCategories = ({ selectedCategories, onCategoriesChange }: SideCategori
       {loading ? (
         <div className="text-gray-500 text-sm">Loading...</div>
       ) : (
-        categories.map((category: Category) => (
-          <div key={category.id} className="flex justify-between items-center mb-3">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                id={category.id}
-                type="checkbox"
-                className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
-                checked={selectedCategories.includes(category.id)}
-                onChange={() => handleCategoryClick(category.id)}
-              />
-              <label htmlFor={category.id} className="ml-0 text-gray-800 cursor-pointer">
-                {category.name}
+        categories
+          .filter((category: Category) => getCategoryCount(category.id) > 0)
+          .map((category: Category) => (
+            <div key={category.id} className="flex justify-between items-center mb-3">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  id={category.id}
+                  type="checkbox"
+                  className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
+                  checked={selectedCategories.includes(category.id)}
+                  onChange={() => handleCategoryClick(category.id)}
+                />
+                <label htmlFor={category.id} className="ml-0 text-gray-800 cursor-pointer">
+                  {category.name}
+                </label>
               </label>
-            </label>
-            <div className="text-sky-900">({getCategoryCount(category.id)})</div>
-          </div>
-        ))
+              <div className="text-sky-900">({getCategoryCount(category.id)})</div>
+            </div>
+          ))
       )}
     </div>
   );

@@ -8,18 +8,20 @@ interface SideAvailabilityProps {
   inStockSelected: boolean;
   outOfStockSelected: boolean;
   onAvailabilityChange: (inStock: boolean, outOfStock: boolean) => void;
+  selectedCategories: string[];
 }
 
 const SideAvaliability = ({
   inStockSelected,
   outOfStockSelected,
   onAvailabilityChange,
+  selectedCategories,
 }: SideAvailabilityProps) => {
   const { data } = useQuery(GET_PRODUCTS, {
     variables: {
       page: 1,
       limit: 1000,
-      filter: {},
+      filter: selectedCategories.length > 0 ? { categoryIds: selectedCategories } : {},
       sort: { field: 'createdAt', order: -1 },
     },
   });
@@ -37,7 +39,7 @@ const SideAvaliability = ({
   };
 
   const handleReset = () => {
-    onAvailabilityChange(false, false);
+    onAvailabilityChange(true, false);
   };
 
   return (
@@ -49,30 +51,42 @@ const SideAvaliability = ({
         </button>
       </div>
       <div className="flex justify-between items-center mb-3">
-        <label className="flex items-center space-x-2 cursor-pointer">
+        <label
+          className={`flex items-center space-x-2 ${inStockCount > 0 ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+        >
           <input
             id="ins"
             type="checkbox"
             checked={inStockSelected}
             onChange={handleInStockChange}
-            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
+            disabled={inStockCount === 0}
+            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           />
-          <label htmlFor="ins" className="ml-0 text-gray-800 cursor-pointer">
+          <label
+            htmlFor="ins"
+            className={`ml-0 text-gray-800 ${inStockCount > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+          >
             In stock
           </label>
         </label>
         <div className="text-sky-900">({inStockCount})</div>
       </div>
       <div className="flex justify-between items-center mb-3">
-        <label className="flex items-center space-x-2 cursor-pointer">
+        <label
+          className={`flex items-center space-x-2 ${outOfStockCount > 0 ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}
+        >
           <input
             id="oos"
             type="checkbox"
             checked={outOfStockSelected}
             onChange={handleOutOfStockChange}
-            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer"
+            disabled={outOfStockCount === 0}
+            className="h-6 w-6 rounded-md bg-slate-400 checked:bg-slate-700 focus:ring-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           />
-          <label htmlFor="oos" className="ml-0 text-gray-800 cursor-pointer">
+          <label
+            htmlFor="oos"
+            className={`ml-0 text-gray-800 ${outOfStockCount > 0 ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+          >
             Out of stock
           </label>
         </label>

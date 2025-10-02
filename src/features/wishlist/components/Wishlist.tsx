@@ -13,6 +13,7 @@ import { useCart } from '@/shared/hooks/useCart';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import { useAuth } from '@/shared/contexts/AuthContext';
+import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import toast from 'react-hot-toast';
 
 const GET_FAVORITE_PRODUCTS = gql`
@@ -71,13 +72,17 @@ const Wishlist = () => {
   const { isAuthenticated } = useAuth();
   const { favorites, toggleFavorite } = useFavorites();
   const { addToCart, cartItems } = useCart();
+  const { openDrawer } = useCartDrawer();
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const [localProducts, setLocalProducts] = useState<Product[]>([]);
   const [hasLocalChanges, setHasLocalChanges] = useState(false);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
   const getCartQuantity = (productId: string): number => {
-    const cartItem = cartItems.find((item: any) => item.productId === productId || item.product?.id === productId);
+    const cartItem = cartItems.find(
+      (item: { id: string; productId: string; quantity: number; product?: { id: string } }) =>
+        item.productId === productId || item.product?.id === productId
+    );
     return cartItem?.quantity || 0;
   };
 
@@ -149,55 +154,12 @@ const Wishlist = () => {
     setAddingToCart(product.id);
     try {
       await addToCart(product.id, selectedQty);
-
       setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
 
-      toast.success(
-        (t) => (
-          <div className="flex items-center justify-between gap-4 min-w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">{product.name}</div>
-                <div className="text-sm text-gray-600">Added to cart (Qty: {selectedQty})</div>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                window.location.href = '/cart';
-              }}
-              className="bg-sky-900 hover:bg-sky-800 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0"
-            >
-              View Cart
-            </button>
-          </div>
-        ),
-        {
-          duration: 5000,
-          style: {
-            minWidth: '450px',
-            padding: '16px',
-          },
-        }
-      );
+      // Open cart drawer to show added item
+      openDrawer();
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      toast.error('Failed to add to cart. Please try again.');
     } finally {
       setAddingToCart(null);
     }
@@ -228,51 +190,8 @@ const Wishlist = () => {
     setAddingToCart(null);
 
     if (successCount > 0) {
-      toast.success(
-        (t) => (
-          <div className="flex items-center justify-between gap-4 min-w-full">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <div className="font-semibold text-gray-900">
-                  {successCount} {successCount === 1 ? 'item' : 'items'} added!
-                </div>
-                <div className="text-sm text-gray-600">Your cart has been updated</div>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                toast.dismiss(t.id);
-                window.location.href = '/cart';
-              }}
-              className="bg-sky-900 hover:bg-sky-800 text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors flex-shrink-0"
-            >
-              View Cart
-            </button>
-          </div>
-        ),
-        {
-          duration: 5000,
-          style: {
-            minWidth: '450px',
-            padding: '16px',
-          },
-        }
-      );
+      // Open cart drawer to show added items
+      openDrawer();
     }
     if (failCount > 0) {
       toast.error(`Failed to add ${failCount} ${failCount === 1 ? 'item' : 'items'}`);
@@ -346,7 +265,8 @@ const Wishlist = () => {
                 <Button
                   onClick={handleAddAllToCart}
                   disabled={
-                    addingToCart === 'all' || displayProducts.filter((p) => p.quantity > 0).length === 0
+                    addingToCart === 'all' ||
+                    displayProducts.filter((p) => p.quantity > 0).length === 0
                   }
                   className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 text-base font-medium rounded-lg transition-colors shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
@@ -406,7 +326,10 @@ const Wishlist = () => {
                       {getCartQuantity(product.id) > 0 && (
                         <div className="mb-2 px-3 py-1.5 bg-sky-50 border border-sky-200 rounded-lg flex items-center justify-between">
                           <span className="text-sm text-sky-900 font-medium">In Cart:</span>
-                          <span className="text-sm font-bold text-sky-900">{getCartQuantity(product.id)} {getCartQuantity(product.id) === 1 ? 'item' : 'items'}</span>
+                          <span className="text-sm font-bold text-sky-900">
+                            {getCartQuantity(product.id)}{' '}
+                            {getCartQuantity(product.id) === 1 ? 'item' : 'items'}
+                          </span>
                         </div>
                       )}
                       {product.quantity > 0 && (
@@ -422,11 +345,23 @@ const Wishlist = () => {
                               disabled={getSelectedQuantity(product.id) <= 1}
                               className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M20 12H4"
+                                />
                               </svg>
                             </button>
-                            <span className="w-10 text-center font-bold text-gray-900">{getSelectedQuantity(product.id)}</span>
+                            <span className="w-10 text-center font-bold text-gray-900">
+                              {getSelectedQuantity(product.id)}
+                            </span>
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
@@ -436,8 +371,18 @@ const Wishlist = () => {
                               disabled={getSelectedQuantity(product.id) >= product.quantity}
                               className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
                               </svg>
                             </button>
                           </div>
