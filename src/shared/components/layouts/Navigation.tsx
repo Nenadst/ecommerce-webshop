@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import React from 'react';
-import { ChevronDownIcon } from '../icons';
 import { CategoriesDropdown } from '../navigation/CategoriesDropdown';
 
 const Navigation = () => {

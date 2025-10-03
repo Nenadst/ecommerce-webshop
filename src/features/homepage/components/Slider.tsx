@@ -1,15 +1,8 @@
 'use client';
 
 import Button from '@/shared/components/elements/Button';
+import Link from 'next/link';
 import React from 'react';
-
-const handleClick = () => {
-  alert('Shop now');
-};
-
-const handleView = () => {
-  alert('View more');
-};
 
 const Slider = () => {
   return (
@@ -25,20 +18,22 @@ const Slider = () => {
         alt=""
       />
       <div className="left-[174px] top-[216px] absolute justify-center items-center gap-5 inline-flex">
-        <Button
-          onClick={handleClick}
-          type="submit"
-          className="w-32 h-14 bg-amber-500 justify-center text-white text-base font-semibold hover:bg-amber-600"
-        >
-          Shop Now
-        </Button>
-        <Button
-          onClick={handleView}
-          type="submit"
-          className="w-32 h-14 rounded-2xl border border-cyan-800 text-cyan-800 text-base font-semibold hover:bg-slate-200"
-        >
-          View more
-        </Button>
+        <Link href="/products">
+          <Button
+            type="button"
+            className="w-32 h-14 bg-amber-500 justify-center text-white text-base font-semibold hover:bg-amber-600"
+          >
+            Shop Now
+          </Button>
+        </Link>
+        <Link href="/products">
+          <Button
+            type="button"
+            className="w-32 h-14 rounded-2xl border border-cyan-800 text-cyan-800 text-base font-semibold hover:bg-slate-200"
+          >
+            View more
+          </Button>
+        </Link>
       </div>
       <div className="w-28 h-28 left-[1174px] top-[227px] absolute bg-amber-500 rounded-full justify-center items-center gap-3.5 inline-flex">
         <div className="text-white text-xl font-semibold">
