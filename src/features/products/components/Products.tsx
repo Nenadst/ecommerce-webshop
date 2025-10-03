@@ -191,7 +191,7 @@ const Products = () => {
 
   return (
     <>
-      <div className="mx-auto min-h-full container mt-20 p-16 flex md:p-4">
+      <div className="mx-auto min-h-full container mt-2 p-16 flex md:p-4">
         <div className="w-[300px] h-full hidden lg:block">
           <SideCategories
             selectedCategories={selectedCategories}
