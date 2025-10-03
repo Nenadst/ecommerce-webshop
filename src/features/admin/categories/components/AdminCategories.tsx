@@ -65,11 +65,14 @@ export function AdminCategories() {
   return (
     <div className="p-6 space-y-10">
       <ConfirmModal
-        show={modal.show}
+        isOpen={modal.show}
+        title="Delete Category"
         message={modal.message}
         onConfirm={modal.onConfirm}
-        onCancel={() => setModal((prev) => ({ ...prev, show: false }))}
-        deleteLoading={deleteLoading}
+        onClose={() => setModal((prev) => ({ ...prev, show: false }))}
+        isLoading={deleteLoading}
+        confirmText="Delete"
+        cancelText="Cancel"
       />
 
       <div className="flex items-center justify-between mb-4">

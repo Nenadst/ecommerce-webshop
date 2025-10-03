@@ -22,21 +22,7 @@ export function useAdminCategories() {
     onConfirm: () => {},
   });
 
-  const [deleteCategory, { loading: deleteLoading }] = useMutation(DELETE_CATEGORY, {
-    update(cache, { data }) {
-      if (data?.deleteCategory) {
-        cache.modify({
-          fields: {
-            categories(existingRefs: readonly Reference[] = [], { readField }) {
-              return existingRefs.filter(
-                (ref: Reference) => readField('id', ref) !== modal.categoryId
-              );
-            },
-          },
-        });
-      }
-    },
-  });
+  const [deleteCategory, { loading: deleteLoading }] = useMutation(DELETE_CATEGORY);
 
   const handleAddCategory = () => {
     router.push('/admin/categories/new');
@@ -49,7 +35,20 @@ export function useAdminCategories() {
       categoryId: id,
       onConfirm: async () => {
         try {
-          const { data } = await deleteCategory({ variables: { id } });
+          const { data } = await deleteCategory({
+            variables: { id },
+            update(cache, { data }) {
+              if (data?.deleteCategory) {
+                cache.modify({
+                  fields: {
+                    categories(existingRefs: readonly Reference[] = [], { readField }) {
+                      return existingRefs.filter((ref: Reference) => readField('id', ref) !== id);
+                    },
+                  },
+                });
+              }
+            },
+          });
           if (data?.deleteCategory) {
             toast.success('Category deleted successfully!');
           } else {
