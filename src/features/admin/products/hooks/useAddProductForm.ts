@@ -130,6 +130,24 @@ export function useAddProductForm() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       try {
+        const price = parseFloat(form.price);
+        const discountPrice = form.discountPrice ? parseFloat(form.discountPrice) : null;
+
+        if (price <= 0) {
+          toast.error('Price must be greater than 0');
+          return;
+        }
+
+        if (form.hasDiscount && discountPrice !== null && discountPrice <= 0) {
+          toast.error('Discount price must be greater than 0');
+          return;
+        }
+
+        if (form.hasDiscount && discountPrice !== null && discountPrice >= price) {
+          toast.error('Discount price must be less than the regular price');
+          return;
+        }
+
         const imageUrls = form.files.length > 0 ? await handleUpload() : [];
 
         await createProduct({
@@ -137,9 +155,9 @@ export function useAddProductForm() {
             input: {
               name: form.name,
               description: form.description,
-              price: parseFloat(form.price),
+              price: price,
               hasDiscount: form.hasDiscount,
-              discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
+              discountPrice: discountPrice,
               quantity: parseInt(form.quantity),
               categoryId: form.categoryId,
               images: imageUrls,

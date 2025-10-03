@@ -94,6 +94,8 @@ export default function AdminProductsFilters({
                   onChange={(e) => setMinPrice(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="0"
+                  min="0"
+                  step="0.01"
                 />
               </div>
               <div>
@@ -104,6 +106,8 @@ export default function AdminProductsFilters({
                   onChange={(e) => setMaxPrice(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="999"
+                  min="0"
+                  step="0.01"
                 />
               </div>
             </div>

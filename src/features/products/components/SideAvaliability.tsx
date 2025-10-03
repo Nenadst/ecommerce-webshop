@@ -39,7 +39,7 @@ const SideAvaliability = ({
   };
 
   const handleReset = () => {
-    onAvailabilityChange(true, false);
+    onAvailabilityChange(true, true);
   };
 
   return (

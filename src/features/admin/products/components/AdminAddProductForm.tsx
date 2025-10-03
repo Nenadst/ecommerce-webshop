@@ -170,6 +170,7 @@ export default function AdminAddProductForm() {
             onChange={handleInputChange}
             required
             step="0.01"
+            min="0.01"
           />
         </div>
 
@@ -203,6 +204,7 @@ export default function AdminAddProductForm() {
                 value={form.discountPrice}
                 onChange={handleInputChange}
                 step="0.01"
+                min="0.01"
               />
             </div>
           )}

@@ -156,6 +156,27 @@ export function useEditProductForm() {
     submittingRef.current = true;
 
     try {
+      const price = parseFloat(form.price);
+      const discountPrice = form.discountPrice ? parseFloat(form.discountPrice) : null;
+
+      if (price <= 0) {
+        toast.error('Price must be greater than 0');
+        submittingRef.current = false;
+        return;
+      }
+
+      if (form.hasDiscount && discountPrice !== null && discountPrice <= 0) {
+        toast.error('Discount price must be greater than 0');
+        submittingRef.current = false;
+        return;
+      }
+
+      if (form.hasDiscount && discountPrice !== null && discountPrice >= price) {
+        toast.error('Discount price must be less than the regular price');
+        submittingRef.current = false;
+        return;
+      }
+
       const newImagesBase64 = await Promise.all(form.files.map((file) => convertToBase64(file)));
 
       const allImages = [...form.existingImages, ...newImagesBase64];
@@ -166,9 +187,9 @@ export function useEditProductForm() {
           input: {
             name: form.name,
             description: form.description,
-            price: parseFloat(form.price),
+            price: price,
             hasDiscount: form.hasDiscount,
-            discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
+            discountPrice: discountPrice,
             quantity: parseInt(form.quantity),
             images: allImages,
             categoryId: form.categoryId,

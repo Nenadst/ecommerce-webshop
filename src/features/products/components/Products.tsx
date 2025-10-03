@@ -39,7 +39,7 @@ const Products = () => {
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [inStockSelected, setInStockSelected] = useState(true);
-  const [outOfStockSelected, setOutOfStockSelected] = useState(false);
+  const [outOfStockSelected, setOutOfStockSelected] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<1 | -1>(-1);
