@@ -12,11 +12,9 @@ import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
 
 interface CheckoutFormData {
-  // Contact Information
   email: string;
   phone: string;
 
-  // Shipping Address
   firstName: string;
   lastName: string;
   address: string;
@@ -24,14 +22,12 @@ interface CheckoutFormData {
   postalCode: string;
   country: string;
 
-  // Payment
   paymentMethod: 'card' | 'paypal' | 'bank';
   cardNumber?: string;
   cardName?: string;
   cardExpiry?: string;
   cardCVV?: string;
 
-  // Options
   saveInfo: boolean;
   sameAsBilling: boolean;
 }
@@ -68,7 +64,6 @@ const Checkout = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    // Clear error for this field
     if (errors[name as keyof CheckoutFormData]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
@@ -124,10 +119,8 @@ const Checkout = () => {
     setIsProcessing(true);
 
     try {
-      // Simulate order processing
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Clear cart after successful order
       await clearCart();
 
       toast.success('Order placed successfully!', {
@@ -135,7 +128,6 @@ const Checkout = () => {
         icon: '🎉',
       });
 
-      // Redirect to success page or orders page
       router.push('/');
     } catch (error) {
       console.error('Failed to place order:', error);
@@ -253,7 +245,6 @@ const Checkout = () => {
                     <button
                       type="button"
                       onClick={() => {
-                        // Allow navigation only to completed steps or current step
                         if (step.num <= currentStep) {
                           setCurrentStep(step.num);
                         }
@@ -730,14 +721,19 @@ const Checkout = () => {
                               id: string;
                               productId: string;
                               quantity: number;
-                              product?: { id: string; name: string; price: number; image?: string };
+                              product?: {
+                                id: string;
+                                name: string;
+                                price: number;
+                                images?: string[];
+                              };
                             }) => (
                               <div
                                 key={item.id}
                                 className="flex items-center gap-4 bg-gray-50 p-3 rounded-lg"
                               >
                                 <Image
-                                  src={item.product?.image || '/assets/img/no-product.png'}
+                                  src={item.product?.images?.[0] || '/assets/img/no-product.png'}
                                   alt={item.product?.name || 'Product'}
                                   width={60}
                                   height={60}
@@ -794,7 +790,7 @@ const Checkout = () => {
                         id: string;
                         productId: string;
                         quantity: number;
-                        product?: { id: string; name: string; price: number; image?: string };
+                        product?: { id: string; name: string; price: number; images?: string[] };
                       }) => (
                         <div key={item.id} className="flex justify-between text-sm">
                           <span className="text-gray-600 truncate mr-2">

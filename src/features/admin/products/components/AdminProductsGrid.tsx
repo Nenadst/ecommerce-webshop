@@ -63,7 +63,7 @@ export default function AdminProductsGrid({
 
           <div className="relative w-full h-48 mb-3 bg-white">
             <Image
-              src={product.image || '/assets/img/no-product.png'}
+              src={product.images?.[0] || '/assets/img/no-product.png'}
               alt={product.name}
               fill
               className="rounded object-contain"

@@ -22,8 +22,10 @@ type CreateProductInput = {
     name: string;
     description?: string;
     price: number;
+    hasDiscount?: boolean;
+    discountPrice?: number;
     quantity: number;
-    image?: string;
+    images?: string[];
     categoryId: string;
   };
 };
@@ -32,8 +34,10 @@ type UpdateProductInput = {
   name: string;
   description?: string;
   price: number;
+  hasDiscount?: boolean;
+  discountPrice?: number;
   quantity: number;
-  image?: string;
+  images?: string[];
   categoryId: string;
 };
 
@@ -188,7 +192,11 @@ const productResolvers = {
   Mutation: {
     createProduct: async (_: unknown, args: CreateProductInput) => {
       const product = await prisma.product.create({
-        data: args.input,
+        data: {
+          ...args.input,
+          hasDiscount: args.input.hasDiscount || false,
+          images: args.input.images || [],
+        },
         include: {
           category: true,
         },

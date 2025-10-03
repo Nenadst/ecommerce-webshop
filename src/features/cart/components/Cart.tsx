@@ -160,7 +160,7 @@ const Cart = () => {
                           id: string;
                           name: string;
                           price: number;
-                          image?: string;
+                          images?: string[];
                           quantity: number;
                           category?: { name: string };
                         };
@@ -182,7 +182,7 @@ const Cart = () => {
                             >
                               <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-sky-50 rounded-lg flex items-center justify-center overflow-hidden">
                                 <Image
-                                  src={product?.image || '/assets/img/no-product.png'}
+                                  src={product?.images?.[0] || '/assets/img/no-product.png'}
                                   alt={product?.name || 'Product'}
                                   width={96}
                                   height={96}

@@ -35,18 +35,20 @@ model Category {
 }
 
 model Product {
-  id          String         @id @default(cuid())
-  name        String
-  description String?
-  price       Float
-  quantity    Int
-  image       String?
-  categoryId  String
-  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  favorites   UserFavorite[]
-  cartItems   CartItem[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  hasDiscount   Boolean        @default(false)
+  discountPrice Float?
+  quantity      Int
+  images        String[]       @default([])
+  categoryId    String
+  category      Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  favorites     UserFavorite[]
+  cartItems     CartItem[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@map("products")
 }

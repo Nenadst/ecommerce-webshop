@@ -5,8 +5,10 @@ export type Product = {
   name: string;
   description?: string;
   price: number;
+  hasDiscount?: boolean;
+  discountPrice?: number;
   quantity: number;
-  image?: string;
+  images?: string[];
   category: Category;
   file?: File | null;
 };

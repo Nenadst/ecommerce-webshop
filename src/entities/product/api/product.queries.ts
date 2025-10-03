@@ -8,8 +8,10 @@ export const GET_PRODUCTS = gql`
         name
         description
         price
+        hasDiscount
+        discountPrice
         quantity
-        image
+        images
         category {
           id
           name
@@ -35,8 +37,10 @@ export const GET_PRODUCT = gql`
       name
       description
       price
+      hasDiscount
+      discountPrice
       quantity
-      image
+      images
       category {
         id
       }
@@ -51,8 +55,10 @@ export const UPDATE_PRODUCT = gql`
       name
       description
       price
+      hasDiscount
+      discountPrice
       quantity
-      image
+      images
       category {
         id
         name
@@ -68,8 +74,10 @@ export const CREATE_PRODUCT = gql`
       name
       description
       price
+      hasDiscount
+      discountPrice
       quantity
-      image
+      images
       category {
         id
         name

@@ -12,10 +12,12 @@ export function useAddProductForm() {
     name: '',
     description: '',
     price: '',
+    hasDiscount: false,
+    discountPrice: '',
     quantity: '',
     categoryId: '',
-    file: null as File | null,
-    imagePreview: '',
+    files: [] as File[],
+    imagePreviews: [] as string[],
   });
   const [loadingUpload, setLoadingUpload] = useState(false);
 
@@ -43,41 +45,83 @@ export function useAddProductForm() {
     },
   });
 
-  const handleUpload = useCallback(async (): Promise<string> => {
-    if (!form.file) return '';
+  const convertToBase64 = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  }, []);
+
+  const handleUpload = useCallback(async (): Promise<string[]> => {
+    if (form.files.length === 0) return [];
     setLoadingUpload(true);
-    const formData = new FormData();
-    formData.append('file', form.file);
-    const res = await fetch('/api/upload', { method: 'POST', body: formData });
-    const data = await res.json();
-    setLoadingUpload(false);
-    return data.url;
-  }, [form.file]);
+    try {
+      const base64Promises = form.files.map((file) => convertToBase64(file));
+      const base64Images = await Promise.all(base64Promises);
+      setLoadingUpload(false);
+      return base64Images;
+    } catch (error) {
+      console.error('Failed to convert images:', error);
+      setLoadingUpload(false);
+      toast.error('Failed to process images');
+      return [];
+    }
+  }, [form.files, convertToBase64]);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (selected && selected.size > 2 * 1024 * 1024) {
-      toast.error('Image must be smaller than 2MB');
-      setForm((f) => ({ ...f, file: null, imagePreview: '' }));
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-    setForm((f) => ({
-      ...f,
-      file: selected || null,
-      imagePreview: selected ? URL.createObjectURL(selected) : '',
-    }));
+    const selectedFiles = Array.from(e.target.files || []);
+    const validFiles = selectedFiles.filter((file) => {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error(`${file.name} is larger than 2MB`);
+        return false;
+      }
+      return true;
+    });
+
+    setForm((f) => {
+      const newFiles = [...f.files, ...validFiles].slice(0, 8); // Limit to 8 images
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+      return { ...f, files: newFiles, imagePreviews: newPreviews };
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }, []);
+
+  const handleImageRemove = useCallback((index: number) => {
+    setForm((f) => {
+      const newFiles = f.files.filter((_, i) => i !== index);
+      const newPreviews = f.imagePreviews.filter((_, i) => i !== index);
+      return { ...f, files: newFiles, imagePreviews: newPreviews };
+    });
+  }, []);
+
+  const handleImageReorder = useCallback((oldIndex: number, newIndex: number) => {
+    setForm((f) => {
+      const newFiles = [...f.files];
+      const newPreviews = [...f.imagePreviews];
+
+      const [movedFile] = newFiles.splice(oldIndex, 1);
+      const [movedPreview] = newPreviews.splice(oldIndex, 1);
+
+      newFiles.splice(newIndex, 0, movedFile);
+      newPreviews.splice(newIndex, 0, movedPreview);
+
+      return { ...f, files: newFiles, imagePreviews: newPreviews };
+    });
   }, []);
 
   const handleImageClear = useCallback(() => {
-    setForm((f) => ({ ...f, file: null, imagePreview: '' }));
+    setForm((f) => ({ ...f, files: [], imagePreviews: [] }));
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-      setForm((f) => ({ ...f, [name]: value }));
+      const { name, value, type } = e.target;
+      const checked = (e.target as HTMLInputElement).checked;
+      setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
     },
     []
   );
@@ -86,19 +130,19 @@ export function useAddProductForm() {
     async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        let imageUrl = '';
-        if (form.file) {
-          imageUrl = await handleUpload();
-        }
+        const imageUrls = form.files.length > 0 ? await handleUpload() : [];
+
         await createProduct({
           variables: {
             input: {
               name: form.name,
               description: form.description,
               price: parseFloat(form.price),
+              hasDiscount: form.hasDiscount,
+              discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
               quantity: parseInt(form.quantity),
               categoryId: form.categoryId,
-              image: imageUrl,
+              images: imageUrls,
             },
           },
         });
@@ -106,10 +150,12 @@ export function useAddProductForm() {
           name: '',
           description: '',
           price: '',
+          hasDiscount: false,
+          discountPrice: '',
           quantity: '',
           categoryId: '',
-          file: null,
-          imagePreview: '',
+          files: [],
+          imagePreviews: [],
         });
         toast.success('Product created successfully');
         router.push('/admin/products');
@@ -130,6 +176,8 @@ export function useAddProductForm() {
     fileInputRef,
     handleFileChange,
     handleImageClear,
+    handleImageRemove,
+    handleImageReorder,
     handleInputChange,
     handleSubmit,
     loading,

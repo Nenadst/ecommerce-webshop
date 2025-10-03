@@ -8,7 +8,7 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  image?: string;
+  images?: string[];
   quantity: number;
   category?: {
     id: string;
@@ -34,7 +34,7 @@ const GET_CART = gql`
           id
           name
           price
-          image
+          images
           quantity
           category {
             id
@@ -54,7 +54,7 @@ const GET_PRODUCTS_BY_IDS = gql`
       id
       name
       price
-      image
+      images
       quantity
       category {
         id
@@ -115,7 +115,6 @@ export function useCart() {
     fetchPolicy: 'cache-and-network',
   });
 
-  // Fetch product details for guest cart items to calculate totals
   const productIds = useMemo(() => localCart.map((item) => item.productId), [localCart]);
   const { data: guestProductsData } = useQuery(GET_PRODUCTS_BY_IDS, {
     variables: { ids: productIds },
@@ -127,7 +126,6 @@ export function useCart() {
   const [updateCartItemMutation] = useMutation(UPDATE_CART_ITEM_MUTATION);
   const [clearCartMutation] = useMutation(CLEAR_CART_MUTATION);
 
-  // Load guest cart from localStorage on mount
   useEffect(() => {
     setMounted(true);
     if (!isAuthenticated) {
@@ -143,7 +141,6 @@ export function useCart() {
     }
   }, [isAuthenticated]);
 
-  // Migrate guest cart to authenticated cart on login
   useEffect(() => {
     const migrateGuestCart = async () => {
       if (isAuthenticated && localCart.length > 0 && !migrationAttempted.current && !isMigrating) {
@@ -161,7 +158,6 @@ export function useCart() {
             }
           }
 
-          // Clear local cart after successful migration
           localStorage.removeItem(LOCAL_STORAGE_KEY);
           setLocalCart([]);
           await refetch();
@@ -178,14 +174,12 @@ export function useCart() {
     migrateGuestCart();
   }, [isAuthenticated, localCart, addToCartMutation, refetch, isMigrating]);
 
-  // Reset migration flag when user logs out
   useEffect(() => {
     if (!isAuthenticated) {
       migrationAttempted.current = false;
     }
   }, [isAuthenticated]);
 
-  // Calculate guest cart items with product details
   const guestCartItems = useMemo(() => {
     if (isAuthenticated || !guestProductsData?.productsByIds) return [];
 
@@ -204,7 +198,6 @@ export function useCart() {
       .filter((item) => item.product !== null);
   }, [localCart, guestProductsData, isAuthenticated]);
 
-  // Calculate totals
   const cartItems = isAuthenticated ? data?.cart?.items || [] : guestCartItems;
 
   const total = useMemo(() => {
@@ -300,7 +293,6 @@ export function useCart() {
     [isAuthenticated, removeFromCartMutation]
   );
 
-  // Debounced update for quantity changes
   const updateQuantityDebounced = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const updateQuantity = useCallback(
@@ -311,12 +303,10 @@ export function useCart() {
       }
 
       if (isAuthenticated) {
-        // Clear existing timeout for this product
         if (updateQuantityDebounced.current[productId]) {
           clearTimeout(updateQuantityDebounced.current[productId]);
         }
 
-        // Debounce the update
         updateQuantityDebounced.current[productId] = setTimeout(async () => {
           try {
             await updateCartItemMutation({

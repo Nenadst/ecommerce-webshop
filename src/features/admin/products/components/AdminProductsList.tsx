@@ -64,7 +64,7 @@ export default function AdminProductsList({
                   <div className="flex items-center">
                     <div className="flex-shrink-0 h-16 w-16">
                       <Image
-                        src={product.image || '/assets/img/no-product.png'}
+                        src={product.images?.[0] || '/assets/img/no-product.png'}
                         alt={product.name}
                         width={64}
                         height={64}

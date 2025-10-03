@@ -10,8 +10,10 @@ export const typeDefs = gql`
     name: String!
     description: String
     price: Float!
+    hasDiscount: Boolean!
+    discountPrice: Float
     quantity: Int!
-    image: String
+    images: [String!]!
     category: Category!
   }
 
@@ -86,8 +88,10 @@ export const typeDefs = gql`
     name: String!
     description: String
     price: Float!
+    hasDiscount: Boolean
+    discountPrice: Float
     quantity: Int!
-    image: String
+    images: [String!]
     categoryId: ID!
   }
 

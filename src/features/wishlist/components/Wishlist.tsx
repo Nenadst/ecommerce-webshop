@@ -156,7 +156,6 @@ const Wishlist = () => {
       await addToCart(product.id, selectedQty);
       setQuantities((prev) => ({ ...prev, [product.id]: 1 }));
 
-      // Open cart drawer to show added item
       openDrawer();
     } catch (error) {
       console.error('Failed to add to cart:', error);
@@ -190,7 +189,6 @@ const Wishlist = () => {
     setAddingToCart(null);
 
     if (successCount > 0) {
-      // Open cart drawer to show added items
       openDrawer();
     }
     if (failCount > 0) {
@@ -281,7 +279,7 @@ const Wishlist = () => {
                   <Card className="w-full h-[570px] flex flex-col overflow-hidden cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.1)] hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] transition-all duration-300 group border-2 border-transparent hover:border-amber-500">
                     <div className="relative h-64 bg-gradient-to-br from-gray-50 to-sky-50 flex items-center justify-center overflow-hidden">
                       <Image
-                        src={product.image || '/assets/img/no-product.png'}
+                        src={product.images?.[0] || '/assets/img/no-product.png'}
                         alt={product.name}
                         width={256}
                         height={256}

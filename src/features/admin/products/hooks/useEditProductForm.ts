@@ -1,12 +1,11 @@
 import { useMutation, useQuery, Reference } from '@apollo/client';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { GET_PRODUCT, UPDATE_PRODUCT } from '@/entities/product/api/product.queries';
 import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { Product } from '@/entities/product/types/product.types';
 import { Category } from '@/entities/category/types/category.types';
-import { EditProduct } from '@/entities/product/types/product-edit.types';
 
 export function useEditProductForm() {
   const router = useRouter();
@@ -22,14 +21,17 @@ export function useEditProductForm() {
     GET_CATEGORIES
   );
 
-  const [form, setForm] = useState<EditProduct>({
+  const [form, setForm] = useState({
     name: '',
     description: '',
     price: '',
+    hasDiscount: false,
+    discountPrice: '',
     quantity: '',
-    image: '',
     categoryId: '',
-    file: null,
+    existingImages: [] as string[],
+    files: [] as File[],
+    imagePreviews: [] as string[],
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const submittingRef = useRef(false);
@@ -41,17 +43,16 @@ export function useEditProductForm() {
         name: product.name,
         description: product.description || '',
         price: product.price.toString(),
+        hasDiscount: product.hasDiscount || false,
+        discountPrice: product.discountPrice?.toString() || '',
         quantity: product.quantity.toString(),
-        image: product.image || '',
         categoryId: product.category?.id || '',
-        file: null,
+        existingImages: product.images || [],
+        files: [],
+        imagePreviews: [],
       });
     }
   }, [productData]);
-
-  const imagePreviewUrl = useMemo(() => {
-    return form.file ? URL.createObjectURL(form.file) : '';
-  }, [form.file]);
 
   const [updateProduct, { loading: updateLoading }] = useMutation(UPDATE_PRODUCT, {
     update(cache, { data }) {
@@ -77,55 +78,88 @@ export function useEditProductForm() {
     },
   });
 
-  const handleUpload = async (): Promise<string> => {
-    if (!form.file) return '';
-    try {
-      const formData = new FormData();
-      formData.append('file', form.file);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      const data = await res.json();
-      return data.url;
-    } catch (err) {
-      toast.error('Image upload failed');
-      console.log(err);
-      return '';
-    }
-  };
-
-  const handleImageClear = () => {
-    setForm((f) => ({ ...f, file: null, image: '' }));
-    if (fileInputRef.current) fileInputRef.current.value = '';
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (selected && selected.size > 2 * 1024 * 1024) {
-      toast.error('Image must be smaller than 2MB');
-      handleImageClear();
-      return;
-    }
-    setForm((f) => ({ ...f, file: selected || null }));
+    const selectedFiles = Array.from(e.target.files || []);
+
+    const validFiles = selectedFiles.filter((file) => {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error(`${file.name} is larger than 2MB`);
+        return false;
+      }
+      return true;
+    });
+
+    setForm((f) => {
+      const availableSlots = 8 - (f.existingImages.length + f.files.length);
+      const newFiles = [...f.files, ...validFiles].slice(0, availableSlots);
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+      return { ...f, files: newFiles, imagePreviews: newPreviews };
+    });
+
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const handleChange =
-    (field: keyof EditProduct) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      setForm((f) => ({ ...f, [field]: e.target.value }));
-    };
+  const handleExistingImageRemove = (index: number) => {
+    setForm((f) => {
+      const newExistingImages = f.existingImages.filter((_, i) => i !== index);
+      return { ...f, existingImages: newExistingImages };
+    });
+  };
+
+  const handleNewImageRemove = (index: number) => {
+    setForm((f) => {
+      const newFiles = f.files.filter((_, i) => i !== index);
+      const newPreviews = f.imagePreviews.filter((_, i) => i !== index);
+      return { ...f, files: newFiles, imagePreviews: newPreviews };
+    });
+  };
+
+  const handleAllImagesReorder = (oldIndex: number, newIndex: number) => {
+    setForm((f) => {
+      const allImages = [...f.existingImages, ...f.imagePreviews];
+      const [moved] = allImages.splice(oldIndex, 1);
+      allImages.splice(newIndex, 0, moved);
+
+      const existingCount = f.existingImages.length;
+      const newExisting = allImages.slice(0, existingCount);
+      const newPreviews = allImages.slice(existingCount);
+
+      return { ...f, existingImages: newExisting, imagePreviews: newPreviews };
+    });
+  };
+
+  const handleImageClear = () => {
+    setForm((f) => ({ ...f, files: [], imagePreviews: [], existingImages: [] }));
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submittingRef.current) return;
     submittingRef.current = true;
 
-    let imageUrl = form.image;
-    if (form.file) {
-      imageUrl = await handleUpload();
-    } else if (!form.image) {
-      imageUrl = '';
-    }
-
     try {
+      const newImagesBase64 = await Promise.all(form.files.map((file) => convertToBase64(file)));
+
+      const allImages = [...form.existingImages, ...newImagesBase64];
+
       await updateProduct({
         variables: {
           id: productId,
@@ -133,8 +167,10 @@ export function useEditProductForm() {
             name: form.name,
             description: form.description,
             price: parseFloat(form.price),
+            hasDiscount: form.hasDiscount,
+            discountPrice: form.discountPrice ? parseFloat(form.discountPrice) : null,
             quantity: parseInt(form.quantity),
-            image: imageUrl,
+            images: allImages,
             categoryId: form.categoryId,
           },
         },
@@ -153,11 +189,13 @@ export function useEditProductForm() {
     setForm,
     categoriesData,
     fileInputRef,
-    imagePreviewUrl,
     handleSubmit,
     handleImageClear,
     handleFileChange,
-    handleChange,
+    handleExistingImageRemove,
+    handleNewImageRemove,
+    handleAllImagesReorder,
+    handleInputChange,
     productLoading,
     categoriesLoading,
     updateLoading,

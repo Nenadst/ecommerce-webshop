@@ -61,9 +61,7 @@ const cartResolvers = {
         throw new Error('Authentication required');
       }
 
-      // Use transaction to prevent race conditions
       const cartItem = await prisma.$transaction(async (tx) => {
-        // Check if product exists and has enough stock
         const product = await tx.product.findUnique({
           where: { id: productId },
         });
@@ -72,7 +70,6 @@ const cartResolvers = {
           throw new Error('Product not found');
         }
 
-        // Check if item already in cart
         const existingItem = await tx.cartItem.findUnique({
           where: {
             userId_productId: {
@@ -88,7 +85,6 @@ const cartResolvers = {
           throw new Error('Not enough stock available');
         }
 
-        // Upsert cart item
         const item = await tx.cartItem.upsert({
           where: {
             userId_productId: {
@@ -163,9 +159,7 @@ const cartResolvers = {
         throw new Error('Quantity must be greater than 0');
       }
 
-      // Use transaction to prevent race conditions
       const updatedItem = await prisma.$transaction(async (tx) => {
-        // Check product stock
         const product = await tx.product.findUnique({
           where: { id: productId },
         });
