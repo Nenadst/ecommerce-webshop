@@ -47,8 +47,13 @@ const Products = () => {
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { openDrawer } = useCartDrawer();
+
+  const getAvailableQuantity = (productId: string, stockQuantity: number) => {
+    const quantityInCart = cartItems.find((item) => item.productId === productId)?.quantity || 0;
+    return stockQuantity - quantityInCart;
+  };
 
   useEffect(() => {
     if (categoryFromUrl) {
@@ -153,10 +158,10 @@ const Products = () => {
     return quantities[productId] || 1;
   };
 
-  const updateQuantity = (productId: string, delta: number, maxStock: number) => {
+  const updateQuantity = (productId: string, delta: number, availableStock: number) => {
     setQuantities((prev) => {
       const current = prev[productId] || 1;
-      const newQty = Math.max(1, Math.min(maxStock, current + delta));
+      const newQty = Math.max(1, Math.min(availableStock, current + delta));
       return { ...prev, [productId]: newQty };
     });
   };
@@ -165,15 +170,17 @@ const Products = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (product.quantity === 0) {
-      toast.error('This product is out of stock');
+    const availableQty = getAvailableQuantity(product.id, product.quantity);
+
+    if (availableQty === 0) {
+      toast.error('All available stock is already in your cart');
       return;
     }
 
     const selectedQty = getSelectedQuantity(product.id);
 
-    if (selectedQty > product.quantity) {
-      toast.error(`Only ${product.quantity} items available in stock`);
+    if (selectedQty > availableQty) {
+      toast.error(`Only ${availableQty} more item(s) can be added to cart`);
       return;
     }
 
@@ -236,139 +243,161 @@ const Products = () => {
             ) : products.length === 0 ? (
               <div className="col-span-full text-center py-20 text-gray-500">No products found</div>
             ) : (
-              products.map((product: Product, index: number) => (
-                <Link href={`/products/${product.id}`} key={product.id}>
-                  <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
-                    <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
-                      <Image
-                        src={product.images?.[0] || '/assets/img/no-product.png'}
-                        alt={product.name}
-                        width={256}
-                        height={256}
-                        className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
-                        priority={index < 4}
-                      />
-                      <button
-                        onClick={(e) => handleToggleFavorite(e, product.id)}
-                        className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
-                        aria-label={
-                          isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
-                        }
-                      >
-                        <HeartIconBig
-                          className={`w-5 h-5 transition-colors ${
-                            isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                          }`}
+              products.map((product: Product, index: number) => {
+                const availableQty = getAvailableQuantity(product.id, product.quantity);
+                return (
+                  <Link href={`/products/${product.id}`} key={product.id}>
+                    <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
+                      <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={product.images?.[0] || '/assets/img/no-product.png'}
+                          alt={product.name}
+                          width={256}
+                          height={256}
+                          className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
+                          priority={index < 4}
                         />
-                      </button>
-                      <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
-                        {product.category.name}
-                      </span>
-                      {product.quantity > 0 ? (
-                        <span className="absolute bottom-3 left-3 bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                          In Stock
+                        <button
+                          onClick={(e) => handleToggleFavorite(e, product.id)}
+                          className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
+                          aria-label={
+                            isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
+                          }
+                        >
+                          <HeartIconBig
+                            className={`w-5 h-5 transition-colors ${
+                              isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                            }`}
+                          />
+                        </button>
+                        <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
+                          {product.category.name}
                         </span>
-                      ) : (
-                        <span className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                          Out of Stock
-                        </span>
-                      )}
-                    </div>
-                    <div className="p-4 flex flex-col flex-grow">
-                      <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
-                        {product.description
-                          ? truncateText(product.description, 80)
-                          : 'No description available'}
-                      </p>
-                      <div className="flex items-center justify-between mt-auto mb-3">
-                        <div className="flex flex-col">
-                          <span className="text-2xl font-bold text-sky-900">€{product.price}</span>
-                        </div>
-                        <Star count={5} />
-                      </div>
-
-                      <div className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                        <span className="text-sm text-gray-700 font-medium">Quantity:</span>
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              updateQuantity(product.id, -1, product.quantity);
-                            }}
-                            disabled={
-                              product.quantity === 0 || getSelectedQuantity(product.id) <= 1
-                            }
-                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                          >
-                            <svg
-                              className="w-4 h-4 text-gray-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20 12H4"
-                              />
-                            </svg>
-                          </button>
-                          <span className="w-10 text-center font-bold text-gray-900">
-                            {product.quantity === 0 ? 0 : getSelectedQuantity(product.id)}
+                        {availableQty > 0 ? (
+                          <span className="absolute bottom-3 left-3 bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                            {availableQty} Available
                           </span>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              updateQuantity(product.id, 1, product.quantity);
-                            }}
-                            disabled={
-                              product.quantity === 0 ||
-                              getSelectedQuantity(product.id) >= product.quantity
-                            }
-                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                          >
-                            <svg
-                              className="w-4 h-4 text-gray-600"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                        ) : product.quantity > 0 ? (
+                          <span className="absolute bottom-3 left-3 bg-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                            All in Cart
+                          </span>
+                        ) : (
+                          <span className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                            Out of Stock
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-4 flex flex-col flex-grow">
+                        <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
+                          {product.description
+                            ? truncateText(product.description, 80)
+                            : 'No description available'}
+                        </p>
+                        <div className="flex items-center justify-between mt-auto mb-3">
+                          <div className="flex flex-col">
+                            <span className="text-2xl font-bold text-sky-900">
+                              €{product.price}
+                            </span>
+                          </div>
+                          <Star count={5} />
+                        </div>
+
+                        <div
+                          className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <span className="text-sm text-gray-700 font-medium">Quantity:</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                updateQuantity(product.id, -1, availableQty);
+                              }}
+                              disabled={availableQty === 0 || getSelectedQuantity(product.id) <= 1}
+                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4v16m8-8H4"
-                              />
-                            </svg>
-                          </button>
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M20 12H4"
+                                />
+                              </svg>
+                            </button>
+                            <span className="w-10 text-center font-bold text-gray-900">
+                              {availableQty === 0 ? 0 : getSelectedQuantity(product.id)}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                updateQuantity(product.id, 1, availableQty);
+                              }}
+                              disabled={
+                                availableQty === 0 ||
+                                getSelectedQuantity(product.id) >= availableQty
+                              }
+                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <svg
+                                className="w-4 h-4 text-gray-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Button
+                            onClick={(e) => handleAddToCart(e, product)}
+                            disabled={availableQty === 0 || addingToCart === product.id}
+                            className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
+                              availableQty > 0
+                                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            } disabled:opacity-50`}
+                          >
+                            {addingToCart === product.id
+                              ? 'Adding...'
+                              : availableQty > 0
+                                ? 'Add to Cart'
+                                : product.quantity > 0
+                                  ? 'All in Cart'
+                                  : 'Out of Stock'}
+                          </Button>
                         </div>
                       </div>
-
-                      <Button
-                        onClick={(e) => handleAddToCart(e, product)}
-                        disabled={product.quantity === 0 || addingToCart === product.id}
-                        className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
-                          product.quantity > 0
-                            ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        } disabled:opacity-50`}
-                      >
-                        {addingToCart === product.id
-                          ? 'Adding...'
-                          : product.quantity > 0
-                            ? 'Add to Cart'
-                            : 'Out of Stock'}
-                      </Button>
-                    </div>
-                  </Card>
-                </Link>
-              ))
+                    </Card>
+                  </Link>
+                );
+              })
             )}
           </div>
           {!loading && allProducts.length > 0 && (

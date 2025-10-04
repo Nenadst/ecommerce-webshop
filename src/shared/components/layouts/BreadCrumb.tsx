@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
 import { ChevronRightIcon } from '../icons';
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCT } from '@/entities/product/api/product.queries';
+import { Product } from '@/entities/product/types/product.types';
 
 interface BreadcrumbItem {
   label: string;
@@ -13,8 +16,16 @@ interface BreadcrumbItem {
 export const BreadCrumb = () => {
   const pathname = usePathname();
 
+  const paths = pathname.split('/').filter((path) => path);
+  const isProductDetail = paths[0] === 'products' && paths[1] && paths[1].length > 10;
+  const productId = isProductDetail ? paths[1] : null;
+
+  const { data: productData } = useQuery<{ product: Product }>(GET_PRODUCT, {
+    variables: { id: productId },
+    skip: !productId,
+  });
+
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
-    const paths = pathname.split('/').filter((path) => path);
     const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }];
 
     let currentPath = '';
@@ -38,6 +49,8 @@ export const BreadCrumb = () => {
         label = 'Checkout';
       } else if (path === 'profile') {
         label = 'My Profile';
+      } else if (isProductDetail && index === 1 && productData?.product) {
+        label = productData.product.name;
       }
 
       breadcrumbs.push({ label, href: currentPath });

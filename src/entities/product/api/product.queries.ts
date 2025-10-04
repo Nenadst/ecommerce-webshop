@@ -43,6 +43,7 @@ export const GET_PRODUCT = gql`
       images
       category {
         id
+        name
       }
     }
   }
