@@ -106,6 +106,7 @@ model Order {
   total           Float
 
   items           OrderItem[]
+  logs            OrderLog[]
 
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -128,6 +129,18 @@ model OrderItem {
   createdAt       DateTime @default(now())
 
   @@map("order_items")
+}
+
+model OrderLog {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  action      String
+  description String
+  performedBy String?
+  createdAt   DateTime @default(now())
+
+  @@map("order_logs")
 }
 
 enum Role {

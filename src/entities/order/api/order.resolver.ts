@@ -57,6 +57,22 @@ const recalculateOrderTotals = async (orderId: string) => {
   });
 };
 
+const logOrderAction = async (
+  orderId: string,
+  action: string,
+  description: string,
+  performedBy?: string
+) => {
+  await prisma.orderLog.create({
+    data: {
+      orderId,
+      action,
+      description,
+      performedBy,
+    },
+  });
+};
+
 const orderResolvers = {
   Query: {
     orders: async (_: unknown, __: unknown, context: { req: NextRequest }) => {
@@ -318,6 +334,13 @@ const orderResolvers = {
         });
       }
 
+      await logOrderAction(
+        order.id,
+        'ORDER_CREATED',
+        `Order ${order.orderNumber} created with ${order.items.length} item(s). Total: €${order.total.toFixed(2)}`,
+        order.user.email
+      );
+
       return {
         ...order,
         createdAt: order.createdAt.toISOString(),
@@ -388,6 +411,14 @@ const orderResolvers = {
         },
       });
 
+      const logParts: string[] = [];
+      if (status) logParts.push(`Status changed to ${status}`);
+      if (paymentStatus) logParts.push(`Payment status changed to ${paymentStatus}`);
+
+      if (logParts.length > 0) {
+        await logOrderAction(updatedOrder.id, 'STATUS_UPDATED', logParts.join(', '), user?.email);
+      }
+
       return {
         ...updatedOrder,
         createdAt: updatedOrder.createdAt.toISOString(),
@@ -444,7 +475,16 @@ const orderResolvers = {
         });
       }
 
-      // Build update data object
+      const originalOrder = await prisma.order.findUnique({
+        where: { id },
+      });
+
+      if (!originalOrder) {
+        throw new GraphQLError('Order not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
       const updateData: {
         email?: string;
         phone?: string;
@@ -460,15 +500,46 @@ const orderResolvers = {
         updatedAt: new Date(),
       };
 
-      if (email) updateData.email = email;
-      if (phone) updateData.phone = phone;
-      if (firstName) updateData.firstName = firstName;
-      if (lastName) updateData.lastName = lastName;
-      if (address) updateData.address = address;
-      if (city) updateData.city = city;
-      if (postalCode) updateData.postalCode = postalCode;
-      if (country) updateData.country = country;
-      if (paymentMethod) updateData.paymentMethod = paymentMethod;
+      const changes: string[] = [];
+
+      if (email && email !== originalOrder.email) {
+        updateData.email = email;
+        changes.push(`Email changed from "${originalOrder.email}" to "${email}"`);
+      }
+      if (phone && phone !== originalOrder.phone) {
+        updateData.phone = phone;
+        changes.push(`Phone changed from "${originalOrder.phone}" to "${phone}"`);
+      }
+      if (firstName && firstName !== originalOrder.firstName) {
+        updateData.firstName = firstName;
+        changes.push(`First name changed from "${originalOrder.firstName}" to "${firstName}"`);
+      }
+      if (lastName && lastName !== originalOrder.lastName) {
+        updateData.lastName = lastName;
+        changes.push(`Last name changed from "${originalOrder.lastName}" to "${lastName}"`);
+      }
+      if (address && address !== originalOrder.address) {
+        updateData.address = address;
+        changes.push(`Address changed from "${originalOrder.address}" to "${address}"`);
+      }
+      if (city && city !== originalOrder.city) {
+        updateData.city = city;
+        changes.push(`City changed from "${originalOrder.city}" to "${city}"`);
+      }
+      if (postalCode && postalCode !== originalOrder.postalCode) {
+        updateData.postalCode = postalCode;
+        changes.push(`Postal code changed from "${originalOrder.postalCode}" to "${postalCode}"`);
+      }
+      if (country && country !== originalOrder.country) {
+        updateData.country = country;
+        changes.push(`Country changed from "${originalOrder.country}" to "${country}"`);
+      }
+      if (paymentMethod && paymentMethod !== originalOrder.paymentMethod) {
+        updateData.paymentMethod = paymentMethod;
+        changes.push(
+          `Payment method changed from "${originalOrder.paymentMethod}" to "${paymentMethod}"`
+        );
+      }
 
       const updatedOrder = await prisma.order.update({
         where: { id },
@@ -486,6 +557,10 @@ const orderResolvers = {
           user: true,
         },
       });
+
+      if (changes.length > 0) {
+        await logOrderAction(updatedOrder.id, 'DETAILS_UPDATED', changes.join('; '), user?.email);
+      }
 
       return {
         ...updatedOrder,
@@ -520,13 +595,33 @@ const orderResolvers = {
         });
       }
 
+      const originalItem = await prisma.orderItem.findUnique({
+        where: { id },
+      });
+
+      if (!originalItem) {
+        throw new GraphQLError('Order item not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
       const updateData: {
         quantity?: number;
         price?: number;
       } = {};
 
-      if (quantity !== undefined) updateData.quantity = quantity;
-      if (price !== undefined) updateData.price = price;
+      const changes: string[] = [];
+
+      if (quantity !== undefined && quantity !== originalItem.quantity) {
+        updateData.quantity = quantity;
+        changes.push(`Quantity changed from ${originalItem.quantity} to ${quantity}`);
+      }
+      if (price !== undefined && price !== originalItem.price) {
+        updateData.price = price;
+        changes.push(
+          `Price changed from €${originalItem.price.toFixed(2)} to €${price.toFixed(2)}`
+        );
+      }
 
       const orderItem = await prisma.orderItem.update({
         where: { id },
@@ -555,6 +650,15 @@ const orderResolvers = {
         throw new GraphQLError('Order not found', {
           extensions: { code: 'NOT_FOUND' },
         });
+      }
+
+      if (changes.length > 0) {
+        await logOrderAction(
+          order.id,
+          'ITEM_UPDATED',
+          `${originalItem.name}: ${changes.join('; ')}`,
+          user?.email
+        );
       }
 
       return {
@@ -595,6 +699,13 @@ const orderResolvers = {
           extensions: { code: 'NOT_FOUND' },
         });
       }
+
+      await logOrderAction(
+        orderItem.orderId,
+        'ITEM_REMOVED',
+        `Removed "${orderItem.name}" (Qty: ${orderItem.quantity}, Price: €${orderItem.price.toFixed(2)})`,
+        user?.email
+      );
 
       await prisma.orderItem.delete({
         where: { id },
@@ -682,6 +793,13 @@ const orderResolvers = {
           image: product.images?.[0] || null,
         },
       });
+
+      await logOrderAction(
+        orderId,
+        'ITEM_ADDED',
+        `Added "${product.name}" (Qty: ${quantity}, Price: €${price.toFixed(2)})`,
+        user?.email
+      );
 
       await recalculateOrderTotals(orderId);
 

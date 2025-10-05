@@ -3,7 +3,16 @@
 import React, { useState, useMemo } from 'react';
 import { useAdminOrders } from '../hooks/useAdminOrders';
 import Spinner from '@/shared/components/spinner/Spinner';
-import { ChevronDown, ChevronUp, Calendar, CreditCard, Package, Trash2, Plus } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronUp,
+  Calendar,
+  CreditCard,
+  Package,
+  Trash2,
+  Plus,
+  Download,
+} from 'lucide-react';
 import Image from 'next/image';
 import AddProductModal from './AddProductModal';
 
@@ -267,21 +276,6 @@ export default function AdminOrders() {
     }
   };
 
-  const getPaymentStatusColor = (status: string) => {
-    switch (status.toUpperCase()) {
-      case 'PAID':
-        return 'bg-green-100 text-green-800';
-      case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'FAILED':
-        return 'bg-red-100 text-red-800';
-      case 'REFUNDED':
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -291,6 +285,34 @@ export default function AdminOrders() {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const handleDownloadLog = async (orderId: string, orderNumber: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/orders/${orderId}/logs`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download log');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `order-${orderNumber}-log.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading log:', error);
+      alert('Failed to download order log');
+    }
   };
 
   if (loading) {
@@ -445,6 +467,13 @@ export default function AdminOrders() {
                         <span className="font-semibold text-gray-900">
                           €{order.total.toFixed(2)}
                         </span>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Items</p>
+                        <div className="flex items-center gap-2">
+                          <Package className="w-4 h-4 text-gray-600" />
+                          <span className="font-semibold text-gray-900">{order.items.length}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -652,16 +681,25 @@ export default function AdminOrders() {
                     <div className="mb-4">
                       <div className="flex justify-between items-center mb-3">
                         <h3 className="font-semibold text-gray-900 text-lg">Order Items</h3>
-                        <button
-                          onClick={() => {
-                            setSelectedOrderId(order.id);
-                            setIsAddProductModalOpen(true);
-                          }}
-                          className="px-3 py-1 bg-sky-900 text-white rounded-lg hover:bg-sky-800 transition text-sm font-medium flex items-center gap-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Add Product
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleDownloadLog(order.id, order.orderNumber)}
+                            className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium flex items-center gap-2"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download Log
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedOrderId(order.id);
+                              setIsAddProductModalOpen(true);
+                            }}
+                            className="px-3 py-1 bg-sky-900 text-white rounded-lg hover:bg-sky-800 transition text-sm font-medium flex items-center gap-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add Product
+                          </button>
+                        </div>
                       </div>
                       <div className="space-y-3">
                         {order.items.map((item) => (
