@@ -374,6 +374,31 @@ const orderResolvers = {
         });
       }
 
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        throw new GraphQLError('User not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      if (user.accountStatus === 'SUSPENDED') {
+        throw new GraphQLError('Your account has been suspended. You cannot create orders.', {
+          extensions: { code: 'FORBIDDEN' },
+        });
+      }
+
+      if (user.accountStatus === 'INACTIVE') {
+        throw new GraphQLError(
+          'Your account is inactive. You cannot create orders. Please contact support.',
+          {
+            extensions: { code: 'FORBIDDEN' },
+          }
+        );
+      }
+
       const cartItems = await prisma.cartItem.findMany({
         where: { userId },
         include: {

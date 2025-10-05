@@ -28,6 +28,10 @@ export const typeDefs = gql`
     email: String!
     name: String
     role: String!
+    accountStatus: String!
+    lastLogin: String
+    country: String
+    createdAt: String!
   }
 
   type AuthResponse {
@@ -149,6 +153,7 @@ export const typeDefs = gql`
     order(id: ID!): Order
     allOrders: [Order!]!
     dashboardStats(days: Int, timezone: String): DashboardStats!
+    allUsers: [User!]!
   }
 
   input OrderInput {
@@ -207,6 +212,9 @@ export const typeDefs = gql`
     register(input: RegisterInput!): AuthResponse!
     login(input: LoginInput!): AuthResponse!
     updateUser(id: ID!, input: UpdateUserInput!): AuthResponse!
+    updateUserRole(id: ID!, role: String!): User!
+    updateAccountStatus(id: ID!, status: String!): User!
+    deleteUser(id: ID!): Boolean!
 
     addToCart(productId: ID!, quantity: Int): CartItem!
     removeFromCart(productId: ID!): Boolean!
@@ -239,6 +247,7 @@ export const resolvers = {
     ...categoryResolvers.Query,
     ...cartResolvers.Query,
     ...orderResolvers.Query,
+    ...userResolvers.Query,
   },
   Mutation: {
     ...productResolvers.Mutation,

@@ -11,16 +11,19 @@ datasource db {
 }
 
 model User {
-  id        String         @id @default(cuid())
-  email     String         @unique
-  password  String
-  name      String?
-  role      Role           @default(USER)
-  favorites UserFavorite[]
-  cartItems CartItem[]
-  orders    Order[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String?
+  role          Role           @default(USER)
+  accountStatus AccountStatus  @default(ACTIVE)
+  lastLogin     DateTime?
+  country       String?
+  favorites     UserFavorite[]
+  cartItems     CartItem[]
+  orders        Order[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@map("users")
 }
@@ -146,6 +149,12 @@ model OrderLog {
 enum Role {
   USER
   ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 
 enum OrderStatus {
