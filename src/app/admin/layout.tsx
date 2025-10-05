@@ -56,6 +56,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin" className="block hover:underline">
             Dashboard
           </Link>
+          <Link href="/admin/orders" className="block hover:underline">
+            Orders
+          </Link>
           <Link href="/admin/users" className="block hover:underline">
             Users
           </Link>

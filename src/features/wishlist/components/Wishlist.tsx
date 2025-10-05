@@ -24,7 +24,7 @@ const GET_FAVORITE_PRODUCTS = gql`
       description
       price
       quantity
-      image
+      images
       category {
         id
         name
@@ -42,7 +42,7 @@ const GET_PRODUCTS_BY_IDS = gql`
         description
         price
         quantity
-        image
+        images
         category {
           id
           name
@@ -61,7 +61,7 @@ interface Product {
   description?: string;
   price: number;
   quantity: number;
-  image?: string;
+  images?: string[];
   category: {
     id: string;
     name: string;
@@ -276,7 +276,7 @@ const Wishlist = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {displayProducts.map((product: Product, index: number) => (
                 <Link href={`/products/${product.id}`} key={product.id}>
-                  <Card className="w-full h-[570px] flex flex-col overflow-hidden cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.1)] hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] transition-all duration-300 group border-2 border-transparent hover:border-amber-500">
+                  <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer shadow-[0_0_15px_rgba(0,0,0,0.1)] hover:shadow-[0_0_25px_rgba(0,0,0,0.15)] transition-all duration-300 group border-2 border-transparent hover:border-amber-500">
                     <div className="relative h-64 bg-gradient-to-br from-gray-50 to-sky-50 flex items-center justify-center overflow-hidden">
                       <Image
                         src={product.images?.[0] || '/assets/img/no-product.png'}
@@ -310,12 +310,12 @@ const Wishlist = () => {
                       <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
                         {product.name}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                         {product.description
                           ? truncateText(product.description, 80)
                           : 'No description available'}
                       </p>
-                      <div className="flex items-center justify-between mt-auto mb-3">
+                      <div className="flex items-center justify-between mb-2 mt-auto">
                         <div className="flex flex-col">
                           <span className="text-2xl font-bold text-sky-900">€{product.price}</span>
                         </div>
@@ -330,62 +330,71 @@ const Wishlist = () => {
                           </span>
                         </div>
                       )}
-                      {product.quantity > 0 && (
-                        <div className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                          <span className="text-sm text-gray-700 font-medium">Quantity:</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                updateQuantity(product.id, -1, product.quantity);
-                              }}
-                              disabled={getSelectedQuantity(product.id) <= 1}
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      <div
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg"
+                      >
+                        <span className="text-sm text-gray-700 font-medium">Quantity:</span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              updateQuantity(product.id, -1, product.quantity);
+                            }}
+                            disabled={
+                              product.quantity === 0 || getSelectedQuantity(product.id) <= 1
+                            }
+                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
                             >
-                              <svg
-                                className="w-4 h-4 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M20 12H4"
-                                />
-                              </svg>
-                            </button>
-                            <span className="w-10 text-center font-bold text-gray-900">
-                              {getSelectedQuantity(product.id)}
-                            </span>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                updateQuantity(product.id, 1, product.quantity);
-                              }}
-                              disabled={getSelectedQuantity(product.id) >= product.quantity}
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M20 12H4"
+                              />
+                            </svg>
+                          </button>
+                          <span className="w-10 text-center font-bold text-gray-900">
+                            {product.quantity === 0 ? 0 : getSelectedQuantity(product.id)}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              updateQuantity(product.id, 1, product.quantity);
+                            }}
+                            disabled={
+                              product.quantity === 0 ||
+                              getSelectedQuantity(product.id) >= product.quantity
+                            }
+                            className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4 text-gray-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
                             >
-                              <svg
-                                className="w-4 h-4 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 4v16m8-8H4"
-                                />
-                              </svg>
-                            </button>
-                          </div>
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
+                              />
+                            </svg>
+                          </button>
                         </div>
-                      )}
+                      </div>
                       <Button
                         onClick={(e) => handleAddToCart(e, product)}
                         disabled={product.quantity === 0 || addingToCart === product.id}

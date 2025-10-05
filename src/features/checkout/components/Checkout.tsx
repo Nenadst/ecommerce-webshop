@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@apollo/client';
 import { Card } from '@/shared/components/elements/Card';
 import { useCart } from '@/shared/hooks/useCart';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
+import { CREATE_ORDER } from '@/entities/order/api/order.queries';
 
 interface CheckoutFormData {
   email: string;
@@ -34,23 +36,30 @@ interface CheckoutFormData {
 
 const Checkout = () => {
   const router = useRouter();
-  const { cartItems, total, itemCount, clearCart, loading, mounted } = useCart();
+  const { cartItems, total, itemCount, loading, mounted } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [createOrder] = useMutation(CREATE_ORDER);
 
-  const [formData, setFormData] = useState<CheckoutFormData>({
-    email: user?.email || '',
-    phone: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    postalCode: '',
-    country: 'Ireland',
-    paymentMethod: 'card',
-    saveInfo: false,
-    sameAsBilling: true,
+  const [formData, setFormData] = useState<CheckoutFormData>(() => {
+    const nameParts = user?.name?.split(' ') || [];
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    return {
+      email: user?.email || '',
+      phone: '',
+      firstName,
+      lastName,
+      address: '',
+      city: '',
+      postalCode: '',
+      country: 'Ireland',
+      paymentMethod: 'card',
+      saveInfo: false,
+      sameAsBilling: true,
+    };
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof CheckoutFormData, string>>>({});
@@ -116,22 +125,42 @@ const Checkout = () => {
       return;
     }
 
+    if (!isAuthenticated) {
+      toast.error('Please log in to place an order');
+      router.push('/login');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const { data } = await createOrder({
+        variables: {
+          input: {
+            email: formData.email,
+            phone: formData.phone,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address: formData.address,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            country: formData.country,
+            paymentMethod: formData.paymentMethod,
+          },
+        },
+      });
 
-      await clearCart();
-
-      toast.success('Order placed successfully!', {
+      toast.success(`Order placed successfully! Order #${data.createOrder.orderNumber}`, {
         duration: 5000,
         icon: '🎉',
       });
 
-      router.push('/');
-    } catch (error) {
+      router.push(`/profile?tab=orders`);
+    } catch (error: unknown) {
       console.error('Failed to place order:', error);
-      toast.error('Failed to place order. Please try again.');
+      const message =
+        error instanceof Error ? error.message : 'Failed to place order. Please try again.';
+      toast.error(message);
     } finally {
       setIsProcessing(false);
     }

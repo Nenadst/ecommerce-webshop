@@ -9,6 +9,7 @@ import UserMenu from '../user/UserMenu';
 import { useFavorites } from '../../hooks/useFavorites';
 import { useCart } from '../../hooks/useCart';
 import { useCartDrawer } from '../../contexts/CartDrawerContext';
+import { Package } from 'lucide-react';
 
 const CartSection = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -51,6 +52,17 @@ const CartSection = () => {
         </div>
         <div className="text-white text-sm font-normal">Wishlist</div>
       </Link>
+      {isAuthenticated && (
+        <Link
+          href="/profile?tab=orders"
+          className="w-32 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg"
+        >
+          <div className="justify-center items-center flex">
+            <Package className="w-5 h-5 text-white" />
+          </div>
+          <div className="text-white text-sm font-normal">Orders</div>
+        </Link>
+      )}
       <button
         onClick={openDrawer}
         className="w-32 h-10 justify-center items-center gap-3 flex hover:bg-amber-600 cursor-pointer rounded-lg"

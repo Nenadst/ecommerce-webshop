@@ -3,6 +3,7 @@ import productResolvers from '../../entities/product/api/product.resolver';
 import categoryResolvers from '../../entities/category/api/category.resolver';
 import userResolvers from '../../entities/user/api/user.resolver';
 import cartResolvers from '../../entities/cart/api/cart.resolver';
+import orderResolvers from '../../entities/order/api/order.resolver';
 
 export const typeDefs = gql`
   type Product {
@@ -48,6 +49,43 @@ export const typeDefs = gql`
     itemCount: Int!
   }
 
+  type Order {
+    id: ID!
+    userId: ID!
+    user: User!
+    orderNumber: String!
+    status: String!
+    email: String!
+    phone: String!
+    firstName: String!
+    lastName: String!
+    address: String!
+    city: String!
+    postalCode: String!
+    country: String!
+    paymentMethod: String!
+    paymentStatus: String!
+    subtotal: Float!
+    tax: Float!
+    shipping: Float!
+    total: Float!
+    items: [OrderItem!]!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type OrderItem {
+    id: ID!
+    orderId: ID!
+    productId: ID!
+    product: Product!
+    name: String!
+    price: Float!
+    quantity: Int!
+    image: String
+    createdAt: String!
+  }
+
   input ProductFilterInput {
     categoryId: ID
     categoryIds: [ID!]
@@ -82,6 +120,21 @@ export const typeDefs = gql`
     userFavorites: [ID!]!
     favoriteProducts: [Product!]!
     cart: Cart!
+    orders: [Order!]!
+    order(id: ID!): Order
+    allOrders: [Order!]!
+  }
+
+  input OrderInput {
+    email: String!
+    phone: String!
+    firstName: String!
+    lastName: String!
+    address: String!
+    city: String!
+    postalCode: String!
+    country: String!
+    paymentMethod: String!
   }
 
   input ProductInput {
@@ -133,6 +186,24 @@ export const typeDefs = gql`
     removeFromCart(productId: ID!): Boolean!
     updateCartItemQuantity(productId: ID!, quantity: Int!): CartItem!
     clearCart: Boolean!
+
+    createOrder(input: OrderInput!): Order!
+    updateOrderStatus(id: ID!, status: String, paymentStatus: String): Order!
+    updateOrderDetails(
+      id: ID!
+      email: String
+      phone: String
+      firstName: String
+      lastName: String
+      address: String
+      city: String
+      postalCode: String
+      country: String
+      paymentMethod: String
+    ): Order!
+    updateOrderItem(id: ID!, quantity: Int, price: Float): Order!
+    removeOrderItem(id: ID!): Order!
+    addOrderItem(orderId: ID!, productId: ID!, quantity: Int!, price: Float!): Order!
   }
 `;
 
@@ -141,11 +212,13 @@ export const resolvers = {
     ...productResolvers.Query,
     ...categoryResolvers.Query,
     ...cartResolvers.Query,
+    ...orderResolvers.Query,
   },
   Mutation: {
     ...productResolvers.Mutation,
     ...categoryResolvers.Mutation,
     ...userResolvers.Mutation,
     ...cartResolvers.Mutation,
+    ...orderResolvers.Mutation,
   },
 };
