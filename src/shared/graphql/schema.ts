@@ -86,6 +86,31 @@ export const typeDefs = gql`
     createdAt: String!
   }
 
+  type RevenueByDay {
+    date: String!
+    revenue: Float!
+  }
+
+  type OrdersByStatus {
+    status: String!
+    count: Int!
+  }
+
+  type DashboardStats {
+    totalRevenue: Float!
+    totalOrders: Int!
+    totalCustomers: Int!
+    totalProducts: Int!
+    averageOrderValue: Float!
+    lowStockCount: Int!
+    revenueChange: Float!
+    ordersChange: Float!
+    customersChange: Float!
+    revenueByDay: [RevenueByDay!]!
+    ordersByStatus: [OrdersByStatus!]!
+    recentOrders: [Order!]!
+  }
+
   input ProductFilterInput {
     categoryId: ID
     categoryIds: [ID!]
@@ -123,6 +148,7 @@ export const typeDefs = gql`
     orders: [Order!]!
     order(id: ID!): Order
     allOrders: [Order!]!
+    dashboardStats(days: Int, timezone: String): DashboardStats!
   }
 
   input OrderInput {

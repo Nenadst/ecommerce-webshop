@@ -69,3 +69,39 @@ export const GET_ORDER = gql`
     }
   }
 `;
+
+export const GET_DASHBOARD_STATS = gql`
+  query GetDashboardStats($days: Int, $timezone: String) {
+    dashboardStats(days: $days, timezone: $timezone) {
+      totalRevenue
+      totalOrders
+      totalCustomers
+      totalProducts
+      averageOrderValue
+      lowStockCount
+      revenueChange
+      ordersChange
+      customersChange
+      revenueByDay {
+        date
+        revenue
+      }
+      ordersByStatus {
+        status
+        count
+      }
+      recentOrders {
+        id
+        orderNumber
+        status
+        paymentStatus
+        total
+        createdAt
+        user {
+          name
+          email
+        }
+      }
+    }
+  }
+`;

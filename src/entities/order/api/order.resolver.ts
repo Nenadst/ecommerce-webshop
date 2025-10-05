@@ -200,6 +200,165 @@ const orderResolvers = {
         })),
       }));
     },
+
+    dashboardStats: async (
+      _: unknown,
+      { days = 30, timezone = 'UTC' }: { days?: number; timezone?: string },
+      context: { req: NextRequest }
+    ) => {
+      const userId = getUserFromToken(context.req);
+      if (!userId) {
+        throw new GraphQLError('Not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (user?.role !== 'ADMIN') {
+        throw new GraphQLError('Unauthorized - Admin access required', {
+          extensions: { code: 'FORBIDDEN' },
+        });
+      }
+
+      const now = new Date();
+
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - days);
+
+      const previousStartDate = new Date(startDate);
+      previousStartDate.setDate(previousStartDate.getDate() - days);
+
+      const [
+        totalRevenue,
+        previousRevenue,
+        totalOrders,
+        previousOrders,
+        totalCustomers,
+        previousCustomers,
+        totalProducts,
+        lowStockProducts,
+        revenueByDay,
+        ordersByStatus,
+        recentOrders,
+      ] = await Promise.all([
+        prisma.$queryRaw<[{ sum: number | null }]>`
+          SELECT SUM(total)::float as sum
+          FROM orders
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${days - 1} * INTERVAL '1 day'
+            AND "paymentStatus" = 'PAID'
+        `.then((result) => ({ _sum: { total: result[0]?.sum || null } })),
+        prisma.$queryRaw<[{ sum: number | null }]>`
+          SELECT SUM(total)::float as sum
+          FROM orders
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${2 * days - 1} * INTERVAL '1 day'
+            AND ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date < (NOW() AT TIME ZONE ${timezone})::date - ${days} * INTERVAL '1 day'
+            AND "paymentStatus" = 'PAID'
+        `.then((result) => ({ _sum: { total: result[0]?.sum || null } })),
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*)::int as count
+          FROM orders
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${days - 1} * INTERVAL '1 day'
+        `.then((result) => Number(result[0]?.count || 0)),
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*)::int as count
+          FROM orders
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${2 * days - 1} * INTERVAL '1 day'
+            AND ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date < (NOW() AT TIME ZONE ${timezone})::date - ${days} * INTERVAL '1 day'
+        `.then((result) => Number(result[0]?.count || 0)),
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*)::int as count
+          FROM users
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${days - 1} * INTERVAL '1 day'
+        `.then((result) => Number(result[0]?.count || 0)),
+        prisma.$queryRaw<[{ count: bigint }]>`
+          SELECT COUNT(*)::int as count
+          FROM users
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${2 * days - 1} * INTERVAL '1 day'
+            AND ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date < (NOW() AT TIME ZONE ${timezone})::date - ${days} * INTERVAL '1 day'
+        `.then((result) => Number(result[0]?.count || 0)),
+        prisma.product.count(),
+        prisma.product.count({
+          where: {
+            quantity: { lte: 10 },
+          },
+        }),
+        prisma.$queryRaw<Array<{ date: string; revenue: number }>>`
+          WITH daily_data AS (
+            SELECT
+              ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date as order_date,
+              total
+            FROM orders
+            WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${days - 1} * INTERVAL '1 day'
+              AND "paymentStatus" = 'PAID'
+          )
+          SELECT
+            order_date::text as date,
+            SUM(total)::float as revenue
+          FROM daily_data
+          GROUP BY order_date
+          ORDER BY order_date ASC
+        `,
+        prisma.$queryRaw<Array<{ status: string; count: bigint }>>`
+          SELECT status, COUNT(*)::int as count
+          FROM orders
+          WHERE ("createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${timezone})::date >= (NOW() AT TIME ZONE ${timezone})::date - ${days - 1} * INTERVAL '1 day'
+          GROUP BY status
+        `,
+        prisma.order.findMany({
+          take: 10,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        }),
+      ]);
+
+      const revenue = totalRevenue._sum.total || 0;
+      const prevRevenue = previousRevenue._sum.total || 0;
+      const revenueChange = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : 0;
+
+      const ordersChange =
+        previousOrders > 0 ? ((totalOrders - previousOrders) / previousOrders) * 100 : 0;
+      const customersChange =
+        previousCustomers > 0
+          ? ((totalCustomers - previousCustomers) / previousCustomers) * 100
+          : 0;
+
+      const averageOrderValue = totalOrders > 0 ? revenue / totalOrders : 0;
+
+      return {
+        totalRevenue: revenue,
+        totalOrders,
+        totalCustomers,
+        totalProducts,
+        averageOrderValue,
+        lowStockCount: lowStockProducts,
+        revenueChange,
+        ordersChange,
+        customersChange,
+        revenueByDay: revenueByDay.map((item) => ({
+          date: item.date,
+          revenue: Number(item.revenue),
+        })),
+        ordersByStatus: ordersByStatus.map((item) => ({
+          status: item.status,
+          count: Number(item.count),
+        })),
+        recentOrders: recentOrders.map((order) => ({
+          ...order,
+          createdAt: order.createdAt.toISOString(),
+          updatedAt: order.updatedAt.toISOString(),
+        })),
+      };
+    },
   },
 
   Mutation: {
