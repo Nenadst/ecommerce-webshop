@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useApolloClient } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -64,6 +64,16 @@ const GET_PRODUCTS_BY_IDS = gql`
   }
 `;
 
+const GET_PRODUCT = gql`
+  query GetProduct($id: ID!) {
+    product(id: $id) {
+      id
+      name
+      quantity
+    }
+  }
+`;
+
 const ADD_TO_CART_MUTATION = gql`
   mutation AddToCart($productId: ID!, $quantity: Int) {
     addToCart(productId: $productId, quantity: $quantity) {
@@ -105,6 +115,7 @@ interface CartItem {
 
 export function useCart() {
   const { isAuthenticated } = useAuth();
+  const client = useApolloClient();
   const [localCart, setLocalCart] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
   const [isMigrating, setIsMigrating] = useState(false);
@@ -234,6 +245,27 @@ export function useCart() {
         }
       } else {
         try {
+          // Fetch product to validate stock for guest users
+          const { data: productData } = await client.query({
+            query: GET_PRODUCT,
+            variables: { id: productId },
+            fetchPolicy: 'network-only',
+          });
+
+          if (!productData?.product) {
+            toast.error('Product not found');
+            throw new Error('Product not found');
+          }
+
+          const product = productData.product;
+          const existingItem = localCart.find((item) => item.productId === productId);
+          const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity;
+
+          if (product.quantity < totalQuantity) {
+            toast.error(`Not enough stock available. Only ${product.quantity} left in stock.`);
+            throw new Error('Not enough stock available');
+          }
+
           setLocalCart((prev) => {
             const existingItem = prev.find((item) => item.productId === productId);
             let newCart;
@@ -252,12 +284,14 @@ export function useCart() {
           toast.success('Added to cart!');
         } catch (error) {
           console.error('Failed to add to cart:', error);
-          toast.error('Failed to add to cart');
+          if (error instanceof Error && error.message !== 'Not enough stock available' && error.message !== 'Product not found') {
+            toast.error('Failed to add to cart');
+          }
           throw error;
         }
       }
     },
-    [isAuthenticated, addToCartMutation]
+    [isAuthenticated, addToCartMutation, client, localCart]
   );
 
   const removeFromCart = useCallback(
@@ -322,6 +356,25 @@ export function useCart() {
         }, 500);
       } else {
         try {
+          // Fetch product to validate stock for guest users
+          const { data: productData } = await client.query({
+            query: GET_PRODUCT,
+            variables: { id: productId },
+            fetchPolicy: 'network-only',
+          });
+
+          if (!productData?.product) {
+            toast.error('Product not found');
+            throw new Error('Product not found');
+          }
+
+          const product = productData.product;
+
+          if (product.quantity < quantity) {
+            toast.error(`Not enough stock available. Only ${product.quantity} left in stock.`);
+            throw new Error('Not enough stock available');
+          }
+
           setLocalCart((prev) => {
             const newCart = prev.map((item) =>
               item.productId === productId ? { ...item, quantity } : item
@@ -331,12 +384,14 @@ export function useCart() {
           });
         } catch (error) {
           console.error('Failed to update cart item:', error);
-          toast.error('Failed to update quantity');
+          if (error instanceof Error && error.message !== 'Not enough stock available' && error.message !== 'Product not found') {
+            toast.error('Failed to update quantity');
+          }
           throw error;
         }
       }
     },
-    [isAuthenticated, updateCartItemMutation, removeFromCart]
+    [isAuthenticated, updateCartItemMutation, removeFromCart, client]
   );
 
   const clearCart = useCallback(async (): Promise<void> => {

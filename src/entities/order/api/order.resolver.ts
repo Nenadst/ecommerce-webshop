@@ -18,6 +18,11 @@ const getUserFromToken = (req: NextRequest): string | null => {
   }
 };
 
+interface OrderItemInput {
+  productId: string;
+  quantity: number;
+}
+
 interface OrderInput {
   email: string;
   phone: string;
@@ -28,6 +33,7 @@ interface OrderInput {
   postalCode: string;
   country: string;
   paymentMethod: string;
+  items?: OrderItemInput[];
 }
 
 const generateOrderNumber = (): string => {
@@ -124,6 +130,40 @@ const orderResolvers = {
           id,
           userId,
         },
+        include: {
+          items: {
+            include: {
+              product: {
+                include: {
+                  category: true,
+                },
+              },
+            },
+          },
+          user: true,
+        },
+      });
+
+      if (!order) {
+        throw new GraphQLError('Order not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      return {
+        ...order,
+        createdAt: order.createdAt.toISOString(),
+        updatedAt: order.updatedAt.toISOString(),
+        items: order.items.map((item) => ({
+          ...item,
+          createdAt: item.createdAt.toISOString(),
+        })),
+      };
+    },
+
+    orderByNumber: async (_: unknown, { orderNumber }: { orderNumber: string }) => {
+      const order = await prisma.order.findUnique({
+        where: { orderNumber },
         include: {
           items: {
             include: {
@@ -368,55 +408,86 @@ const orderResolvers = {
       context: { req: NextRequest }
     ) => {
       const userId = getUserFromToken(context.req);
-      if (!userId) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
+
+      // For authenticated users, check account status
+      if (userId) {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
         });
-      }
 
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-      });
-
-      if (!user) {
-        throw new GraphQLError('User not found', {
-          extensions: { code: 'NOT_FOUND' },
-        });
-      }
-
-      if (user.accountStatus === 'SUSPENDED') {
-        throw new GraphQLError('Your account has been suspended. You cannot create orders.', {
-          extensions: { code: 'FORBIDDEN' },
-        });
-      }
-
-      if (user.accountStatus === 'INACTIVE') {
-        throw new GraphQLError(
-          'Your account is inactive. You cannot create orders. Please contact support.',
-          {
-            extensions: { code: 'FORBIDDEN' },
+        if (user) {
+          if (user.accountStatus === 'SUSPENDED') {
+            throw new GraphQLError('Your account has been suspended. You cannot create orders.', {
+              extensions: { code: 'FORBIDDEN' },
+            });
           }
-        );
+
+          if (user.accountStatus === 'INACTIVE') {
+            throw new GraphQLError(
+              'Your account is inactive. You cannot create orders. Please contact support.',
+              {
+                extensions: { code: 'FORBIDDEN' },
+              }
+            );
+          }
+        }
       }
 
-      const cartItems = await prisma.cartItem.findMany({
-        where: { userId },
-        include: {
-          product: {
-            include: {
-              category: true,
+      let itemsToOrder;
+
+      // Guest checkout: use items from input
+      if (input.items && input.items.length > 0) {
+        // Fetch product details for guest items
+        itemsToOrder = await Promise.all(
+          input.items.map(async (item) => {
+            const product = await prisma.product.findUnique({
+              where: { id: item.productId },
+              include: { category: true },
+            });
+
+            if (!product) {
+              throw new GraphQLError(`Product not found: ${item.productId}`, {
+                extensions: { code: 'NOT_FOUND' },
+              });
+            }
+
+            return {
+              product,
+              quantity: item.quantity,
+            };
+          })
+        );
+      } else if (userId) {
+        // Authenticated user: fetch from cart
+        const cartItems = await prisma.cartItem.findMany({
+          where: { userId },
+          include: {
+            product: {
+              include: {
+                category: true,
+              },
             },
           },
-        },
-      });
+        });
 
-      if (cartItems.length === 0) {
-        throw new GraphQLError('Cart is empty', {
+        if (cartItems.length === 0) {
+          throw new GraphQLError('Cart is empty', {
+            extensions: { code: 'BAD_REQUEST' },
+          });
+        }
+
+        itemsToOrder = cartItems.map((item) => ({
+          product: item.product,
+          quantity: item.quantity,
+        }));
+      } else {
+        throw new GraphQLError('No items to order', {
           extensions: { code: 'BAD_REQUEST' },
         });
       }
 
-      for (const item of cartItems) {
+      // Validate stock for all items
+      for (const item of itemsToOrder) {
         if (item.product.quantity < item.quantity) {
           throw new GraphQLError(
             `Insufficient stock for ${item.product.name}. Only ${item.product.quantity} available.`,
@@ -427,7 +498,7 @@ const orderResolvers = {
         }
       }
 
-      const subtotal = cartItems.reduce((sum, item) => {
+      const subtotal = itemsToOrder.reduce((sum, item) => {
         const price =
           item.product.hasDiscount && item.product.discountPrice
             ? item.product.discountPrice
@@ -444,7 +515,7 @@ const orderResolvers = {
       const order = await prisma.$transaction(async (tx) => {
         const newOrder = await tx.order.create({
           data: {
-            userId,
+            ...(userId ? { userId } : {}),
             orderNumber,
             status: 'PENDING',
             email: input.email,
@@ -464,7 +535,7 @@ const orderResolvers = {
           },
         });
 
-        for (const item of cartItems) {
+        for (const item of itemsToOrder) {
           const price =
             item.product.hasDiscount && item.product.discountPrice
               ? item.product.discountPrice
@@ -473,7 +544,7 @@ const orderResolvers = {
           await tx.orderItem.create({
             data: {
               orderId: newOrder.id,
-              productId: item.productId,
+              productId: item.product.id,
               name: item.product.name,
               price,
               quantity: item.quantity,
@@ -482,7 +553,7 @@ const orderResolvers = {
           });
 
           await tx.product.update({
-            where: { id: item.productId },
+            where: { id: item.product.id },
             data: {
               quantity: {
                 decrement: item.quantity,
@@ -491,9 +562,12 @@ const orderResolvers = {
           });
         }
 
-        await tx.cartItem.deleteMany({
-          where: { userId },
-        });
+        // Clear cart only for authenticated users
+        if (userId) {
+          await tx.cartItem.deleteMany({
+            where: { userId },
+          });
+        }
 
         return tx.order.findUnique({
           where: { id: newOrder.id },
@@ -522,7 +596,7 @@ const orderResolvers = {
         order.id,
         'ORDER_CREATED',
         `Order ${order.orderNumber} created with ${order.items.length} item(s). Total: €${order.total.toFixed(2)}`,
-        order.user.email
+        order.email
       );
 
       return {

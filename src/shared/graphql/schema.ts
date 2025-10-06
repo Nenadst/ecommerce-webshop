@@ -151,9 +151,15 @@ export const typeDefs = gql`
     cart: Cart!
     orders: [Order!]!
     order(id: ID!): Order
+    orderByNumber(orderNumber: String!): Order
     allOrders: [Order!]!
     dashboardStats(days: Int, timezone: String): DashboardStats!
     allUsers: [User!]!
+  }
+
+  input OrderItemInput {
+    productId: ID!
+    quantity: Int!
   }
 
   input OrderInput {
@@ -166,6 +172,7 @@ export const typeDefs = gql`
     postalCode: String!
     country: String!
     paymentMethod: String!
+    items: [OrderItemInput!]
   }
 
   input ProductInput {

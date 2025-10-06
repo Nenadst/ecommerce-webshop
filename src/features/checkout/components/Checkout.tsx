@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@apollo/client';
+import { useMutation, useApolloClient, gql } from '@apollo/client';
 import { Card } from '@/shared/components/elements/Card';
 import { useCart } from '@/shared/hooks/useCart';
 import { useAuth } from '@/shared/contexts/AuthContext';
@@ -12,6 +12,16 @@ import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
 import { CREATE_ORDER } from '@/entities/order/api/order.queries';
+
+const GET_PRODUCTS_BY_IDS = gql`
+  query GetProductsByIds($ids: [ID!]!) {
+    productsByIds(ids: $ids) {
+      id
+      name
+      quantity
+    }
+  }
+`;
 
 interface CheckoutFormData {
   email: string;
@@ -36,6 +46,7 @@ interface CheckoutFormData {
 
 const Checkout = () => {
   const router = useRouter();
+  const client = useApolloClient();
   const { cartItems, total, itemCount, loading, mounted } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -55,7 +66,7 @@ const Checkout = () => {
       address: '',
       city: '',
       postalCode: '',
-      country: 'Ireland',
+      country: 'Portugal',
       paymentMethod: 'card',
       saveInfo: false,
       sameAsBilling: true,
@@ -125,15 +136,52 @@ const Checkout = () => {
       return;
     }
 
-    if (!isAuthenticated) {
-      toast.error('Please log in to place an order');
-      router.push('/login');
-      return;
-    }
-
     setIsProcessing(true);
 
     try {
+      // Validate stock before placing order
+      const productIds = cartItems.map((item) => item.productId);
+      const { data: productsData } = await client.query({
+        query: GET_PRODUCTS_BY_IDS,
+        variables: { ids: productIds },
+        fetchPolicy: 'network-only',
+      });
+
+      if (productsData?.productsByIds) {
+        const stockIssues: string[] = [];
+
+        for (const cartItem of cartItems) {
+          const product = productsData.productsByIds.find(
+            (p: { id: string; quantity: number }) => p.id === cartItem.productId
+          );
+
+          if (!product) {
+            stockIssues.push(`Product not found`);
+          } else if (product.quantity < cartItem.quantity) {
+            stockIssues.push(
+              `${product.name || 'Product'}: Only ${product.quantity} available (you have ${cartItem.quantity} in cart)`
+            );
+          }
+        }
+
+        if (stockIssues.length > 0) {
+          toast.error(
+            `Stock issues detected:\n${stockIssues.join('\n')}`,
+            { duration: 6000 }
+          );
+          setIsProcessing(false);
+          return;
+        }
+      }
+
+      // Prepare items for guest checkout
+      const items = isAuthenticated
+        ? undefined
+        : cartItems.map((item) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+          }));
+
       const { data } = await createOrder({
         variables: {
           input: {
@@ -146,6 +194,7 @@ const Checkout = () => {
             postalCode: formData.postalCode,
             country: formData.country,
             paymentMethod: formData.paymentMethod,
+            items,
           },
         },
       });
@@ -155,7 +204,17 @@ const Checkout = () => {
         icon: '🎉',
       });
 
-      router.push(`/profile?tab=orders`);
+      // Clear guest cart from localStorage
+      if (!isAuthenticated) {
+        localStorage.removeItem('guest_cart');
+      }
+
+      // Redirect based on authentication status
+      if (isAuthenticated) {
+        router.push(`/profile?tab=orders`);
+      } else {
+        router.push(`/order-confirmation?orderNumber=${data.createOrder.orderNumber}`);
+      }
     } catch (error: unknown) {
       console.error('Failed to place order:', error);
       const message =
@@ -481,11 +540,8 @@ const Checkout = () => {
                                   errors.country ? 'border-red-500' : 'border-gray-300'
                                 }`}
                               >
-                                <option value="Ireland">Ireland</option>
-                                <option value="United Kingdom">United Kingdom</option>
-                                <option value="United States">United States</option>
-                                <option value="Germany">Germany</option>
-                                <option value="France">France</option>
+                                <option value="Portugal">Portugal</option>
+                                <option value="Belgium">Belgium</option>
                               </select>
                               {errors.country && (
                                 <p className="mt-1 text-sm text-red-500">{errors.country}</p>
