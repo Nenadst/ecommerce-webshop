@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import UserMenu from '../user/UserMenu';
 import { useFavorites } from '../../hooks/useFavorites';
-import { useCart } from '../../hooks/useCart';
+import { useCart } from '../../contexts/CartContext';
 import { useCartDrawer } from '../../contexts/CartDrawerContext';
 import { Package } from 'lucide-react';
 

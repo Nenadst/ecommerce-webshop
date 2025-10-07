@@ -15,7 +15,7 @@ import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 import Spinner from '@/shared/components/spinner/Spinner';
 import { HeartIconBig } from '@/shared/components/icons';
 import { useFavorites } from '@/shared/hooks/useFavorites';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';

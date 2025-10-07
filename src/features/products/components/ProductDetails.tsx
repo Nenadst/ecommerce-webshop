@@ -11,7 +11,7 @@ import { useQuery } from '@apollo/client';
 import { GET_PRODUCT } from '@/entities/product/api/product.queries';
 import { Product } from '@/entities/product/types/product.types';
 import { useFavorites } from '@/shared/hooks/useFavorites';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import toast from 'react-hot-toast';

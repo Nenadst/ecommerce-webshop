@@ -113,7 +113,7 @@ interface CartItem {
   quantity: number;
 }
 
-export function useCart() {
+export function useCartInternal() {
   const { isAuthenticated } = useAuth();
   const client = useApolloClient();
   const [localCart, setLocalCart] = useState<CartItem[]>([]);
@@ -121,15 +121,22 @@ export function useCart() {
   const [isMigrating, setIsMigrating] = useState(false);
   const migrationAttempted = useRef(false);
 
+
   const { data, refetch, loading } = useQuery(GET_CART, {
     skip: !isAuthenticated,
     fetchPolicy: 'cache-and-network',
   });
 
-  const productIds = useMemo(() => localCart.map((item) => item.productId), [localCart]);
-  const { data: guestProductsData } = useQuery(GET_PRODUCTS_BY_IDS, {
+  const productIds = useMemo(() => {
+    return localCart.map((item) => item.productId);
+  }, [localCart]);
+
+  const { data: guestProductsData, refetch: refetchGuestProducts, loading: guestProductsLoading } = useQuery(GET_PRODUCTS_BY_IDS, {
     variables: { ids: productIds },
     skip: isAuthenticated || productIds.length === 0,
+    fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-and-network',
+    notifyOnNetworkStatusChange: true,
   });
 
   const [addToCartMutation] = useMutation(ADD_TO_CART_MUTATION);
@@ -192,7 +199,17 @@ export function useCart() {
   }, [isAuthenticated]);
 
   const guestCartItems = useMemo(() => {
-    if (isAuthenticated || !guestProductsData?.productsByIds) return [];
+    if (isAuthenticated) {
+      return [];
+    }
+
+    if (localCart.length === 0) {
+      return [];
+    }
+
+    if (!guestProductsData?.productsByIds) {
+      return [];
+    }
 
     return localCart
       .map((cartItem) => {
@@ -207,7 +224,7 @@ export function useCart() {
         };
       })
       .filter((item) => item.product !== null);
-  }, [localCart, guestProductsData, isAuthenticated]);
+  }, [localCart, guestProductsData, isAuthenticated, guestProductsLoading]);
 
   const cartItems = isAuthenticated ? data?.cart?.items || [] : guestCartItems;
 
@@ -223,8 +240,9 @@ export function useCart() {
   const itemCount = useMemo(() => {
     if (isAuthenticated) {
       return data?.cart?.itemCount || 0;
+    } else {
+      return localCart.reduce((sum, item) => sum + item.quantity, 0);
     }
-    return localCart.reduce((sum, item) => sum + item.quantity, 0);
   }, [isAuthenticated, data?.cart?.itemCount, localCart]);
 
   const addToCart = useCallback(
@@ -245,7 +263,6 @@ export function useCart() {
         }
       } else {
         try {
-          // Fetch product to validate stock for guest users
           const { data: productData } = await client.query({
             query: GET_PRODUCT,
             variables: { id: productId },
@@ -266,9 +283,9 @@ export function useCart() {
             throw new Error('Not enough stock available');
           }
 
+          let newCart: CartItem[];
           setLocalCart((prev) => {
             const existingItem = prev.find((item) => item.productId === productId);
-            let newCart;
             if (existingItem) {
               newCart = prev.map((item) =>
                 item.productId === productId
@@ -281,6 +298,14 @@ export function useCart() {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
             return newCart;
           });
+
+          setTimeout(() => {
+            if (newCart && newCart.length > 0) {
+              const newIds = newCart.map(c => c.productId);
+              refetchGuestProducts({ ids: newIds });
+            }
+          }, 0);
+
           toast.success('Added to cart!');
         } catch (error) {
           console.error('Failed to add to cart:', error);
@@ -291,7 +316,7 @@ export function useCart() {
         }
       }
     },
-    [isAuthenticated, addToCartMutation, client, localCart]
+    [isAuthenticated, addToCartMutation, client, localCart, refetchGuestProducts]
   );
 
   const removeFromCart = useCallback(
@@ -316,6 +341,9 @@ export function useCart() {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
             return newCart;
           });
+
+          setTimeout(() => refetchGuestProducts(), 0);
+
           toast.success('Removed from cart');
         } catch (error) {
           console.error('Failed to remove from cart:', error);
@@ -324,7 +352,7 @@ export function useCart() {
         }
       }
     },
-    [isAuthenticated, removeFromCartMutation]
+    [isAuthenticated, removeFromCartMutation, refetchGuestProducts]
   );
 
   const updateQuantityDebounced = useRef<{ [key: string]: NodeJS.Timeout }>({});
@@ -356,7 +384,6 @@ export function useCart() {
         }, 500);
       } else {
         try {
-          // Fetch product to validate stock for guest users
           const { data: productData } = await client.query({
             query: GET_PRODUCT,
             variables: { id: productId },
@@ -382,6 +409,8 @@ export function useCart() {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
             return newCart;
           });
+
+          setTimeout(() => refetchGuestProducts(), 0);
         } catch (error) {
           console.error('Failed to update cart item:', error);
           if (error instanceof Error && error.message !== 'Not enough stock available' && error.message !== 'Product not found') {
@@ -391,7 +420,7 @@ export function useCart() {
         }
       }
     },
-    [isAuthenticated, updateCartItemMutation, removeFromCart, client]
+    [isAuthenticated, updateCartItemMutation, removeFromCart, client, refetchGuestProducts]
   );
 
   const clearCart = useCallback(async (): Promise<void> => {

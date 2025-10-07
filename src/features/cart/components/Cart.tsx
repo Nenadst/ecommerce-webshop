@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card } from '@/shared/components/elements/Card';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import ConfirmModal from '@/shared/components/modals/ConfirmModal';

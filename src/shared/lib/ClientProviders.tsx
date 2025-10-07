@@ -3,6 +3,7 @@
 import { ApolloProvider } from '@apollo/client';
 import { client } from '../config/apollo-client';
 import { AuthProvider } from '../contexts/AuthContext';
+import { CartProvider } from '../contexts/CartContext';
 import { CartDrawerProvider } from '../contexts/CartDrawerContext';
 import CartDrawer from '../components/cart/CartDrawer';
 
@@ -10,10 +11,12 @@ export default function ClientProviders({ children }: { children: React.ReactNod
   return (
     <ApolloProvider client={client}>
       <AuthProvider>
-        <CartDrawerProvider>
-          {children}
-          <CartDrawer />
-        </CartDrawerProvider>
+        <CartProvider>
+          <CartDrawerProvider>
+            {children}
+            <CartDrawer />
+          </CartDrawerProvider>
+        </CartProvider>
       </AuthProvider>
     </ApolloProvider>
   );

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useApolloClient, gql } from '@apollo/client';
 import { Card } from '@/shared/components/elements/Card';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';

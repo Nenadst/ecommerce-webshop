@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import Button from '@/shared/components/elements/Button';
 import Spinner from '@/shared/components/spinner/Spinner';

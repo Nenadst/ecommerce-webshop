@@ -9,7 +9,7 @@ import { Card } from '@/shared/components/elements/Card';
 import Star from '@/shared/components/elements/Star';
 import { HeartIconBig } from '@/shared/components/icons';
 import { useFavorites } from '@/shared/hooks/useFavorites';
-import { useCart } from '@/shared/hooks/useCart';
+import { useCart } from '@/shared/contexts/CartContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import { useAuth } from '@/shared/contexts/AuthContext';
