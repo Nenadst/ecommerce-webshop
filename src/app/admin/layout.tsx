@@ -53,19 +53,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <h2 className="text-2xl font-bold mb-10">Admin Panel</h2>
 
         <nav className="space-y-2 mb-8">
-          <Link href="/admin" className="block hover:underline">
+          <Link
+            href="/admin"
+            className={`block px-4 py-2 rounded-lg transition-colors ${
+              pathname === '/admin'
+                ? 'bg-sky-700 font-semibold'
+                : 'hover:bg-sky-800'
+            }`}
+          >
             Dashboard
           </Link>
-          <Link href="/admin/orders" className="block hover:underline">
+          <Link
+            href="/admin/orders"
+            className={`block px-4 py-2 rounded-lg transition-colors ${
+              pathname.startsWith('/admin/orders')
+                ? 'bg-sky-700 font-semibold'
+                : 'hover:bg-sky-800'
+            }`}
+          >
             Orders
           </Link>
-          <Link href="/admin/users" className="block hover:underline">
+          <Link
+            href="/admin/users"
+            className={`block px-4 py-2 rounded-lg transition-colors ${
+              pathname.startsWith('/admin/users')
+                ? 'bg-sky-700 font-semibold'
+                : 'hover:bg-sky-800'
+            }`}
+          >
             Users
           </Link>
-          <Link href="/admin/products" className="block hover:underline">
+          <Link
+            href="/admin/products"
+            className={`block px-4 py-2 rounded-lg transition-colors ${
+              pathname.startsWith('/admin/products')
+                ? 'bg-sky-700 font-semibold'
+                : 'hover:bg-sky-800'
+            }`}
+          >
             Products
           </Link>
-          <Link href="/admin/categories" className="block hover:underline">
+          <Link
+            href="/admin/categories"
+            className={`block px-4 py-2 rounded-lg transition-colors ${
+              pathname.startsWith('/admin/categories')
+                ? 'bg-sky-700 font-semibold'
+                : 'hover:bg-sky-800'
+            }`}
+          >
             Categories
           </Link>
         </nav>

@@ -55,8 +55,8 @@ export const typeDefs = gql`
 
   type Order {
     id: ID!
-    userId: ID!
-    user: User!
+    userId: ID
+    user: User
     orderNumber: String!
     status: String!
     email: String!

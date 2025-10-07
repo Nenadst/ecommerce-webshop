@@ -13,7 +13,7 @@ interface Order {
   user: {
     name: string | null;
     email: string;
-  };
+  } | null;
 }
 
 interface RecentOrdersProps {
@@ -81,8 +81,8 @@ export default function RecentOrders({ orders }: RecentOrdersProps) {
                     <div className="text-sm font-medium text-gray-900">{order.orderNumber}</div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{order.user.name || 'N/A'}</div>
-                    <div className="text-xs text-gray-500">{order.user.email}</div>
+                    <div className="text-sm text-gray-900">{order.user?.name || 'Guest'}</div>
+                    <div className="text-xs text-gray-500">{order.user?.email || 'N/A'}</div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <span

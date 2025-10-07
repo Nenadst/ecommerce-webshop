@@ -40,7 +40,7 @@ interface Order {
     id: string;
     name: string;
     email: string;
-  };
+  } | null;
   items: Array<{
     id: string;
     productId: string;
@@ -113,7 +113,7 @@ export default function AdminOrders() {
       const matchesSearch =
         searchTerm === '' ||
         order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         order.email.toLowerCase().includes(searchTerm.toLowerCase());
 
       const orderDate = new Date(order.createdAt);
@@ -447,7 +447,7 @@ export default function AdminOrders() {
                       <div>
                         <p className="text-sm text-gray-500">Customer</p>
                         <p className="font-medium text-gray-900">
-                          {order.user.name || order.email}
+                          {order.user?.name || order.email}
                         </p>
                       </div>
                       <div>
@@ -477,6 +477,11 @@ export default function AdminOrders() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      {!order.user && (
+                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-800">
+                          GUEST
+                        </span>
+                      )}
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}
                       >
