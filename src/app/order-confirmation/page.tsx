@@ -169,7 +169,6 @@ export default function OrderConfirmationPage() {
       <HeaderBottom />
 
       <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
-        {/* Success Header */}
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6 text-center">
           <div className="flex justify-center mb-4">
             <CheckCircle className="w-16 h-16 text-green-500" />
@@ -187,7 +186,6 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        {/* Order Status */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Status</h2>
           <div className="flex flex-wrap gap-4">
@@ -226,7 +224,6 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        {/* Order Items */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Items</h2>
           <div className="space-y-4">
@@ -260,7 +257,6 @@ export default function OrderConfirmationPage() {
             ))}
           </div>
 
-          {/* Order Summary */}
           <div className="mt-6 pt-6 border-t space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal:</span>
@@ -281,9 +277,7 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        {/* Shipping & Payment Info */}
         <div className="grid md:grid-cols-2 gap-6 mb-6">
-          {/* Shipping Address */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-5 h-5 text-sky-600" />
@@ -311,7 +305,6 @@ export default function OrderConfirmationPage() {
             </div>
           </div>
 
-          {/* Payment Method */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex items-center gap-2 mb-4">
               <CreditCard className="w-5 h-5 text-sky-600" />
@@ -332,7 +325,6 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex gap-4 justify-center">
           <button
             onClick={() => router.push('/products')}

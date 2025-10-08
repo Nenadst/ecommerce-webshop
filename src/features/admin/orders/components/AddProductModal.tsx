@@ -64,7 +64,6 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-sky-900">Add Product to Order</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
@@ -72,7 +71,6 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
           </button>
         </div>
 
-        {/* Search */}
         <div className="p-6 border-b border-gray-200">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -86,7 +84,6 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
           </div>
         </div>
 
-        {/* Product List */}
         <div className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="text-center py-8 text-gray-500">Loading products...</div>
@@ -141,7 +138,6 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
           )}
         </div>
 
-        {/* Selected Product & Quantity */}
         {selectedProduct && (
           <div className="p-6 border-t border-gray-200 bg-gray-50">
             <div className="flex items-center justify-between mb-4">

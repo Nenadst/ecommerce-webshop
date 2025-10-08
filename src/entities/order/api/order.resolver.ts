@@ -2,6 +2,7 @@ import { GraphQLError } from 'graphql';
 import { prisma } from '@/shared/lib/prisma';
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
+import { validateCheckoutData, sanitizeCheckoutData } from '@/shared/validation/checkout.validation';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -203,7 +204,6 @@ const orderResolvers = {
         });
       }
 
-      // Check if user is admin
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -407,9 +407,29 @@ const orderResolvers = {
       { input }: { input: OrderInput },
       context: { req: NextRequest }
     ) => {
+      const validationResult = validateCheckoutData({
+        email: input.email,
+        phone: input.phone,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        address: input.address,
+        city: input.city,
+        postalCode: input.postalCode,
+        country: input.country,
+        paymentMethod: input.paymentMethod,
+      });
+
+      if (!validationResult.success) {
+        const errors = validationResult.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
+        throw new GraphQLError(`Validation failed: ${errors}`, {
+          extensions: { code: 'BAD_REQUEST', validationErrors: validationResult.error.errors },
+        });
+      }
+
+      const sanitizedData = sanitizeCheckoutData(validationResult.data);
+
       const userId = getUserFromToken(context.req);
 
-      // For authenticated users, check account status
       if (userId) {
         const user = await prisma.user.findUnique({
           where: { id: userId },
@@ -435,9 +455,7 @@ const orderResolvers = {
 
       let itemsToOrder;
 
-      // Guest checkout: use items from input
       if (input.items && input.items.length > 0) {
-        // Fetch product details for guest items
         itemsToOrder = await Promise.all(
           input.items.map(async (item) => {
             const product = await prisma.product.findUnique({
@@ -458,7 +476,6 @@ const orderResolvers = {
           })
         );
       } else if (userId) {
-        // Authenticated user: fetch from cart
         const cartItems = await prisma.cartItem.findMany({
           where: { userId },
           include: {
@@ -486,7 +503,6 @@ const orderResolvers = {
         });
       }
 
-      // Validate stock for all items
       for (const item of itemsToOrder) {
         if (item.product.quantity < item.quantity) {
           throw new GraphQLError(
@@ -518,15 +534,15 @@ const orderResolvers = {
             ...(userId ? { userId } : {}),
             orderNumber,
             status: 'PENDING',
-            email: input.email,
-            phone: input.phone,
-            firstName: input.firstName,
-            lastName: input.lastName,
-            address: input.address,
-            city: input.city,
-            postalCode: input.postalCode,
-            country: input.country,
-            paymentMethod: input.paymentMethod,
+            email: sanitizedData.email,
+            phone: sanitizedData.phone,
+            firstName: sanitizedData.firstName,
+            lastName: sanitizedData.lastName,
+            address: sanitizedData.address,
+            city: sanitizedData.city,
+            postalCode: sanitizedData.postalCode,
+            country: sanitizedData.country,
+            paymentMethod: sanitizedData.paymentMethod,
             paymentStatus: 'PAID',
             subtotal,
             tax,
@@ -562,7 +578,6 @@ const orderResolvers = {
           });
         }
 
-        // Clear cart only for authenticated users
         if (userId) {
           await tx.cartItem.deleteMany({
             where: { userId },
@@ -622,7 +637,6 @@ const orderResolvers = {
         });
       }
 
-      // Check if user is admin
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -633,7 +647,6 @@ const orderResolvers = {
         });
       }
 
-      // Build update data object
       const updateData: {
         status?: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
         paymentStatus?: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
@@ -722,7 +735,6 @@ const orderResolvers = {
         });
       }
 
-      // Check if user is admin
       const user = await prisma.user.findUnique({
         where: { id: userId },
       });
