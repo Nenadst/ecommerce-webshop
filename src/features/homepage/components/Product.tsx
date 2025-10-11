@@ -25,25 +25,25 @@ const randomNonFeaturedProducts = nonFeaturedProducts.sort(() => 0.5 - Math.rand
 
 const Product = () => {
   return (
-    <div className="container mx-auto">
-      <div className="w-full flex flex-wrap justify-center mb-5 gap-5">
+    <div className="container mx-auto px-4">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5 mb-5 place-items-center">
         <>
           {featuredProducts.map((product) => (
             <Card
               key={product.id}
-              className="w-80 h-80 justify-center gap-9 flex flex-wrap relative"
+              className="w-full max-w-[320px] h-80 justify-center gap-6 md:gap-9 flex flex-wrap relative"
             >
-              <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="" />
+              <img className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg" src={product.image} alt={product.name} />
               <ButtonLoveIcon />
-              <div className="flex justify-between gap-5 mb-4">
-                <Button className="w-56 h-14 pl-6 justify-between flex items-center bg-blue-300 hover:bg-blue-400 text-slate-800 text-base font-semibold">
-                  Add to cart
-                  <div className="w-8 h-8 bg-amber-500 rounded-full justify-center items-center flex mr-4">
+              <div className="flex justify-between gap-2 md:gap-5 mb-4 px-2">
+                <Button className="flex-1 min-w-0 h-12 md:h-14 pl-3 md:pl-6 pr-2 justify-between flex items-center bg-blue-300 hover:bg-blue-400 text-slate-800 text-sm md:text-base font-semibold">
+                  <span className="truncate">Add to cart</span>
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-amber-500 rounded-full justify-center items-center flex ml-2">
                     <ShoppingCartIcon />
                   </div>
                 </Button>
                 <Link href={`/products/${product.id}`}>
-                  <Button className="w-16 h-14 bg-blue-300 justify-center flex items-center hover:bg-blue-400">
+                  <Button className="w-12 md:w-16 h-12 md:h-14 bg-blue-300 justify-center flex items-center hover:bg-blue-400">
                     <EyeIcon />
                   </Button>
                 </Link>
@@ -54,13 +54,13 @@ const Product = () => {
             <Link href={`/products/${product.id}`} key={product.id}>
               <Card
                 key={product.id}
-                className="w-80 h-80 justify-center flex flex-wrap relative cursor-pointer hover:bg-slate-100"
+                className="w-full max-w-[320px] h-80 justify-center flex flex-wrap relative cursor-pointer hover:bg-slate-100"
               >
-                <img className="w-48 h-44 mt-7 rounded-lg" src={product.image} alt="" />
+                <img className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg" src={product.image} alt={product.name} />
                 <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
-                  <div className="text-sky-900 text-lg font-medium">{product.name}</div>
-                  <div className="text-neutral-600 text-lg font-semibold">${product.price}</div>
+                  <div className="text-sky-900 text-base md:text-lg font-medium">{product.name}</div>
+                  <div className="text-neutral-600 text-base md:text-lg font-semibold">${product.price}</div>
                   <Star count={product.rating} />
                 </div>
               </Card>
