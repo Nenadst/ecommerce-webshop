@@ -4,37 +4,23 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMutation, useApolloClient, gql } from '@apollo/client';
 import { Card } from '@/shared/components/elements/Card';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
-import { CREATE_ORDER } from '@/entities/order/api/order.queries';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { checkoutValidationSchema, type CheckoutFormData } from '@/shared/validation/checkout.validation';
 
-const GET_PRODUCTS_BY_IDS = gql`
-  query GetProductsByIds($ids: [ID!]!) {
-    productsByIds(ids: $ids) {
-      id
-      name
-      quantity
-    }
-  }
-`;
-
 const Checkout = () => {
   const router = useRouter();
-  const client = useApolloClient();
   const { cartItems, total, itemCount, loading, mounted } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [validatedSteps, setValidatedSteps] = useState<Set<number>>(new Set());
-  const [createOrder] = useMutation(CREATE_ORDER);
 
   const nameParts = user?.name?.split(' ') || [];
   const firstName = nameParts[0] || '';
@@ -125,102 +111,51 @@ const Checkout = () => {
     try {
       const formValues = getValues();
 
-      const productIds = cartItems.map((item) => item.productId);
-      const { data: productsData } = await client.query({
-        query: GET_PRODUCTS_BY_IDS,
-        variables: { ids: productIds },
-        fetchPolicy: 'network-only',
-      });
+      const items = cartItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      }));
 
-      if (productsData?.productsByIds) {
-        const stockIssues: string[] = [];
+      const shippingInfo = {
+        email: formValues.email,
+        phone: formValues.phone,
+        firstName: formValues.firstName,
+        lastName: formValues.lastName,
+        address: formValues.address,
+        city: formValues.city,
+        postalCode: formValues.postalCode,
+        country: formValues.country,
+      };
 
-        for (const cartItem of cartItems) {
-          const product = productsData.productsByIds.find(
-            (p: { id: string; name: string; quantity: number }) => p.id === cartItem.productId
-          );
-
-          if (!product) {
-            stockIssues.push(`Product not found`);
-          } else if (product.quantity < cartItem.quantity) {
-            stockIssues.push(
-              `${product.name || 'Product'}: Only ${product.quantity} available (you have ${cartItem.quantity} in cart)`
-            );
-          }
-        }
-
-        if (stockIssues.length > 0) {
-          toast.error(
-            `Stock issues detected:\n${stockIssues.join('\n')}`,
-            { duration: 6000 }
-          );
-          setIsProcessing(false);
-          return;
-        }
-      }
-
-      const items = isAuthenticated
-        ? undefined
-        : cartItems.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          }));
-
-      const { data } = await createOrder({
-        variables: {
-          input: {
-            email: formValues.email,
-            phone: formValues.phone,
-            firstName: formValues.firstName,
-            lastName: formValues.lastName,
-            address: formValues.address,
-            city: formValues.city,
-            postalCode: formValues.postalCode,
-            country: formValues.country,
-            paymentMethod: formValues.paymentMethod,
-            items,
-          },
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          items,
+          shippingInfo,
+          userId: user?.id || null,
+        }),
       });
 
-      toast.success(`Order placed successfully! Order #${data.createOrder.orderNumber}`, {
-        duration: 5000,
-        icon: '🎉',
-      });
+      const data = await response.json();
 
-      if (!isAuthenticated) {
-        localStorage.removeItem('guest_cart');
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create checkout session');
       }
 
-      if (isAuthenticated) {
-        router.push(`/profile?tab=orders`);
+      if (data.url) {
+        window.location.href = data.url;
       } else {
-        router.push(`/order-confirmation?orderNumber=${data.createOrder.orderNumber}`);
+        throw new Error('No checkout URL returned');
       }
     } catch (error: unknown) {
-      console.error('Failed to place order:', error);
+      console.error('Failed to create checkout session:', error);
       const message =
-        error instanceof Error ? error.message : 'Failed to place order. Please try again.';
+        error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
       toast.error(message);
-    } finally {
       setIsProcessing(false);
-    }
-  };
-
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || '';
-    const parts = [];
-
-    for (let i = 0; i < match.length; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return value;
     }
   };
 
@@ -568,92 +503,36 @@ const Checkout = () => {
                     <h2 className="text-2xl font-bold text-sky-900 mb-6">Payment Method</h2>
 
                     <div className="space-y-6">
-                      <div className="grid grid-cols-1 gap-4">
-                        {[
-                          { value: 'card', label: 'Credit Card', icon: '💳', disabled: false },
-                          { value: 'paypal', label: 'PayPal (Coming Soon)', icon: '🅿️', disabled: true },
-                          { value: 'bank', label: 'Bank Transfer (Coming Soon)', icon: '🏦', disabled: true },
-                        ].map((method) => (
-                          <button
-                            key={method.value}
-                            type="button"
-                            onClick={() => {
-                              if (!method.disabled) {
-                                setValue('paymentMethod', method.value as 'card');
-                              }
-                            }}
-                            disabled={method.disabled}
-                            className={`p-4 border-2 rounded-lg transition-all ${
-                              method.disabled
-                                ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                                : formData.paymentMethod === method.value
-                                ? 'border-amber-500 bg-amber-50'
-                                : 'border-gray-200 hover:border-amber-300 cursor-pointer'
-                            }`}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="text-3xl">{method.icon}</div>
-                              <div className="font-medium text-gray-900 text-left">{method.label}</div>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-
-                      {formData.paymentMethod === 'card' && (
-                        <div className="space-y-4 mt-6">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Card Number *
-                            </label>
-                            <input
-                              type="text"
-                              name="cardNumber"
-                              maxLength={19}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                              placeholder="1234 5678 9012 3456"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Cardholder Name *
-                            </label>
-                            <input
-                              type="text"
-                              name="cardName"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                              placeholder="John Doe"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Expiry Date *
-                              </label>
-                              <input
-                                type="text"
-                                name="cardExpiry"
-                                maxLength={5}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                                placeholder="MM/YY"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                CVV *
-                              </label>
-                              <input
-                                type="text"
-                                name="cardCVV"
-                                maxLength={3}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                                placeholder="123"
-                              />
+                      <div className="p-6 border-2 border-sky-200 bg-sky-50 rounded-lg">
+                        <div className="flex items-start gap-4">
+                          <div className="text-4xl">💳</div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-sky-900 text-lg mb-2">Secure Payment with Stripe</h3>
+                            <p className="text-gray-700 mb-4">
+                              Your payment will be processed securely through Stripe. You&apos;ll be redirected to enter your payment details on the next step.
+                            </p>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>PCI-DSS Compliant</span>
+                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              <span>SSL Encrypted</span>
                             </div>
                           </div>
                         </div>
-                      )}
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-semibold text-gray-900 mb-2">Accepted Payment Methods:</h4>
+                        <div className="flex items-center gap-4 text-2xl">
+                          <span>💳 Visa</span>
+                          <span>💳 Mastercard</span>
+                          <span>💳 Amex</span>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="mt-8 flex justify-between">
@@ -704,7 +583,7 @@ const Checkout = () => {
 
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <h3 className="font-semibold text-sky-900 mb-3">Payment Method:</h3>
-                        <p className="text-gray-700">Credit Card</p>
+                        <p className="text-gray-700">Stripe Secure Checkout</p>
                         <button
                           onClick={() => setCurrentStep(2)}
                           className="text-sky-600 hover:text-sky-700 text-sm font-medium mt-2"
@@ -769,7 +648,7 @@ const Checkout = () => {
                         disabled={isProcessing}
                         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg hover:shadow-xl disabled:opacity-50"
                       >
-                        {isProcessing ? 'Processing...' : `Place Order - €${orderTotal.toFixed(2)}`}
+                        {isProcessing ? 'Redirecting to Stripe...' : `Proceed to Payment - €${orderTotal.toFixed(2)}`}
                       </Button>
                     </div>
                   </div>

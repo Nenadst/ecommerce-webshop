@@ -157,7 +157,20 @@ export function useCartInternal() {
         }
       }
     }
-  }, [isAuthenticated]);
+
+    const handleCartCleared = () => {
+      if (isAuthenticated) {
+        refetch();
+      } else {
+        setLocalCart([]);
+      }
+    };
+
+    window.addEventListener('cart-cleared', handleCartCleared);
+    return () => {
+      window.removeEventListener('cart-cleared', handleCartCleared);
+    };
+  }, [isAuthenticated, refetch]);
 
   useEffect(() => {
     const migrateGuestCart = async () => {
