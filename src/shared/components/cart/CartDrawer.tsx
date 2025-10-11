@@ -116,105 +116,49 @@ const CartDrawer = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              {cartItems.map(
-                (item: {
-                  id: string;
-                  productId: string;
-                  quantity: number;
-                  product?: {
-                    id: string;
-                    name: string;
-                    price: number;
-                    images?: string[];
-                    quantity: number;
-                    category?: { name: string };
-                  };
-                }) => {
-                  const product = item.product;
-                  return (
-                    <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-200">
+              {cartItems.map((item) => {
+                const product = item.product;
+                return (
+                  <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-200">
+                    <Link
+                      href={`/products/${product?.id || item.productId}`}
+                      onClick={closeDrawer}
+                      className="flex-shrink-0"
+                    >
+                      <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-sky-50 rounded-lg flex items-center justify-center overflow-hidden">
+                        <Image
+                          src={product?.images?.[0] || '/assets/img/no-product.png'}
+                          alt={product?.name || 'Product'}
+                          width={80}
+                          height={80}
+                          className="object-contain w-full h-full p-2"
+                        />
+                      </div>
+                    </Link>
+
+                    <div className="flex-grow min-w-0">
                       <Link
                         href={`/products/${product?.id || item.productId}`}
                         onClick={closeDrawer}
-                        className="flex-shrink-0"
+                        className="block"
                       >
-                        <div className="w-20 h-20 bg-gradient-to-br from-gray-50 to-sky-50 rounded-lg flex items-center justify-center overflow-hidden">
-                          <Image
-                            src={product?.images?.[0] || '/assets/img/no-product.png'}
-                            alt={product?.name || 'Product'}
-                            width={80}
-                            height={80}
-                            className="object-contain w-full h-full p-2"
-                          />
-                        </div>
+                        <h3 className="text-sm font-semibold text-sky-900 hover:text-sky-700 transition-colors line-clamp-2">
+                          {product?.name || 'Product'}
+                        </h3>
                       </Link>
+                      {product?.category && (
+                        <p className="text-xs text-gray-500 mt-1">{product.category.name}</p>
+                      )}
 
-                      <div className="flex-grow min-w-0">
-                        <Link
-                          href={`/products/${product?.id || item.productId}`}
-                          onClick={closeDrawer}
-                          className="block"
-                        >
-                          <h3 className="text-sm font-semibold text-sky-900 hover:text-sky-700 transition-colors line-clamp-2">
-                            {product?.name || 'Product'}
-                          </h3>
-                        </Link>
-                        {product?.category && (
-                          <p className="text-xs text-gray-500 mt-1">{product.category.name}</p>
-                        )}
-
-                        <div className="flex items-center justify-between mt-2">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                              className="w-6 h-6 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M20 12H4"
-                                />
-                              </svg>
-                            </button>
-                            <span className="text-sm font-medium w-8 text-center">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                              disabled={product?.quantity && item.quantity >= product.quantity}
-                              className="w-6 h-6 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 4v16m8-8H4"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2">
                           <button
-                            onClick={() => removeFromCart(item.productId)}
-                            className="text-red-500 hover:text-red-700 transition-colors p-1"
-                            aria-label="Remove item"
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                            className="w-6 h-6 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <svg
-                              className="w-4 h-4"
+                              className="w-3 h-3"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -223,20 +167,62 @@ const CartDrawer = () => {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                d="M20 12H4"
+                              />
+                            </svg>
+                          </button>
+                          <span className="text-sm font-medium w-8 text-center">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                            disabled={!!(product?.quantity && item.quantity >= product.quantity)}
+                            className="w-6 h-6 flex items-center justify-center rounded border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 4v16m8-8H4"
                               />
                             </svg>
                           </button>
                         </div>
 
-                        <div className="text-sm font-bold text-sky-900 mt-2">
-                          €{((product?.price || 0) * item.quantity).toFixed(2)}
-                        </div>
+                        <button
+                          onClick={() => removeFromCart(item.productId)}
+                          className="text-red-500 hover:text-red-700 transition-colors p-1"
+                          aria-label="Remove item"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="text-sm font-bold text-sky-900 mt-2">
+                        €{((product?.price || 0) * item.quantity).toFixed(2)}
                       </div>
                     </div>
-                  );
-                }
-              )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

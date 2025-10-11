@@ -250,7 +250,7 @@ const Products = () => {
                     <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
                       <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
                         <Image
-                          src={product.images?.[0] || '/assets/img/no-product.png'}
+                          src={product.image || '/assets/img/no-product.png'}
                           alt={product.name}
                           width={256}
                           height={256}
@@ -376,7 +376,7 @@ const Products = () => {
                           }}
                         >
                           <Button
-                            onClick={(e) => handleAddToCart(e, product)}
+                            onClick={(e) => e && handleAddToCart(e, product)}
                             disabled={availableQty === 0 || addingToCart === product.id}
                             className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
                               availableQty > 0

@@ -219,9 +219,7 @@ export default function AdminUsers() {
       }),
       columnHelper.accessor('createdAt', {
         header: 'Joined',
-        cell: (info) => (
-          <div className="text-sm text-gray-500">{formatDate(info.getValue())}</div>
-        ),
+        cell: (info) => <div className="text-sm text-gray-500">{formatDate(info.getValue())}</div>,
       }),
       columnHelper.display({
         id: 'actions',
@@ -335,9 +333,7 @@ export default function AdminUsers() {
                             onClick={header.column.getToggleSortingHandler()}
                           >
                             {flexRender(header.column.columnDef.header, header.getContext())}
-                            {header.column.getCanSort() && (
-                              <ArrowUpDown className="w-3 h-3" />
-                            )}
+                            {header.column.getCanSort() && <ArrowUpDown className="w-3 h-3" />}
                           </div>
                         )}
                       </th>
@@ -461,7 +457,9 @@ export default function AdminUsers() {
                   <CheckCircle className="w-5 h-5 text-green-600" />
                   <div className="text-left">
                     <div className="font-semibold">Active</div>
-                    <div className="text-xs text-gray-500">Full access - can login and create orders</div>
+                    <div className="text-xs text-gray-500">
+                      Full access - can login and create orders
+                    </div>
                   </div>
                 </div>
               </button>
@@ -493,7 +491,9 @@ export default function AdminUsers() {
                   <AlertCircle className="w-5 h-5 text-red-600" />
                   <div className="text-left">
                     <div className="font-semibold">Suspended</div>
-                    <div className="text-xs text-gray-500">Account blocked - cannot login or create orders</div>
+                    <div className="text-xs text-gray-500">
+                      Account blocked - cannot login or create orders
+                    </div>
                   </div>
                 </div>
               </button>

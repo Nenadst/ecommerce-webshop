@@ -56,9 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/admin"
             className={`block px-4 py-2 rounded-lg transition-colors ${
-              pathname === '/admin'
-                ? 'bg-sky-700 font-semibold'
-                : 'hover:bg-sky-800'
+              pathname === '/admin' ? 'bg-sky-700 font-semibold' : 'hover:bg-sky-800'
             }`}
           >
             Dashboard
@@ -66,9 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/admin/orders"
             className={`block px-4 py-2 rounded-lg transition-colors ${
-              pathname.startsWith('/admin/orders')
-                ? 'bg-sky-700 font-semibold'
-                : 'hover:bg-sky-800'
+              pathname.startsWith('/admin/orders') ? 'bg-sky-700 font-semibold' : 'hover:bg-sky-800'
             }`}
           >
             Orders
@@ -76,9 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/admin/users"
             className={`block px-4 py-2 rounded-lg transition-colors ${
-              pathname.startsWith('/admin/users')
-                ? 'bg-sky-700 font-semibold'
-                : 'hover:bg-sky-800'
+              pathname.startsWith('/admin/users') ? 'bg-sky-700 font-semibold' : 'hover:bg-sky-800'
             }`}
           >
             Users

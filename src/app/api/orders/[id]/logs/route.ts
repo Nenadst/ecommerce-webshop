@@ -17,7 +17,7 @@ const getUserFromToken = (req: NextRequest): string | null => {
   }
 };
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const userId = getUserFromToken(req);
     if (!userId) {
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 403 });
     }
 
-    const orderId = params.id;
+    const { id: orderId } = await params;
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -53,7 +53,7 @@ ORDER LOG HISTORY
 ==================
 
 Order Number: ${order.orderNumber}
-Customer: ${order.user.name || 'N/A'} (${order.user.email})
+Customer: ${order.user?.name || 'N/A'} (${order.user?.email || 'N/A'})
 Order Date: ${order.createdAt.toLocaleString()}
 Current Status: ${order.status}
 Payment Status: ${order.paymentStatus}

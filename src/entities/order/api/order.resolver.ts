@@ -2,7 +2,10 @@ import { GraphQLError } from 'graphql';
 import { prisma } from '@/shared/lib/prisma';
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
-import { validateCheckoutData, sanitizeCheckoutData } from '@/shared/validation/checkout.validation';
+import {
+  validateCheckoutData,
+  sanitizeCheckoutData,
+} from '@/shared/validation/checkout.validation';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -420,9 +423,11 @@ const orderResolvers = {
       });
 
       if (!validationResult.success) {
-        const errors = validationResult.error.errors.map((err) => `${err.path.join('.')}: ${err.message}`).join(', ');
+        const errors = validationResult.error.issues
+          .map((err) => `${err.path.join('.')}: ${err.message}`)
+          .join(', ');
         throw new GraphQLError(`Validation failed: ${errors}`, {
-          extensions: { code: 'BAD_REQUEST', validationErrors: validationResult.error.errors },
+          extensions: { code: 'BAD_REQUEST', validationErrors: validationResult.error.issues },
         });
       }
 

@@ -21,7 +21,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout>();
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const filteredItems = items.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -221,7 +221,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
                       </div>
                     )}
                   </div>
-                  <ChevronDownIcon className="ml-2 -rotate-90 w-3 h-3 text-gray-400 group-hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                  <span className="ml-2 -rotate-90 w-3 h-3 text-gray-400 group-hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                    <ChevronDownIcon />
+                  </span>
                 </button>
               ))}
             </div>

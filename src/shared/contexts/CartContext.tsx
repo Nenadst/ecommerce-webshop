@@ -3,8 +3,22 @@
 import React, { createContext, useContext } from 'react';
 import { useCartInternal as useCartHook } from '../hooks/useCart';
 
+interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+  product?: {
+    id: string;
+    name: string;
+    price: number;
+    images?: string[];
+    quantity: number;
+    category?: { name: string };
+  } | null;
+}
+
 interface CartContextType {
-  cartItems: any[];
+  cartItems: CartItem[];
   total: number;
   itemCount: number;
   addToCart: (productId: string, quantity?: number) => Promise<void>;

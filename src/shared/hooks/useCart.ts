@@ -121,7 +121,6 @@ export function useCartInternal() {
   const [isMigrating, setIsMigrating] = useState(false);
   const migrationAttempted = useRef(false);
 
-
   const { data, refetch, loading } = useQuery(GET_CART, {
     skip: !isAuthenticated,
     fetchPolicy: 'cache-and-network',
@@ -131,7 +130,11 @@ export function useCartInternal() {
     return localCart.map((item) => item.productId);
   }, [localCart]);
 
-  const { data: guestProductsData, refetch: refetchGuestProducts, loading: guestProductsLoading } = useQuery(GET_PRODUCTS_BY_IDS, {
+  const {
+    data: guestProductsData,
+    refetch: refetchGuestProducts,
+    loading: guestProductsLoading,
+  } = useQuery(GET_PRODUCTS_BY_IDS, {
     variables: { ids: productIds },
     skip: isAuthenticated || productIds.length === 0,
     fetchPolicy: 'cache-and-network',
@@ -306,7 +309,7 @@ export function useCartInternal() {
                   : item
               );
             } else {
-              newCart = [...prev, { productId, quantity }];
+              newCart = [...prev, { id: productId, productId, quantity }];
             }
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
             return newCart;
@@ -314,7 +317,7 @@ export function useCartInternal() {
 
           setTimeout(() => {
             if (newCart && newCart.length > 0) {
-              const newIds = newCart.map(c => c.productId);
+              const newIds = newCart.map((c) => c.productId);
               refetchGuestProducts({ ids: newIds });
             }
           }, 0);
@@ -322,7 +325,11 @@ export function useCartInternal() {
           toast.success('Added to cart!');
         } catch (error) {
           console.error('Failed to add to cart:', error);
-          if (error instanceof Error && error.message !== 'Not enough stock available' && error.message !== 'Product not found') {
+          if (
+            error instanceof Error &&
+            error.message !== 'Not enough stock available' &&
+            error.message !== 'Product not found'
+          ) {
             toast.error('Failed to add to cart');
           }
           throw error;
@@ -344,7 +351,9 @@ export function useCartInternal() {
           toast.success('Removed from cart');
         } catch (error) {
           console.error('Failed to remove from cart:', error);
-          toast.error(error.message || 'Failed to remove from cart');
+          const errorMessage =
+            error instanceof Error ? error.message : 'Failed to remove from cart';
+          toast.error(errorMessage);
           throw error;
         }
       } else {
@@ -391,7 +400,9 @@ export function useCartInternal() {
             });
           } catch (error) {
             console.error('Failed to update cart item:', error);
-            toast.error(error.message || 'Failed to update quantity');
+            const errorMessage =
+              error instanceof Error ? error.message : 'Failed to update quantity';
+            toast.error(errorMessage);
             throw error;
           }
         }, 500);
@@ -426,7 +437,11 @@ export function useCartInternal() {
           setTimeout(() => refetchGuestProducts(), 0);
         } catch (error) {
           console.error('Failed to update cart item:', error);
-          if (error instanceof Error && error.message !== 'Not enough stock available' && error.message !== 'Product not found') {
+          if (
+            error instanceof Error &&
+            error.message !== 'Not enough stock available' &&
+            error.message !== 'Product not found'
+          ) {
             toast.error('Failed to update quantity');
           }
           throw error;
@@ -446,7 +461,8 @@ export function useCartInternal() {
         toast.success('Cart cleared');
       } catch (error) {
         console.error('Failed to clear cart:', error);
-        toast.error(error.message || 'Failed to clear cart');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
+        toast.error(errorMessage);
         throw error;
       }
     } else {

@@ -114,7 +114,7 @@ export default function OrderConfirmationPage() {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
             <p className="text-gray-600 mb-4">
-              We couldn't find an order with this order number.
+              We couldn&apos;t find an order with this order number.
             </p>
             <button
               onClick={() => router.push('/')}
@@ -175,7 +175,7 @@ export default function OrderConfirmationPage() {
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
           <p className="text-gray-600 mb-4">
-            Thank you for your order. We've sent a confirmation email to{' '}
+            Thank you for your order. We&apos;ve sent a confirmation email to{' '}
             <span className="font-semibold">{order.email}</span>
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-sky-50 rounded-lg">
@@ -244,9 +244,7 @@ export default function OrderConfirmationPage() {
                 <div className="flex-grow">
                   <h3 className="font-medium text-gray-900">{item.name}</h3>
                   <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                  <p className="text-sm text-gray-600">
-                    ${item.price.toFixed(2)} each
-                  </p>
+                  <p className="text-sm text-gray-600">${item.price.toFixed(2)} each</p>
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">

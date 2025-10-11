@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Card } from '@/shared/components/elements/Card';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
@@ -12,10 +11,12 @@ import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { checkoutValidationSchema, type CheckoutFormData } from '@/shared/validation/checkout.validation';
+import {
+  checkoutValidationSchema,
+  type CheckoutFormData,
+} from '@/shared/validation/checkout.validation';
 
 const Checkout = () => {
-  const router = useRouter();
   const { cartItems, total, itemCount, loading, mounted } = useCart();
   const { isAuthenticated, user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,13 +29,11 @@ const Checkout = () => {
 
   const {
     register,
-    handleSubmit,
     formState: { errors },
     trigger,
     getValues,
     reset,
     watch,
-    setValue,
     clearErrors,
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutValidationSchema),
@@ -246,69 +245,71 @@ const Checkout = () => {
               ].map((step, index) => {
                 const isAccessible = step.num <= currentStep || validatedSteps.has(step.num - 1);
                 return (
-                <React.Fragment key={step.num}>
-                  <div className="flex flex-col items-center relative">
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!isAccessible) return;
+                  <React.Fragment key={step.num}>
+                    <div className="flex flex-col items-center relative">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!isAccessible) return;
 
-                        if (step.num > currentStep) {
-                          const isValid = await trigger();
-                          if (isValid) {
-                            setValidatedSteps((prev) => new Set(prev).add(currentStep));
-                            setCurrentStep(step.num);
+                          if (step.num > currentStep) {
+                            const isValid = await trigger();
+                            if (isValid) {
+                              setValidatedSteps((prev) => new Set(prev).add(currentStep));
+                              setCurrentStep(step.num);
+                            } else {
+                              toast.error('Please fill in all required fields correctly');
+                            }
                           } else {
-                            toast.error('Please fill in all required fields correctly');
+                            setCurrentStep(step.num);
                           }
-                        } else {
-                          setCurrentStep(step.num);
-                        }
-                      }}
-                      disabled={!isAccessible}
-                      className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all ${
-                        currentStep === step.num
-                          ? 'bg-sky-900 text-white shadow-xl ring-4 ring-sky-300 scale-110'
-                          : isAccessible
-                          ? 'bg-amber-500 text-white shadow-lg hover:bg-amber-600 cursor-pointer hover:scale-110'
-                          : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {currentStep > step.num ? (
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      ) : (
-                        step.num
-                      )}
-                    </button>
-                    <span
-                      className={`mt-2 text-sm transition-all ${
-                        currentStep === step.num
-                          ? 'text-sky-900 font-bold text-base'
-                          : isAccessible
-                          ? 'text-sky-900 font-medium'
-                          : 'text-gray-500 font-medium'
-                      }`}
-                    >
-                      {step.label}
-                    </span>
-                  </div>
-                  {index < 2 && (
-                    <div className="flex items-center" style={{ marginBottom: '28px' }}>
-                      <div
-                        className={`w-24 h-1 transition-all ${
-                          currentStep > step.num || validatedSteps.has(step.num) ? 'bg-amber-500' : 'bg-gray-200'
+                        }}
+                        disabled={!isAccessible}
+                        className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg transition-all ${
+                          currentStep === step.num
+                            ? 'bg-sky-900 text-white shadow-xl ring-4 ring-sky-300 scale-110'
+                            : isAccessible
+                              ? 'bg-amber-500 text-white shadow-lg hover:bg-amber-600 cursor-pointer hover:scale-110'
+                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                         }`}
-                      />
+                      >
+                        {currentStep > step.num ? (
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        ) : (
+                          step.num
+                        )}
+                      </button>
+                      <span
+                        className={`mt-2 text-sm transition-all ${
+                          currentStep === step.num
+                            ? 'text-sky-900 font-bold text-base'
+                            : isAccessible
+                              ? 'text-sky-900 font-medium'
+                              : 'text-gray-500 font-medium'
+                        }`}
+                      >
+                        {step.label}
+                      </span>
                     </div>
-                  )}
-                </React.Fragment>
-              );
+                    {index < 2 && (
+                      <div className="flex items-center" style={{ marginBottom: '28px' }}>
+                        <div
+                          className={`w-24 h-1 transition-all ${
+                            currentStep > step.num || validatedSteps.has(step.num)
+                              ? 'bg-amber-500'
+                              : 'bg-gray-200'
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
               })}
             </div>
           </div>
@@ -377,7 +378,9 @@ const Checkout = () => {
                                 }`}
                               />
                               {errors.firstName && (
-                                <p className="mt-1 text-sm text-red-500">{errors.firstName.message}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                  {errors.firstName.message}
+                                </p>
                               )}
                             </div>
                             <div>
@@ -392,7 +395,9 @@ const Checkout = () => {
                                 }`}
                               />
                               {errors.lastName && (
-                                <p className="mt-1 text-sm text-red-500">{errors.lastName.message}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                  {errors.lastName.message}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -443,7 +448,9 @@ const Checkout = () => {
                                 placeholder={postalCodePlaceholders[selectedCountry] || '1234-567'}
                               />
                               {errors.postalCode && (
-                                <p className="mt-1 text-sm text-red-500">{errors.postalCode.message}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                  {errors.postalCode.message}
+                                </p>
                               )}
                             </div>
                             <div>
@@ -460,7 +467,9 @@ const Checkout = () => {
                                 <option value="Belgium">Belgium</option>
                               </select>
                               {errors.country && (
-                                <p className="mt-1 text-sm text-red-500">{errors.country.message}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                  {errors.country.message}
+                                </p>
                               )}
                             </div>
                           </div>
@@ -507,17 +516,40 @@ const Checkout = () => {
                         <div className="flex items-start gap-4">
                           <div className="text-4xl">💳</div>
                           <div className="flex-1">
-                            <h3 className="font-bold text-sky-900 text-lg mb-2">Secure Payment with Stripe</h3>
+                            <h3 className="font-bold text-sky-900 text-lg mb-2">
+                              Secure Payment with Stripe
+                            </h3>
                             <p className="text-gray-700 mb-4">
-                              Your payment will be processed securely through Stripe. You&apos;ll be redirected to enter your payment details on the next step.
+                              Your payment will be processed securely through Stripe. You&apos;ll be
+                              redirected to enter your payment details on the next step.
                             </p>
                             <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg
+                                className="w-5 h-5 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                               </svg>
                               <span>PCI-DSS Compliant</span>
-                              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              <svg
+                                className="w-5 h-5 text-green-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                />
                               </svg>
                               <span>SSL Encrypted</span>
                             </div>
@@ -526,7 +558,9 @@ const Checkout = () => {
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h4 className="font-semibold text-gray-900 mb-2">Accepted Payment Methods:</h4>
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          Accepted Payment Methods:
+                        </h4>
                         <div className="flex items-center gap-4 text-2xl">
                           <span>💳 Visa</span>
                           <span>💳 Mastercard</span>
@@ -595,43 +629,29 @@ const Checkout = () => {
                       <div>
                         <h3 className="font-semibold text-sky-900 mb-3">Order Items:</h3>
                         <div className="space-y-3">
-                          {cartItems.map(
-                            (item: {
-                              id: string;
-                              productId: string;
-                              quantity: number;
-                              product?: {
-                                id: string;
-                                name: string;
-                                price: number;
-                                images?: string[];
-                              };
-                            }) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-4 bg-gray-50 p-3 rounded-lg"
-                              >
-                                <Image
-                                  src={item.product?.images?.[0] || '/assets/img/no-product.png'}
-                                  alt={item.product?.name || 'Product'}
-                                  width={60}
-                                  height={60}
-                                  className="object-contain bg-white rounded"
-                                />
-                                <div className="flex-grow">
-                                  <h4 className="font-medium text-gray-900">
-                                    {item.product?.name}
-                                  </h4>
-                                  <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-bold text-sky-900">
-                                    €{((item.product?.price || 0) * item.quantity).toFixed(2)}
-                                  </p>
-                                </div>
+                          {cartItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="flex items-center gap-4 bg-gray-50 p-3 rounded-lg"
+                            >
+                              <Image
+                                src={item.product?.images?.[0] || '/assets/img/no-product.png'}
+                                alt={item.product?.name || 'Product'}
+                                width={60}
+                                height={60}
+                                className="object-contain bg-white rounded"
+                              />
+                              <div className="flex-grow">
+                                <h4 className="font-medium text-gray-900">{item.product?.name}</h4>
+                                <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                               </div>
-                            )
-                          )}
+                              <div className="text-right">
+                                <p className="font-bold text-sky-900">
+                                  €{((item.product?.price || 0) * item.quantity).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -648,7 +668,9 @@ const Checkout = () => {
                         disabled={isProcessing}
                         className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition-colors shadow-lg hover:shadow-xl disabled:opacity-50"
                       >
-                        {isProcessing ? 'Redirecting to Stripe...' : `Proceed to Payment - €${orderTotal.toFixed(2)}`}
+                        {isProcessing
+                          ? 'Redirecting to Stripe...'
+                          : `Proceed to Payment - €${orderTotal.toFixed(2)}`}
                       </Button>
                     </div>
                   </div>
@@ -661,27 +683,18 @@ const Checkout = () => {
                 <h2 className="text-xl font-bold text-sky-900 mb-4">Order Summary</h2>
 
                 <div className="space-y-2 mb-4">
-                  {cartItems
-                    .slice(0, 3)
-                    .map(
-                      (item: {
-                        id: string;
-                        productId: string;
-                        quantity: number;
-                        product?: { id: string; name: string; price: number; images?: string[] };
-                      }) => (
-                        <div key={item.id} className="flex justify-between items-center text-sm py-2">
-                          <span className="text-gray-700 truncate mr-3">
-                            <span className="font-semibold text-gray-900">{item.quantity}</span>
-                            <span className="text-gray-400 mx-1.5">×</span>
-                            <span>{item.product?.name}</span>
-                          </span>
-                          <span className="font-semibold text-gray-900 whitespace-nowrap">
-                            €{((item.product?.price || 0) * item.quantity).toFixed(2)}
-                          </span>
-                        </div>
-                      )
-                    )}
+                  {cartItems.slice(0, 3).map((item) => (
+                    <div key={item.id} className="flex justify-between items-center text-sm py-2">
+                      <span className="text-gray-700 truncate mr-3">
+                        <span className="font-semibold text-gray-900">{item.quantity}</span>
+                        <span className="text-gray-400 mx-1.5">×</span>
+                        <span>{item.product?.name}</span>
+                      </span>
+                      <span className="font-semibold text-gray-900 whitespace-nowrap">
+                        €{((item.product?.price || 0) * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
                   {cartItems.length > 3 && (
                     <p className="text-sm text-gray-500 italic">
                       +{cartItems.length - 3} more {cartItems.length - 3 === 1 ? 'item' : 'items'}

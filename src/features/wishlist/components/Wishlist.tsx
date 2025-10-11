@@ -80,8 +80,7 @@ const Wishlist = () => {
 
   const getCartQuantity = (productId: string): number => {
     const cartItem = cartItems.find(
-      (item: { id: string; productId: string; quantity: number; product?: { id: string } }) =>
-        item.productId === productId || item.product?.id === productId
+      (item) => item.productId === productId || item.product?.id === productId
     );
     return cartItem?.quantity || 0;
   };
@@ -396,7 +395,7 @@ const Wishlist = () => {
                         </div>
                       </div>
                       <Button
-                        onClick={(e) => handleAddToCart(e, product)}
+                        onClick={(e) => e && handleAddToCart(e, product)}
                         disabled={product.quantity === 0 || addingToCart === product.id}
                         className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
                           product.quantity > 0

@@ -69,7 +69,9 @@ export const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ classNam
   const trigger = (
     <div className="w-52 h-16 bg-amber-500 flex items-center justify-center hover:bg-amber-600 transition-all duration-200 cursor-pointer group">
       <div className="text-white font-semibold text-base mr-3">Browse categories</div>
-      <ChevronDownIcon className="text-white w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
+      <span className="text-white w-4 h-4 transition-transform duration-200 group-hover:rotate-180 inline-block">
+        <ChevronDownIcon />
+      </span>
     </div>
   );
 

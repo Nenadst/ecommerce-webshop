@@ -151,156 +151,142 @@ const Cart = () => {
                   </div>
 
                   <div className="space-y-4">
-                    {cartItems.map(
-                      (item: {
-                        id: string;
-                        productId: string;
-                        quantity: number;
-                        product?: {
-                          id: string;
-                          name: string;
-                          price: number;
-                          images?: string[];
-                          quantity: number;
-                          category?: { name: string };
-                        };
-                      }) => {
-                        const product = item.product;
-                        const isRemoving = removingItems.has(item.productId);
-                        const isUpdating = updatingItems.has(item.productId);
+                    {cartItems.map((item) => {
+                      const product = item.product;
+                      const isRemoving = removingItems.has(item.productId);
+                      const isUpdating = updatingItems.has(item.productId);
 
-                        return (
-                          <Card
-                            key={item.id}
-                            className={`p-4 flex gap-4 transition-all duration-300 ${
-                              isRemoving ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
-                            }`}
+                      return (
+                        <Card
+                          key={item.id}
+                          className={`p-4 flex gap-4 transition-all duration-300 ${
+                            isRemoving ? 'opacity-50 scale-95' : 'opacity-100 scale-100'
+                          }`}
+                        >
+                          <Link
+                            href={`/products/${product?.id || item.productId}`}
+                            className="flex-shrink-0"
                           >
-                            <Link
-                              href={`/products/${product?.id || item.productId}`}
-                              className="flex-shrink-0"
-                            >
-                              <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-sky-50 rounded-lg flex items-center justify-center overflow-hidden">
-                                <Image
-                                  src={product?.images?.[0] || '/assets/img/no-product.png'}
-                                  alt={product?.name || 'Product'}
-                                  width={96}
-                                  height={96}
-                                  className="object-contain w-full h-full p-2"
-                                />
-                              </div>
-                            </Link>
-
-                            <div className="flex-grow">
-                              <div className="flex justify-between items-start mb-2">
-                                <div>
-                                  <Link href={`/products/${product?.id || item.productId}`}>
-                                    <h3 className="text-lg font-semibold text-sky-900 hover:text-sky-700 transition-colors">
-                                      {product?.name || 'Product'}
-                                    </h3>
-                                  </Link>
-                                  {product?.category && (
-                                    <p className="text-sm text-gray-500">{product.category.name}</p>
-                                  )}
-                                </div>
-                                <button
-                                  onClick={() => handleRemoveItem(item.productId)}
-                                  disabled={isRemoving}
-                                  className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
-                                  aria-label="Remove item"
-                                >
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
-                                </button>
-                              </div>
-
-                              <div className="flex justify-between items-center mt-4">
-                                <div className="flex items-center gap-3">
-                                  <span className="text-sm text-gray-600">Quantity:</span>
-                                  <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1">
-                                    <button
-                                      onClick={() =>
-                                        handleUpdateQuantity(item.productId, item.quantity - 1)
-                                      }
-                                      disabled={item.quantity <= 1 || isUpdating || isRemoving}
-                                      className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                      <svg
-                                        className="w-4 h-4 text-gray-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M20 12H4"
-                                        />
-                                      </svg>
-                                    </button>
-                                    <span className="w-12 text-center font-bold text-gray-900">
-                                      {item.quantity}
-                                    </span>
-                                    <button
-                                      onClick={() =>
-                                        handleUpdateQuantity(item.productId, item.quantity + 1)
-                                      }
-                                      disabled={
-                                        (product?.quantity && item.quantity >= product.quantity) ||
-                                        isUpdating ||
-                                        isRemoving
-                                      }
-                                      className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                      <svg
-                                        className="w-4 h-4 text-gray-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M12 4v16m8-8H4"
-                                        />
-                                      </svg>
-                                    </button>
-                                  </div>
-                                </div>
-
-                                <div className="text-right">
-                                  <div className="text-sm text-gray-500">
-                                    €{product?.price?.toFixed(2) || '0.00'} each
-                                  </div>
-                                  <div className="text-xl font-bold text-sky-900">
-                                    €{((product?.price || 0) * item.quantity).toFixed(2)}
-                                  </div>
-                                </div>
-                              </div>
-
-                              {product?.quantity !== undefined && product.quantity < 10 && (
-                                <div className="mt-2 text-sm text-amber-600 font-medium">
-                                  Only {product.quantity} left in stock
-                                </div>
-                              )}
+                            <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-sky-50 rounded-lg flex items-center justify-center overflow-hidden">
+                              <Image
+                                src={product?.images?.[0] || '/assets/img/no-product.png'}
+                                alt={product?.name || 'Product'}
+                                width={96}
+                                height={96}
+                                className="object-contain w-full h-full p-2"
+                              />
                             </div>
-                          </Card>
-                        );
-                      }
-                    )}
+                          </Link>
+
+                          <div className="flex-grow">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <Link href={`/products/${product?.id || item.productId}`}>
+                                  <h3 className="text-lg font-semibold text-sky-900 hover:text-sky-700 transition-colors">
+                                    {product?.name || 'Product'}
+                                  </h3>
+                                </Link>
+                                {product?.category && (
+                                  <p className="text-sm text-gray-500">{product.category.name}</p>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleRemoveItem(item.productId)}
+                                disabled={isRemoving}
+                                className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                                aria-label="Remove item"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+
+                            <div className="flex justify-between items-center mt-4">
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-600">Quantity:</span>
+                                <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1">
+                                  <button
+                                    onClick={() =>
+                                      handleUpdateQuantity(item.productId, item.quantity - 1)
+                                    }
+                                    disabled={item.quantity <= 1 || isUpdating || isRemoving}
+                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    <svg
+                                      className="w-4 h-4 text-gray-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M20 12H4"
+                                      />
+                                    </svg>
+                                  </button>
+                                  <span className="w-12 text-center font-bold text-gray-900">
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    onClick={() =>
+                                      handleUpdateQuantity(item.productId, item.quantity + 1)
+                                    }
+                                    disabled={
+                                      (product?.quantity && item.quantity >= product.quantity) ||
+                                      isUpdating ||
+                                      isRemoving
+                                    }
+                                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    <svg
+                                      className="w-4 h-4 text-gray-600"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 4v16m8-8H4"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="text-right">
+                                <div className="text-sm text-gray-500">
+                                  €{product?.price?.toFixed(2) || '0.00'} each
+                                </div>
+                                <div className="text-xl font-bold text-sky-900">
+                                  €{((product?.price || 0) * item.quantity).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+
+                            {product?.quantity !== undefined && product.quantity < 10 && (
+                              <div className="mt-2 text-sm text-amber-600 font-medium">
+                                Only {product.quantity} left in stock
+                              </div>
+                            )}
+                          </div>
+                        </Card>
+                      );
+                    })}
                   </div>
                 </div>
 

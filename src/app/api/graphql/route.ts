@@ -4,18 +4,27 @@ import { typeDefs, resolvers } from '@/shared/graphql/schema';
 import { connectDB } from '@/shared/lib/db';
 import { NextRequest } from 'next/server';
 
-const server = new ApolloServer({
+interface Context {
+  req: NextRequest;
+}
+
+const server = new ApolloServer<Context>({
   typeDefs,
   resolvers,
   introspection: true,
 });
 
-const handler = startServerAndCreateNextHandler<NextRequest>(server, {
-  context: async (req) => {
+const handler = startServerAndCreateNextHandler(server, {
+  context: async (req: NextRequest) => {
     await connectDB();
     return { req };
   },
 });
 
-export const GET = handler;
-export const POST = handler;
+export async function GET(request: NextRequest) {
+  return handler(request);
+}
+
+export async function POST(request: NextRequest) {
+  return handler(request);
+}

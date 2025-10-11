@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/shared/lib/stripe';
 import { prisma } from '@/shared/lib/db';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +42,8 @@ export async function POST(req: NextRequest) {
       const product = products.find((p) => p.id === item.productId);
       if (!product) throw new Error('Product not found');
 
-      const price = product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
+      const price =
+        product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
 
       return {
         price_data: {
@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
     const subtotal = items.reduce((sum: number, item: { productId: string; quantity: number }) => {
       const product = products.find((p) => p.id === item.productId);
       if (!product) return sum;
-      const price = product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
+      const price =
+        product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
       return sum + price * item.quantity;
     }, 0);
 
@@ -93,7 +94,8 @@ export async function POST(req: NextRequest) {
           create: items.map((item: { productId: string; quantity: number }) => {
             const product = products.find((p) => p.id === item.productId);
             if (!product) throw new Error('Product not found');
-            const price = product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
+            const price =
+              product.hasDiscount && product.discountPrice ? product.discountPrice : product.price;
             return {
               productId: item.productId,
               name: product.name,

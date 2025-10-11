@@ -133,9 +133,10 @@ const productResolvers = {
       }
 
       if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
-        where.price = {};
-        if (filter.minPrice !== undefined) where.price.gte = filter.minPrice;
-        if (filter.maxPrice !== undefined) where.price.lte = filter.maxPrice;
+        const priceFilter: { gte?: number; lte?: number } = {};
+        if (filter.minPrice !== undefined) priceFilter.gte = filter.minPrice;
+        if (filter.maxPrice !== undefined) priceFilter.lte = filter.maxPrice;
+        where.price = priceFilter;
       }
 
       const skip = (page - 1) * limit;
