@@ -15,8 +15,12 @@ const Features = () => {
               </div>
             </div>
             <div className="flex-col justify-center items-start gap-1 md:gap-1.5 inline-flex">
-              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">Free delivery</div>
-              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">on order above $50,00</div>
+              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">
+                Free delivery
+              </div>
+              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">
+                on order above $50,00
+              </div>
             </div>
           </div>
           <div className="justify-start items-center gap-4 md:gap-8 flex w-full md:w-auto">
@@ -26,8 +30,12 @@ const Features = () => {
               </div>
             </div>
             <div className="flex-col justify-center items-start gap-1 md:gap-1.5 inline-flex">
-              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">Best quality </div>
-              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">best quality in low price</div>
+              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">
+                Best quality{' '}
+              </div>
+              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">
+                best quality in low price
+              </div>
             </div>
           </div>
           <div className="justify-start items-center gap-4 md:gap-8 flex w-full md:w-auto">
@@ -37,8 +45,12 @@ const Features = () => {
               </div>
             </div>
             <div className="flex-col justify-center items-start gap-1 md:gap-1.5 inline-flex">
-              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">1 year warranty</div>
-              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">Avaliable warranty</div>
+              <div className="text-sky-900 text-lg md:text-xl lg:text-2xl font-semibold">
+                1 year warranty
+              </div>
+              <div className="text-sky-900 text-sm md:text-base lg:text-lg font-normal">
+                Avaliable warranty
+              </div>
             </div>
           </div>
         </div>

@@ -10,7 +10,11 @@ const TopSeller = () => {
     <div className="container mx-auto px-4">
       <div className="flex flex-col lg:flex-row justify-center items-center gap-5 mb-5">
         <Card className="w-full lg:w-[830px] min-h-[500px] justify-center items-center gap-6 md:gap-10 flex flex-col md:flex-row relative p-4 md:p-6">
-          <img className="p-3 rounded-2xl max-w-[250px] md:max-w-[350px]" src="/assets/img/jbl-bar.png" alt="JBL bar" />
+          <img
+            className="p-3 rounded-2xl max-w-[250px] md:max-w-[350px]"
+            src="/assets/img/jbl-bar.png"
+            alt="JBL bar"
+          />
           <div className="justify-center items-center flex absolute bottom-4 md:bottom-10">
             <DotSlide count={1} />
           </div>

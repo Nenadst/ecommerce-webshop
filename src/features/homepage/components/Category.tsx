@@ -26,16 +26,26 @@ const Category = () => {
           </Link>
           <Link href="/products" className="w-full lg:w-auto">
             <Card className="w-full lg:w-96 h-36 justify-center items-center gap-6 md:gap-11 cursor-pointer transition ease-in-out hover:-translate-y-1 hover:scale-105 flex">
-              <img className="w-24 md:w-32 h-24 md:h-28 rounded-lg" src="/assets/img/5-1.png" alt="Desktop & laptop" />
+              <img
+                className="w-24 md:w-32 h-24 md:h-28 rounded-lg"
+                src="/assets/img/5-1.png"
+                alt="Desktop & laptop"
+              />
               <div className="flex-col justify-center items-start gap-2.5 inline-flex">
-                <div className="text-cyan-800 text-lg md:text-xl font-semibold">Desktop & laptop</div>
+                <div className="text-cyan-800 text-lg md:text-xl font-semibold">
+                  Desktop & laptop
+                </div>
                 <div className="text-cyan-800 text-base md:text-lg font-medium">(6 items)</div>
               </div>
             </Card>
           </Link>
           <Link href="/products" className="w-full lg:w-auto">
             <Card className="w-full lg:w-96 h-36 justify-center items-center gap-6 md:gap-11 relative cursor-pointer transition ease-in-out hover:-translate-y-1 hover:scale-105 flex">
-              <img className="w-24 md:w-28 h-24 md:h-28 rounded-lg" src="/assets/img/8-1.png" alt="DSLR camera" />
+              <img
+                className="w-24 md:w-28 h-24 md:h-28 rounded-lg"
+                src="/assets/img/8-1.png"
+                alt="DSLR camera"
+              />
               <div className="flex-col justify-center items-start gap-2.5 inline-flex">
                 <div className="text-cyan-800 text-xl md:text-2xl font-semibold">DSLR camera</div>
                 <div className="text-cyan-800 text-base md:text-lg font-medium">(6 items)</div>

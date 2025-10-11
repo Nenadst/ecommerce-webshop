@@ -33,7 +33,11 @@ const Product = () => {
               key={product.id}
               className="w-full max-w-[320px] h-80 justify-center gap-6 md:gap-9 flex flex-wrap relative"
             >
-              <img className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg" src={product.image} alt={product.name} />
+              <img
+                className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg"
+                src={product.image}
+                alt={product.name}
+              />
               <ButtonLoveIcon />
               <div className="flex justify-between gap-2 md:gap-5 mb-4 px-2">
                 <Button className="flex-1 min-w-0 h-12 md:h-14 pl-3 md:pl-6 pr-2 justify-between flex items-center bg-blue-300 hover:bg-blue-400 text-slate-800 text-sm md:text-base font-semibold">
@@ -56,11 +60,19 @@ const Product = () => {
                 key={product.id}
                 className="w-full max-w-[320px] h-80 justify-center flex flex-wrap relative cursor-pointer hover:bg-slate-100"
               >
-                <img className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg" src={product.image} alt={product.name} />
+                <img
+                  className="w-40 md:w-48 h-36 md:h-44 mt-7 rounded-lg"
+                  src={product.image}
+                  alt={product.name}
+                />
                 <ButtonLoveIcon />
                 <div className="gap-2 flex flex-col absolute bottom-5 left-3">
-                  <div className="text-sky-900 text-base md:text-lg font-medium">{product.name}</div>
-                  <div className="text-neutral-600 text-base md:text-lg font-semibold">${product.price}</div>
+                  <div className="text-sky-900 text-base md:text-lg font-medium">
+                    {product.name}
+                  </div>
+                  <div className="text-neutral-600 text-base md:text-lg font-semibold">
+                    ${product.price}
+                  </div>
                   <Star count={product.rating} />
                 </div>
               </Card>

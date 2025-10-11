@@ -22,7 +22,9 @@ const Testimoni = () => {
                   />
                 </div>
               </div>
-              <div className="flex-1 text-sky-900 text-sm md:text-base font-medium">{testimoni.name}</div>
+              <div className="flex-1 text-sky-900 text-sm md:text-base font-medium">
+                {testimoni.name}
+              </div>
             </div>
             <div className="w-full min-h-20 bg-sky-100 rounded-2xl justify-center items-center flex">
               <div className="w-full p-3 md:p-4 text-sky-900 text-xs md:text-sm font-normal">

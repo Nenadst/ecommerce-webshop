@@ -11,8 +11,17 @@ const Partner = () => {
               key={index}
               className="transition ease-in-out hover:-translate-y-1 hover:scale-110"
             >
-              <a href={partner.url} target="_blank" rel="noopener noreferrer" className="cursor-pointer rounded-lg">
-                <img className="rounded-xl p-2 max-w-[80px] md:max-w-[100px] lg:max-w-none h-auto" src={partner.logo} alt={`Partner ${index + 1}`} />
+              <a
+                href={partner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer rounded-lg"
+              >
+                <img
+                  className="rounded-xl p-2 max-w-[80px] md:max-w-[100px] lg:max-w-none h-auto"
+                  src={partner.logo}
+                  alt={`Partner ${index + 1}`}
+                />
               </a>
             </div>
           ))}
