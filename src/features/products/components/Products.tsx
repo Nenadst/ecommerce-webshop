@@ -26,7 +26,7 @@ interface Product {
   description?: string;
   price: number;
   quantity: number;
-  image?: string;
+  images?: string[];
   category: {
     id: string;
     name: string;
@@ -250,7 +250,7 @@ const Products = () => {
                     <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
                       <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
                         <Image
-                          src={product.image || '/assets/img/no-product.png'}
+                          src={product.images?.[0] || '/assets/img/no-product.png'}
                           alt={product.name}
                           width={256}
                           height={256}
