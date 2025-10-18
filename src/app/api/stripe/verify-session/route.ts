@@ -17,19 +17,67 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No order found for this session' }, { status: 404 });
     }
 
-    const order = await prisma.order.findUnique({
+    let order = await prisma.order.findUnique({
       where: { id: session.metadata.orderId },
-      select: { orderNumber: true, paymentStatus: true, status: true },
+      include: { items: true },
     });
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
+    if (session.payment_status === 'paid' && order.paymentStatus === 'PENDING') {
+      console.log(`Processing payment for order ${order.orderNumber} (webhook fallback)`);
+
+      const currentOrder = order;
+
+      await prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: { id: currentOrder.id },
+          data: {
+            paymentStatus: 'PAID',
+            status: 'PROCESSING',
+            stripePaymentIntentId: session.payment_intent as string,
+          },
+        });
+
+        for (const item of currentOrder.items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              quantity: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
+
+        await tx.orderLog.create({
+          data: {
+            orderId: currentOrder.id,
+            action: 'PAYMENT_COMPLETED',
+            description: `Payment completed via Stripe (webhook fallback). Payment Intent: ${session.payment_intent}`,
+            performedBy: 'system',
+          },
+        });
+
+        if (currentOrder.userId) {
+          await tx.cartItem.deleteMany({
+            where: { userId: currentOrder.userId },
+          });
+        }
+      });
+
+      order = await prisma.order.findUnique({
+        where: { id: session.metadata.orderId },
+        include: { items: true },
+      });
+    }
+
     return NextResponse.json({
-      orderNumber: order.orderNumber,
-      paymentStatus: order.paymentStatus,
-      status: order.status,
+      orderNumber: order!.orderNumber,
+      paymentStatus: order!.paymentStatus,
+      status: order!.status,
     });
   } catch (error) {
     console.error('Verify session error:', error);
