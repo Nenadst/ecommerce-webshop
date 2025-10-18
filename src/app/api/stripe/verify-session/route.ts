@@ -29,9 +29,11 @@ export async function GET(req: NextRequest) {
     if (session.payment_status === 'paid' && order.paymentStatus === 'PENDING') {
       console.log(`Processing payment for order ${order.orderNumber} (webhook fallback)`);
 
+      const currentOrder = order;
+
       await prisma.$transaction(async (tx) => {
         await tx.order.update({
-          where: { id: order.id },
+          where: { id: currentOrder.id },
           data: {
             paymentStatus: 'PAID',
             status: 'PROCESSING',
@@ -39,7 +41,7 @@ export async function GET(req: NextRequest) {
           },
         });
 
-        for (const item of order.items) {
+        for (const item of currentOrder.items) {
           await tx.product.update({
             where: { id: item.productId },
             data: {
@@ -52,16 +54,16 @@ export async function GET(req: NextRequest) {
 
         await tx.orderLog.create({
           data: {
-            orderId: order.id,
+            orderId: currentOrder.id,
             action: 'PAYMENT_COMPLETED',
             description: `Payment completed via Stripe (webhook fallback). Payment Intent: ${session.payment_intent}`,
             performedBy: 'system',
           },
         });
 
-        if (order.userId) {
+        if (currentOrder.userId) {
           await tx.cartItem.deleteMany({
-            where: { userId: order.userId },
+            where: { userId: currentOrder.userId },
           });
         }
       });
