@@ -62,7 +62,7 @@ export default function AdminUsers() {
   const [updateAccountStatus] = useMutation(UPDATE_ACCOUNT_STATUS);
   const [deleteUser] = useMutation(DELETE_USER);
 
-  const users: User[] = data?.allUsers || [];
+  const users: User[] = useMemo(() => data?.allUsers || [], [data?.allUsers]);
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
@@ -247,7 +247,15 @@ export default function AdminUsers() {
         },
       }),
     ],
-    [setEditingUser, setEditingStatus, setDeletingUser]
+    [
+      setEditingUser,
+      setEditingStatus,
+      setDeletingUser,
+      formatLastLogin,
+      formatDate,
+      getStatusColor,
+      getStatusIcon,
+    ]
   );
 
   const filteredData = useMemo(() => {

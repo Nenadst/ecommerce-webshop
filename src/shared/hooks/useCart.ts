@@ -130,11 +130,7 @@ export function useCartInternal() {
     return localCart.map((item) => item.productId);
   }, [localCart]);
 
-  const {
-    data: guestProductsData,
-    refetch: refetchGuestProducts,
-    loading: guestProductsLoading,
-  } = useQuery(GET_PRODUCTS_BY_IDS, {
+  const { data: guestProductsData, refetch: refetchGuestProducts } = useQuery(GET_PRODUCTS_BY_IDS, {
     variables: { ids: productIds },
     skip: isAuthenticated || productIds.length === 0,
     fetchPolicy: 'cache-and-network',
@@ -240,7 +236,7 @@ export function useCartInternal() {
         };
       })
       .filter((item) => item.product !== null);
-  }, [localCart, guestProductsData, isAuthenticated, guestProductsLoading]);
+  }, [localCart, guestProductsData, isAuthenticated]);
 
   const cartItems = isAuthenticated ? data?.cart?.items || [] : guestCartItems;
 
