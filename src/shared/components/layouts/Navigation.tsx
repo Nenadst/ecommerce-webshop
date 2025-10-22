@@ -13,7 +13,7 @@ const Navigation = () => {
 
   return (
     <>
-      <div className="w-full h-16 bg-zinc-100 sticky top-16 z-50">
+      <div className="w-full h-16 bg-zinc-100">
         <div className="flex justify-between items-center h-full">
           {/* Desktop Navigation */}
           <div className="hidden lg:flex flex-wrap">
@@ -79,7 +79,7 @@ const Navigation = () => {
 
       {/* Mobile Full Screen Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-32 bg-zinc-100 z-40 overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 top-38 bg-zinc-100 z-[70] overflow-y-auto">
           <div className="flex flex-col">
             <Link
               href="/products"

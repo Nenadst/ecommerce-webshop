@@ -10,7 +10,7 @@ const FooterMenu = () => {
           <div className="flex-col justify-center items-center lg:justify-start lg:items-start gap-9 flex">
             <div className="flex-col gap-10 flex lg:justify-start lg:items-start">
               <Image
-                src="/assets/img/logo-11.png"
+                src="/assets/img/logo-footer.png"
                 alt="WebShop Footer Logo"
                 width={144}
                 height={40}
