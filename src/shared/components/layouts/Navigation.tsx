@@ -79,7 +79,7 @@ const Navigation = () => {
 
       {/* Mobile Full Screen Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-38 bg-zinc-100 z-[70] overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 top-[152px] bg-zinc-100 z-[70] overflow-y-auto">
           <div className="flex flex-col">
             <Link
               href="/products"

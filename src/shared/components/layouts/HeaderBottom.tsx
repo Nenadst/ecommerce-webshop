@@ -8,7 +8,7 @@ import Link from 'next/link';
 const HeaderBottom = () => {
   return (
     <div className="sticky top-0 z-[60] w-full">
-      <div className="w-full h-22 py-1 bg-sky-900 flex items-center gap-20 px-16">
+      <div className="w-full h-[88px] py-1 bg-sky-900 flex items-center gap-20 px-16">
         <Link href="/" className="cursor-pointer flex items-center group">
           <Image
             src="/assets/img/logo.png"

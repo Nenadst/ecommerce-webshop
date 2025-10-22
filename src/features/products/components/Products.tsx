@@ -17,6 +17,7 @@ import { HeartIconBig } from '@/shared/components/icons';
 import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
+import { useAuth } from '@/shared/contexts/AuthContext';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
 
@@ -49,6 +50,7 @@ const Products = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addToCart, cartItems } = useCart();
   const { openDrawer } = useCartDrawer();
+  const { isAuthenticated } = useAuth();
 
   const getAvailableQuantity = (productId: string, stockQuantity: number) => {
     const quantityInCart = cartItems.find((item) => item.productId === productId)?.quantity || 0;
@@ -257,19 +259,23 @@ const Products = () => {
                           className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
                           priority={index < 4}
                         />
-                        <button
-                          onClick={(e) => handleToggleFavorite(e, product.id)}
-                          className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
-                          aria-label={
-                            isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
-                          }
-                        >
-                          <HeartIconBig
-                            className={`w-5 h-5 transition-colors ${
-                              isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                            }`}
-                          />
-                        </button>
+                        {isAuthenticated && (
+                          <button
+                            onClick={(e) => handleToggleFavorite(e, product.id)}
+                            className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
+                            aria-label={
+                              isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
+                            }
+                          >
+                            <HeartIconBig
+                              className={`w-5 h-5 transition-colors ${
+                                isFavorite(product.id)
+                                  ? 'fill-red-500 text-red-500'
+                                  : 'text-gray-400'
+                              }`}
+                            />
+                          </button>
+                        )}
                         <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
                           {product.category.name}
                         </span>

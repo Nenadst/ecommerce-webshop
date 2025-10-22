@@ -13,6 +13,7 @@ import { Product } from '@/entities/product/types/product.types';
 import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
+import { useAuth } from '@/shared/contexts/AuthContext';
 import Spinner from '@/shared/components/spinner/Spinner';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -33,6 +34,7 @@ const ProductDetails = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addToCart, cartItems } = useCart();
   const { openDrawer } = useCartDrawer();
+  const { isAuthenticated } = useAuth();
 
   const product = data?.product;
   const quantityInCart = cartItems.find((item) => item.productId === productId)?.quantity || 0;
@@ -260,20 +262,22 @@ const ProductDetails = () => {
                       ? 'All in cart'
                       : 'Out of stock'}
               </button>
-              <button
-                onClick={handleToggleFavorite}
-                className="w-16 h-16 bg-zinc-100 rounded-full justify-center items-center flex hover:bg-amber-100 group transition-colors"
-              >
-                <div className="w-9 h-9 justify-center items-center flex">
-                  <div className="w-9 h-9 relative">
-                    <HeartIconBig
-                      className={`transition-colors ${
-                        isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                      }`}
-                    />
+              {isAuthenticated && (
+                <button
+                  onClick={handleToggleFavorite}
+                  className="w-16 h-16 bg-zinc-100 rounded-full justify-center items-center flex hover:bg-amber-100 group transition-colors"
+                >
+                  <div className="w-9 h-9 justify-center items-center flex">
+                    <div className="w-9 h-9 relative">
+                      <HeartIconBig
+                        className={`transition-colors ${
+                          isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                        }`}
+                      />
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              )}
             </div>
             <Separator />
             <div className="flex items-center">
