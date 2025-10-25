@@ -5,10 +5,9 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { useEffect, useRef } from 'react';
-import toast from 'react-hot-toast';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isLoggingOut = useRef(false);
@@ -39,9 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = () => {
     isLoggingOut.current = true;
-    logout();
-    toast.success('Logged out successfully!');
-    router.push('/');
+    router.push('/logout');
   };
   return (
     <div className="min-h-screen flex">

@@ -2,15 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { User, LogOut } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 export default function UserMenu() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -40,16 +38,8 @@ export default function UserMenu() {
   }, []);
 
   const handleLogout = () => {
-    const protectedRoutes = ['/profile', '/admin'];
-    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
-
-    logout();
     setIsOpen(false);
-    toast.success('Logged out successfully!');
-
-    if (isProtectedRoute) {
-      router.push('/');
-    }
+    router.push('/logout');
   };
 
   return (
