@@ -3,9 +3,6 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import HeaderTop from '@/shared/components/layouts/HeaderTop';
-import HeaderBottom from '@/shared/components/layouts/HeaderBottom';
-import Footer from '@/shared/components/layouts/Footer';
 import Button from '@/shared/components/elements/Button';
 import Spinner from '@/shared/components/spinner/Spinner';
 import { useAuth } from '@/shared/contexts/AuthContext';
@@ -126,13 +123,8 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <main className="bg-white">
-      <HeaderTop />
-      <HeaderBottom />
-      <Suspense fallback={<Spinner />}>
-        <SuccessContent />
-      </Suspense>
-      <Footer />
-    </main>
+    <Suspense fallback={<Spinner />}>
+      <SuccessContent />
+    </Suspense>
   );
 }

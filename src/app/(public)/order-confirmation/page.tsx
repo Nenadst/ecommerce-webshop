@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
-import HeaderTop from '@/shared/components/layouts/HeaderTop';
-import HeaderBottom from '@/shared/components/layouts/HeaderBottom';
-import Footer from '@/shared/components/layouts/Footer';
 import { CheckCircle, Package, Mail, Phone, MapPin, CreditCard, Calendar } from 'lucide-react';
 
 const ORDER_BY_NUMBER_QUERY = gql`
@@ -94,37 +91,27 @@ export default function OrderConfirmationPage() {
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <HeaderTop />
-        <HeaderBottom />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-sky-900 text-lg">Loading order details...</div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-sky-900 text-lg">Loading order details...</div>
       </div>
     );
   }
 
   if (error || !data?.orderByNumber) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <HeaderTop />
-        <HeaderBottom />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
-            <p className="text-gray-600 mb-4">
-              We couldn&apos;t find an order with this order number.
-            </p>
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition"
-            >
-              Back to Home
-            </button>
-          </div>
-        </main>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
+          <p className="text-gray-600 mb-4">
+            We couldn&apos;t find an order with this order number.
+          </p>
+          <button
+            onClick={() => router.push('/')}
+            className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition"
+          >
+            Back to Home
+          </button>
+        </div>
       </div>
     );
   }
@@ -164,11 +151,8 @@ export default function OrderConfirmationPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <HeaderTop />
-      <HeaderBottom />
-
-      <main className="flex-grow container mx-auto px-4 py-8 max-w-4xl">
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white rounded-lg shadow-sm p-8 mb-6 text-center">
           <div className="flex justify-center mb-4">
             <CheckCircle className="w-16 h-16 text-green-500" />
@@ -337,9 +321,7 @@ export default function OrderConfirmationPage() {
             Back to Home
           </button>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }

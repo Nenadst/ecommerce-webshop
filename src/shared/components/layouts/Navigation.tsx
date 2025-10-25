@@ -28,23 +28,29 @@ const Navigation = () => {
               </div>
             </Link>
             <Link
-              href="/products"
+              href="/catalog"
               className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group"
             >
               <div className="text-slate-500 font-semibold text-base group-hover:text-white">
                 Catalog
               </div>
             </Link>
-            <div className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group">
+            <Link
+              href="/blog"
+              className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group"
+            >
               <div className="text-slate-500 font-semibold text-base group-hover:text-white">
                 Blog
               </div>
-            </div>
-            <div className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group">
+            </Link>
+            <Link
+              href="/about-us"
+              className="w-32 h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group"
+            >
               <div className="text-slate-500 font-semibold text-base group-hover:text-white">
                 About us
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -100,7 +106,7 @@ const Navigation = () => {
               </div>
             </Link>
             <Link
-              href="/products"
+              href="/catalog"
               onClick={toggleMobileMenu}
               className="w-full h-16 flex items-center justify-center hover:bg-amber-500 group border-b border-zinc-200"
             >
@@ -108,22 +114,24 @@ const Navigation = () => {
                 Catalog
               </div>
             </Link>
-            <div
+            <Link
+              href="/blog"
               onClick={toggleMobileMenu}
               className="w-full h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group border-b border-zinc-200"
             >
               <div className="text-slate-500 font-semibold text-base group-hover:text-white">
                 Blog
               </div>
-            </div>
-            <div
+            </Link>
+            <Link
+              href="/about-us"
               onClick={toggleMobileMenu}
               className="w-full h-16 flex items-center justify-center hover:bg-amber-500 cursor-pointer group border-b border-zinc-200"
             >
               <div className="text-slate-500 font-semibold text-base group-hover:text-white">
                 About us
               </div>
-            </div>
+            </Link>
             <div className="w-full h-16 flex items-center justify-center border-b border-zinc-200">
               <div className="text-sky-800 font-semibold text-base">24/7 Support</div>
             </div>
