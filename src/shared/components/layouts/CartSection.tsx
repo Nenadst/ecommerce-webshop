@@ -19,7 +19,7 @@ const CartSection = () => {
   const { openDrawer } = useCartDrawer();
 
   return (
-    <div className="ml-auto mr-24 h-10 hidden md:hidden lg:flex">
+    <div className="ml-auto h-10 hidden md:hidden lg:flex">
       {isAdmin && (
         <Link
           href="/admin"

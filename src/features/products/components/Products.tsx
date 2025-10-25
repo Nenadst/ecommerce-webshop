@@ -249,8 +249,8 @@ const Products = () => {
                 const availableQty = getAvailableQuantity(product.id, product.quantity);
                 return (
                   <Link href={`/products/${product.id}`} key={product.id}>
-                    <Card className="w-full h-[500px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
-                      <div className="relative h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
+                    <Card className="w-full h-[520px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
+                      <div className="relative h-64 min-h-64 max-h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
                         <Image
                           src={product.images?.[0] || '/assets/img/no-product.png'}
                           alt={product.name}
@@ -293,16 +293,16 @@ const Products = () => {
                           </span>
                         )}
                       </div>
-                      <div className="p-4 flex flex-col flex-grow">
+                      <div className="px-4 pb-4 pt-1 flex flex-col flex-1 min-h-0">
                         <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
                           {product.name}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">
+                        <p className="text-gray-600 text-sm mb-1 line-clamp-3 h-[4.5rem]">
                           {product.description
-                            ? truncateText(product.description, 80)
+                            ? truncateText(product.description, 120)
                             : 'No description available'}
                         </p>
-                        <div className="flex items-center justify-between mt-auto mb-3">
+                        <div className="flex items-center justify-between mt-1 mb-3">
                           <div className="flex flex-col">
                             <span className="text-2xl font-bold text-sky-900">
                               €{product.price}
