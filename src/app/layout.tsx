@@ -4,6 +4,8 @@ import { METADATA } from '../data/metadata';
 import { poppins } from '@/shared/lib/fonts';
 import { Toaster } from 'react-hot-toast';
 import ClientProviders from '@/shared/lib/ClientProviders';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: METADATA.title + METADATA.bTitle,
@@ -33,6 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           />
         </ClientProviders>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
