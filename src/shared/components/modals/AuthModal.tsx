@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Button from '../elements/Button';
 
 interface AuthModalProps {
@@ -11,10 +12,14 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, message }) => {
+  const pathname = usePathname();
+
   if (!isOpen) return null;
 
   const defaultMessage =
     'You need to be signed in to use the wishlist feature. Please log in to your account or create a new one to start adding your favorite products!';
+
+  const returnUrl = encodeURIComponent(pathname || '/');
 
   return (
     <div
@@ -48,12 +53,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, message }
         </div>
 
         <div className="flex flex-col gap-3">
-          <Link href="/login" className="w-full">
+          <Link href={`/login?returnUrl=${returnUrl}`} className="w-full">
             <Button className="w-full bg-sky-900 hover:bg-sky-800 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg">
               Log In
             </Button>
           </Link>
-          <Link href="/register" className="w-full">
+          <Link href={`/register?returnUrl=${returnUrl}`} className="w-full">
             <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg">
               Create Account
             </Button>

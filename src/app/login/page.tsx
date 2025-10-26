@@ -39,11 +39,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <Link
-          href="/"
+          href={returnUrl}
           className="flex items-center space-x-2 mb-6 text-sky-900 hover:text-sky-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Back to Homepage</span>
+          <span className="text-sm">Back to Previous Page</span>
         </Link>
         <h1 className="text-2xl font-bold text-sky-900 mb-6 text-center">Login</h1>
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
@@ -74,10 +74,13 @@ export default function LoginPage() {
         </form>
 
         <p className="mt-4 text-sm text-center">
-          Don’t have an account?{' '}
-          <a href="/register" className="text-sky-900 hover:underline">
+          Don&apos;t have an account?{' '}
+          <Link
+            href={`/register?returnUrl=${encodeURIComponent(returnUrl)}`}
+            className="text-sky-900 hover:underline"
+          >
             Register
-          </a>
+          </Link>
         </p>
       </div>
     </div>

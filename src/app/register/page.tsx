@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -9,6 +9,8 @@ import { useAuthMutations } from '@/shared/hooks/useAuthMutations';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
   const { isAuthenticated } = useAuth();
   const { register, error, setError, isLoading } = useAuthMutations();
 
@@ -19,9 +21,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push(returnUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,11 +55,11 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <Link
-          href="/"
+          href={returnUrl}
           className="flex items-center space-x-2 mb-6 text-sky-900 hover:text-sky-700 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="text-sm">Back to Homepage</span>
+          <span className="text-sm">Back to Previous Page</span>
         </Link>
         <h1 className="text-2xl font-bold text-sky-900 mb-6 text-center">Create an Account</h1>
         {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
@@ -107,9 +109,12 @@ export default function RegisterPage() {
 
         <p className="mt-4 text-sm text-center">
           Already have an account?{' '}
-          <a href="/login" className="text-sky-900 hover:underline">
+          <Link
+            href={`/login?returnUrl=${encodeURIComponent(returnUrl)}`}
+            className="text-sky-900 hover:underline"
+          >
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
