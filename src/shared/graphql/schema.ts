@@ -4,6 +4,7 @@ import categoryResolvers from '../../entities/category/api/category.resolver';
 import userResolvers from '../../entities/user/api/user.resolver';
 import cartResolvers from '../../entities/cart/api/cart.resolver';
 import orderResolvers from '../../entities/order/api/order.resolver';
+import activityResolvers from '../../entities/activity/api/activity.resolver';
 
 export const typeDefs = gql`
   type Product {
@@ -100,6 +101,20 @@ export const typeDefs = gql`
     count: Int!
   }
 
+  type ActivityLog {
+    id: ID!
+    userId: ID
+    userName: String
+    user: User
+    action: String!
+    description: String!
+    ipAddress: String
+    userAgent: String
+    path: String
+    metadata: String
+    createdAt: String!
+  }
+
   type DashboardStats {
     totalRevenue: Float!
     totalOrders: Int!
@@ -155,6 +170,8 @@ export const typeDefs = gql`
     allOrders: [Order!]!
     dashboardStats(days: Int, timezone: String): DashboardStats!
     allUsers: [User!]!
+    userActivityLogs(userId: ID!, limit: Int, fromDate: String, toDate: String): [ActivityLog!]!
+    allActivityLogs(limit: Int, fromDate: String, toDate: String): [ActivityLog!]!
   }
 
   input OrderItemInput {
@@ -206,6 +223,17 @@ export const typeDefs = gql`
     email: String
   }
 
+  input ActivityLogInput {
+    userId: ID
+    userName: String
+    action: String!
+    description: String!
+    ipAddress: String
+    userAgent: String
+    path: String
+    metadata: String
+  }
+
   type Mutation {
     createProduct(input: ProductInput!): Product!
     updateProduct(id: ID!, input: ProductInput!): Product!
@@ -245,6 +273,8 @@ export const typeDefs = gql`
     updateOrderItem(id: ID!, quantity: Int, price: Float): Order!
     removeOrderItem(id: ID!): Order!
     addOrderItem(orderId: ID!, productId: ID!, quantity: Int!, price: Float!): Order!
+
+    createActivityLog(input: ActivityLogInput!): ActivityLog!
   }
 `;
 
@@ -255,6 +285,7 @@ export const resolvers = {
     ...cartResolvers.Query,
     ...orderResolvers.Query,
     ...userResolvers.Query,
+    ...activityResolvers.Query,
   },
   Mutation: {
     ...productResolvers.Mutation,
@@ -262,5 +293,6 @@ export const resolvers = {
     ...userResolvers.Mutation,
     ...cartResolvers.Mutation,
     ...orderResolvers.Mutation,
+    ...activityResolvers.Mutation,
   },
 };

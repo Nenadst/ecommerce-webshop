@@ -1,6 +1,7 @@
 import { gql } from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export const GET_ALL_ORDERS = gql`
   query GetAllOrders {
@@ -160,6 +161,7 @@ export const ADD_ORDER_ITEM = gql`
 `;
 
 export function useAdminOrders() {
+  const { trackActivity } = useActivityTracker();
   const { data, loading, error, refetch } = useQuery(GET_ALL_ORDERS, {
     fetchPolicy: 'cache-and-network',
   });
@@ -215,11 +217,25 @@ export function useAdminOrders() {
   });
 
   const handleUpdateStatus = async (orderId: string, status?: string, paymentStatus?: string) => {
+    const order = data?.allOrders?.find((o: { id: string }) => o.id === orderId);
     await updateOrderStatus({
       variables: {
         id: orderId,
         status,
         paymentStatus,
+      },
+    });
+
+    // Track admin action
+    trackActivity({
+      action: 'ADMIN_ACTION',
+      description: `Updated order status: ${order?.orderNumber || orderId}`,
+      metadata: {
+        action: 'UPDATE_ORDER_STATUS',
+        orderId: orderId,
+        orderNumber: order?.orderNumber,
+        status: status,
+        paymentStatus: paymentStatus,
       },
     });
   };
@@ -238,15 +254,34 @@ export function useAdminOrders() {
       paymentMethod?: string;
     }
   ) => {
+    const order = data?.allOrders?.find((o: { id: string }) => o.id === orderId);
     await updateOrderDetails({
       variables: {
         id: orderId,
         ...details,
       },
     });
+
+    // Track admin action
+    trackActivity({
+      action: 'ADMIN_ACTION',
+      description: `Updated order details: ${order?.orderNumber || orderId}`,
+      metadata: {
+        action: 'UPDATE_ORDER_DETAILS',
+        orderId: orderId,
+        orderNumber: order?.orderNumber,
+        updatedFields: Object.keys(details),
+      },
+    });
   };
 
   const handleUpdateOrderItem = async (itemId: string, quantity?: number, price?: number) => {
+    // Find the order and item
+    const order = data?.allOrders?.find((o: { items: Array<{ id: string }> }) =>
+      o.items.some((item) => item.id === itemId)
+    );
+    const item = order?.items.find((i: { id: string }) => i.id === itemId);
+
     await updateOrderItem({
       variables: {
         id: itemId,
@@ -254,12 +289,46 @@ export function useAdminOrders() {
         price,
       },
     });
+
+    // Track admin action
+    trackActivity({
+      action: 'ADMIN_ACTION',
+      description: `Updated order item: ${item?.name || 'Unknown'} in order ${order?.orderNumber || 'Unknown'}`,
+      metadata: {
+        action: 'UPDATE_ORDER_ITEM',
+        orderId: order?.id,
+        orderNumber: order?.orderNumber,
+        itemId: itemId,
+        itemName: item?.name,
+        quantity: quantity,
+        price: price,
+      },
+    });
   };
 
   const handleRemoveOrderItem = async (itemId: string) => {
+    // Find the order and item before removing
+    const order = data?.allOrders?.find((o: { items: Array<{ id: string }> }) =>
+      o.items.some((item) => item.id === itemId)
+    );
+    const item = order?.items.find((i: { id: string }) => i.id === itemId);
+
     await removeOrderItem({
       variables: {
         id: itemId,
+      },
+    });
+
+    // Track admin action
+    trackActivity({
+      action: 'ADMIN_ACTION',
+      description: `Removed order item: ${item?.name || 'Unknown'} from order ${order?.orderNumber || 'Unknown'}`,
+      metadata: {
+        action: 'REMOVE_ORDER_ITEM',
+        orderId: order?.id,
+        orderNumber: order?.orderNumber,
+        itemId: itemId,
+        itemName: item?.name,
       },
     });
   };
@@ -270,12 +339,28 @@ export function useAdminOrders() {
     quantity: number,
     price: number
   ) => {
+    const order = data?.allOrders?.find((o: { id: string }) => o.id === orderId);
+
     await addOrderItem({
       variables: {
         orderId,
         productId,
         quantity,
         price,
+      },
+    });
+
+    // Track admin action
+    trackActivity({
+      action: 'ADMIN_ACTION',
+      description: `Added product to order ${order?.orderNumber || orderId}`,
+      metadata: {
+        action: 'ADD_ORDER_ITEM',
+        orderId: orderId,
+        orderNumber: order?.orderNumber,
+        productId: productId,
+        quantity: quantity,
+        price: price,
       },
     });
   };

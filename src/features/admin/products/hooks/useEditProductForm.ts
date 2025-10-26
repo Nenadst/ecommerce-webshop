@@ -6,11 +6,13 @@ import { GET_PRODUCT, UPDATE_PRODUCT } from '@/entities/product/api/product.quer
 import { GET_CATEGORIES } from '@/entities/category/api/category.queries';
 import { Product } from '@/entities/product/types/product.types';
 import { Category } from '@/entities/category/types/category.types';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export function useEditProductForm() {
   const router = useRouter();
   const params = useParams();
   const productId = params?.id as string;
+  const { trackActivity } = useActivityTracker();
   const { data: productData, loading: productLoading } = useQuery<{ product: Product }>(
     GET_PRODUCT,
     {
@@ -196,6 +198,20 @@ export function useEditProductForm() {
           },
         },
       });
+
+      // Track admin action
+      trackActivity({
+        action: 'ADMIN_ACTION',
+        description: `Updated product: ${form.name}`,
+        metadata: {
+          action: 'UPDATE_PRODUCT',
+          productId: productId,
+          productName: form.name,
+          price: price,
+          quantity: parseInt(form.quantity),
+        },
+      });
+
       toast.success('Product updated successfully!');
       router.push('/admin/products');
     } catch (error) {

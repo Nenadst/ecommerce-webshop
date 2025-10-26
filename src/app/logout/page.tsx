@@ -3,15 +3,25 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/shared/contexts/AuthContext';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 import { LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Button from '@/shared/components/elements/Button';
 
 export default function LogoutPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { trackActivity } = useActivityTracker();
 
   useEffect(() => {
+    // Track logout before actually logging out
+    if (user) {
+      trackActivity({
+        action: 'LOGOUT',
+        description: `User ${user.email} logged out`,
+      });
+    }
+
     // Call logout immediately
     logout();
 

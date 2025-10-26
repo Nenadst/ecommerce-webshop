@@ -4,6 +4,7 @@ import { GET_PRODUCTS, DELETE_PRODUCT } from '@/entities/product/api/product.que
 import { Product } from '@/entities/product/types/product.types';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export type ModalState = {
   show: boolean;
@@ -55,6 +56,7 @@ type UseAdminProductsResult = {
 
 export function useAdminProducts(): UseAdminProductsResult {
   const router = useRouter();
+  const { trackActivity } = useActivityTracker();
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -109,22 +111,43 @@ export function useAdminProducts(): UseAdminProductsResult {
   const handleAddProduct = () => router.push('/admin/products/new');
 
   const handleDeleteProduct = (id: string) => {
+    const productToDelete = data?.products.items.find((p) => p.id === id);
+
     setModal({
       show: true,
       message: 'Are you sure you want to delete this product?',
       productId: id,
       onConfirm: async () => {
         try {
-          const { data } = await deleteProduct({ variables: { id } });
-          if (data?.deleteProduct) {
+          const { data: deleteData } = await deleteProduct({ variables: { id } });
+          if (deleteData?.deleteProduct) {
             await refetch();
             toast.success('Product deleted successfully!');
+
+            // Track admin action
+            trackActivity({
+              action: 'ADMIN_ACTION',
+              description: `Deleted product: ${productToDelete?.name || 'Unknown'}`,
+              metadata: {
+                action: 'DELETE_PRODUCT',
+                productId: id,
+                productName: productToDelete?.name,
+              },
+            });
           } else {
             toast.error('Failed to delete product.');
           }
-        } catch (err) {
-          toast.error('An error occurred while deleting.');
-          console.error(err);
+        } catch (err: unknown) {
+          console.error('Delete error:', err);
+
+          // Extract error message from GraphQL error
+          const errorMessage =
+            (err && typeof err === 'object' && 'graphQLErrors' in err
+              ? (err as { graphQLErrors?: Array<{ message?: string }> }).graphQLErrors?.[0]?.message
+              : undefined) ||
+            (err instanceof Error ? err.message : undefined) ||
+            'An error occurred while deleting.';
+          toast.error(errorMessage);
         } finally {
           setModal((prev) => ({ ...prev, show: false }));
         }

@@ -3,10 +3,12 @@ import { useRouter } from 'next/navigation';
 import { useMutation } from '@apollo/client';
 import toast from 'react-hot-toast';
 import { CREATE_PRODUCT } from '@/entities/product/api/product.queries';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export function useAddProductForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { trackActivity } = useActivityTracker();
 
   const [form, setForm] = useState({
     name: '',
@@ -150,7 +152,7 @@ export function useAddProductForm() {
 
         const imageUrls = form.files.length > 0 ? await handleUpload() : [];
 
-        await createProduct({
+        const result = await createProduct({
           variables: {
             input: {
               name: form.name,
@@ -164,6 +166,20 @@ export function useAddProductForm() {
             },
           },
         });
+
+        // Track admin action
+        trackActivity({
+          action: 'ADMIN_ACTION',
+          description: `Created product: ${form.name}`,
+          metadata: {
+            action: 'CREATE_PRODUCT',
+            productId: result.data?.createProduct?.id,
+            productName: form.name,
+            price: price,
+            quantity: parseInt(form.quantity),
+          },
+        });
+
         setForm({
           name: '',
           description: '',

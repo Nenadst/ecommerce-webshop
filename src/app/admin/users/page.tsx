@@ -8,6 +8,7 @@ import {
   UPDATE_ACCOUNT_STATUS,
   DELETE_USER,
 } from '@/entities/user/api/user.queries';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 import {
   Search,
   UserCog,
@@ -46,6 +47,7 @@ interface User {
 const columnHelper = createColumnHelper<User>();
 
 export default function AdminUsers() {
+  const { trackActivity } = useActivityTracker();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -65,11 +67,26 @@ export default function AdminUsers() {
   const users: User[] = useMemo(() => data?.allUsers || [], [data?.allUsers]);
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
+    const user = users.find((u) => u.id === userId);
     try {
       await updateUserRole({
         variables: { id: userId, role: newRole },
       });
       await refetch();
+
+      // Track admin action
+      trackActivity({
+        action: 'ADMIN_ACTION',
+        description: `Updated user role for ${user?.email || userId} to ${newRole}`,
+        metadata: {
+          action: 'UPDATE_USER_ROLE',
+          userId: userId,
+          userEmail: user?.email,
+          newRole: newRole,
+          previousRole: user?.role,
+        },
+      });
+
       setEditingUser(null);
     } catch (error) {
       console.error('Error updating user role:', error);
@@ -78,11 +95,26 @@ export default function AdminUsers() {
   };
 
   const handleUpdateStatus = async (userId: string, newStatus: string) => {
+    const user = users.find((u) => u.id === userId);
     try {
       await updateAccountStatus({
         variables: { id: userId, status: newStatus },
       });
       await refetch();
+
+      // Track admin action
+      trackActivity({
+        action: 'ADMIN_ACTION',
+        description: `Updated account status for ${user?.email || userId} to ${newStatus}`,
+        metadata: {
+          action: 'UPDATE_ACCOUNT_STATUS',
+          userId: userId,
+          userEmail: user?.email,
+          newStatus: newStatus,
+          previousStatus: user?.accountStatus,
+        },
+      });
+
       setEditingStatus(null);
     } catch (error) {
       console.error('Error updating account status:', error);
@@ -91,11 +123,26 @@ export default function AdminUsers() {
   };
 
   const handleDeleteUser = async (userId: string) => {
+    const user = users.find((u) => u.id === userId);
     try {
       await deleteUser({
         variables: { id: userId },
       });
       await refetch();
+
+      // Track admin action
+      trackActivity({
+        action: 'ADMIN_ACTION',
+        description: `Deleted user: ${user?.email || userId}`,
+        metadata: {
+          action: 'DELETE_USER',
+          userId: userId,
+          userEmail: user?.email,
+          userName: user?.name,
+          userRole: user?.role,
+        },
+      });
+
       setDeletingUser(null);
     } catch (error) {
       console.error('Error deleting user:', error);

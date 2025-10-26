@@ -8,11 +8,13 @@ import {
   UPDATE_CATEGORY,
 } from '@/entities/category/api/category.queries';
 import { CategoryData, UpdateCategoryData } from '@/entities/category/types/category.types';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export function useEditCategoryForm() {
   const router = useRouter();
   const params = useParams();
   const categoryId = params?.id as string;
+  const { trackActivity } = useActivityTracker();
   const { data } = useQuery<CategoryData>(GET_CATEGORY, {
     variables: { id: categoryId },
   });
@@ -47,6 +49,18 @@ export function useEditCategoryForm() {
     }
     try {
       await updateCategory({ variables: { id: categoryId, input: { name } } });
+
+      // Track admin action
+      trackActivity({
+        action: 'ADMIN_ACTION',
+        description: `Updated category: ${name}`,
+        metadata: {
+          action: 'UPDATE_CATEGORY',
+          categoryId: categoryId,
+          categoryName: name,
+        },
+      });
+
       router.push('/admin/categories');
     } catch (err) {
       if (err instanceof ApolloError) {

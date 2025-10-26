@@ -70,6 +70,13 @@ const cartResolvers = {
           throw new Error('Product not found');
         }
 
+        // Check if product is out of stock
+        if (product.quantity === 0) {
+          throw new Error(
+            'This product is currently out of stock and cannot be added to your cart'
+          );
+        }
+
         const existingItem = await tx.cartItem.findUnique({
           where: {
             userId_productId: {
@@ -82,7 +89,9 @@ const cartResolvers = {
         const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity;
 
         if (product.quantity < totalQuantity) {
-          throw new Error('Not enough stock available');
+          throw new Error(
+            `Only ${product.quantity} unit(s) available in stock. You currently have ${existingItem?.quantity || 0} in your cart`
+          );
         }
 
         const item = await tx.cartItem.upsert({
@@ -168,8 +177,13 @@ const cartResolvers = {
           throw new Error('Product not found');
         }
 
+        // Check if requested quantity exceeds available stock
+        if (product.quantity === 0) {
+          throw new Error('This product is currently out of stock');
+        }
+
         if (product.quantity < quantity) {
-          throw new Error('Not enough stock available');
+          throw new Error(`Only ${product.quantity} unit(s) available in stock`);
         }
 
         const cartItem = await tx.cartItem.findUnique({

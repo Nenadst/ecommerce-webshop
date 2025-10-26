@@ -5,11 +5,13 @@ import { useState, useCallback, useRef } from 'react';
 import { gql, Reference, useMutation } from '@apollo/client';
 import { CREATE_CATEGORY } from '@/entities/category/api/category.queries';
 import toast from 'react-hot-toast';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 
 export function useAddCategory() {
   const router = useRouter();
   const [name, setName] = useState('');
   const submittingRef = useRef(false);
+  const { trackActivity } = useActivityTracker();
 
   const [createCategory, { loading }] = useMutation(CREATE_CATEGORY, {
     update(cache, { data }) {
@@ -41,8 +43,20 @@ export function useAddCategory() {
       if (submittingRef.current) return;
       submittingRef.current = true;
       try {
-        await createCategory({ variables: { input: { name } } });
+        const result = await createCategory({ variables: { input: { name } } });
         toast.success('Category created!');
+
+        // Track admin action
+        trackActivity({
+          action: 'ADMIN_ACTION',
+          description: `Created category: ${name}`,
+          metadata: {
+            action: 'CREATE_CATEGORY',
+            categoryId: result.data?.createCategory?.id,
+            categoryName: name,
+          },
+        });
+
         router.push('/admin/categories');
       } catch (err) {
         console.error(err);
@@ -50,7 +64,7 @@ export function useAddCategory() {
         submittingRef.current = false;
       }
     },
-    [name, createCategory, router]
+    [name, createCategory, router, trackActivity]
   );
 
   return {

@@ -86,8 +86,10 @@ const categoryResolvers = {
         });
 
         if (productUsingCategory) {
-          console.warn(`Cannot delete category ${id} - in use by a product`);
-          return false;
+          throw new ApolloError(
+            'Cannot delete this category because it is being used by one or more products. Please reassign or delete those products first.',
+            'CATEGORY_IN_USE'
+          );
         }
 
         await prisma.category.delete({
@@ -97,7 +99,12 @@ const categoryResolvers = {
         return true;
       } catch (error) {
         console.error('Failed to delete category:', error);
-        return false;
+
+        if (error instanceof ApolloError) {
+          throw error;
+        }
+
+        throw new ApolloError('Failed to delete category');
       }
     },
   },

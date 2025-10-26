@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useMutation, useQuery, useApolloClient } from '@apollo/client';
 import { gql } from 'graphql-tag';
 import { useAuth } from '../contexts/AuthContext';
+import { CREATE_ACTIVITY_LOG } from '../graphql/mutations/activity.mutations';
 import toast from 'react-hot-toast';
 
 interface Product {
@@ -114,7 +115,7 @@ interface CartItem {
 }
 
 export function useCartInternal() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const client = useApolloClient();
   const [localCart, setLocalCart] = useState<CartItem[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -125,6 +126,31 @@ export function useCartInternal() {
     skip: !isAuthenticated,
     fetchPolicy: 'cache-and-network',
   });
+
+  const [createActivityLog] = useMutation(CREATE_ACTIVITY_LOG);
+
+  const trackActivity = useCallback(
+    async (action: string, description: string, metadata?: Record<string, unknown>) => {
+      try {
+        await createActivityLog({
+          variables: {
+            input: {
+              userId: user?.id,
+              userName: user?.name || user?.email,
+              action,
+              description,
+              userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+              path: typeof window !== 'undefined' ? window.location.pathname : undefined,
+              metadata: metadata ? JSON.stringify(metadata) : undefined,
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Failed to track activity:', error);
+      }
+    },
+    [user?.id, user?.name, user?.email, createActivityLog]
+  );
 
   const productIds = useMemo(() => {
     return localCart.map((item) => item.productId);
@@ -267,6 +293,19 @@ export function useCartInternal() {
             awaitRefetchQueries: true,
           });
           toast.success('Added to cart!');
+
+          // Track activity for authenticated users
+          const cartItem = data?.cart?.items?.find(
+            (i: { productId: string }) => i.productId === productId
+          );
+          if (cartItem?.product) {
+            trackActivity('ADD_TO_CART', `Added ${cartItem.product.name} to cart`, {
+              productId,
+              productName: cartItem.product.name,
+              quantity,
+              price: cartItem.product.price,
+            });
+          }
         } catch (error) {
           console.error('Failed to add to cart:', error);
           const errorMessage = error instanceof Error ? error.message : 'Failed to add to cart';
@@ -287,11 +326,22 @@ export function useCartInternal() {
           }
 
           const product = productData.product;
+
+          // Check if product is out of stock
+          if (product.quantity === 0) {
+            toast.error('This product is currently out of stock and cannot be added to your cart');
+            throw new Error(
+              'This product is currently out of stock and cannot be added to your cart'
+            );
+          }
+
           const existingItem = localCart.find((item) => item.productId === productId);
           const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity;
 
           if (product.quantity < totalQuantity) {
-            toast.error(`Not enough stock available. Only ${product.quantity} left in stock.`);
+            toast.error(
+              `Only ${product.quantity} unit(s) available in stock. You currently have ${existingItem?.quantity || 0} in your cart`
+            );
             throw new Error('Not enough stock available');
           }
 
@@ -319,12 +369,22 @@ export function useCartInternal() {
           }, 0);
 
           toast.success('Added to cart!');
+
+          // Track activity for guest users
+          if (product) {
+            trackActivity('ADD_TO_CART', `Added ${product.name} to cart`, {
+              productId,
+              productName: product.name,
+              quantity,
+            });
+          }
         } catch (error) {
           console.error('Failed to add to cart:', error);
           if (
             error instanceof Error &&
             error.message !== 'Not enough stock available' &&
-            error.message !== 'Product not found'
+            error.message !== 'Product not found' &&
+            !error.message.includes('out of stock')
           ) {
             toast.error('Failed to add to cart');
           }
@@ -339,12 +399,24 @@ export function useCartInternal() {
     async (productId: string): Promise<void> => {
       if (isAuthenticated) {
         try {
+          const removedItem = cartItems.find(
+            (item: { productId: string }) => item.productId === productId
+          );
+
           await removeFromCartMutation({
             variables: { productId },
             refetchQueries: [{ query: GET_CART }],
             awaitRefetchQueries: true,
           });
           toast.success('Removed from cart');
+
+          // Track activity
+          if (removedItem?.product) {
+            trackActivity('REMOVE_FROM_CART', `Removed ${removedItem.product.name} from cart`, {
+              productId,
+              productName: removedItem.product.name,
+            });
+          }
         } catch (error) {
           console.error('Failed to remove from cart:', error);
           const errorMessage =
@@ -354,6 +426,10 @@ export function useCartInternal() {
         }
       } else {
         try {
+          const removedItem = guestCartItems.find(
+            (item: { productId: string }) => item.productId === productId
+          );
+
           setLocalCart((prev) => {
             const newCart = prev.filter((item) => item.productId !== productId);
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
@@ -363,6 +439,14 @@ export function useCartInternal() {
           setTimeout(() => refetchGuestProducts(), 0);
 
           toast.success('Removed from cart');
+
+          // Track activity
+          if (removedItem?.product) {
+            trackActivity('REMOVE_FROM_CART', `Removed ${removedItem.product.name} from cart`, {
+              productId,
+              productName: removedItem.product.name,
+            });
+          }
         } catch (error) {
           console.error('Failed to remove from cart:', error);
           toast.error('Failed to remove from cart');
@@ -370,7 +454,14 @@ export function useCartInternal() {
         }
       }
     },
-    [isAuthenticated, removeFromCartMutation, refetchGuestProducts]
+    [
+      isAuthenticated,
+      removeFromCartMutation,
+      refetchGuestProducts,
+      cartItems,
+      guestCartItems,
+      trackActivity,
+    ]
   );
 
   const updateQuantityDebounced = useRef<{ [key: string]: NodeJS.Timeout }>({});
@@ -450,11 +541,18 @@ export function useCartInternal() {
   const clearCart = useCallback(async (): Promise<void> => {
     if (isAuthenticated) {
       try {
+        const itemCount = cartItems.length;
+
         await clearCartMutation({
           refetchQueries: [{ query: GET_CART }],
           awaitRefetchQueries: true,
         });
         toast.success('Cart cleared');
+
+        // Track activity
+        trackActivity('CLEAR_CART', `Cleared cart with ${itemCount} items`, {
+          itemCount,
+        });
       } catch (error) {
         console.error('Failed to clear cart:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
@@ -472,7 +570,7 @@ export function useCartInternal() {
         throw error;
       }
     }
-  }, [isAuthenticated, clearCartMutation]);
+  }, [isAuthenticated, clearCartMutation, cartItems, trackActivity]);
 
   return {
     cartItems,

@@ -14,6 +14,7 @@ import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
+import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 import Spinner from '@/shared/components/spinner/Spinner';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -35,10 +36,26 @@ const ProductDetails = () => {
   const { addToCart, cartItems } = useCart();
   const { openDrawer } = useCartDrawer();
   const { isAuthenticated } = useAuth();
+  const { trackActivity } = useActivityTracker();
 
   const product = data?.product;
   const quantityInCart = cartItems.find((item) => item.productId === productId)?.quantity || 0;
   const availableQuantity = product ? product.quantity - quantityInCart : 0;
+
+  // Track product view
+  React.useEffect(() => {
+    if (product) {
+      trackActivity({
+        action: 'VIEW_PRODUCT',
+        description: `Viewed product: ${product.name}`,
+        metadata: {
+          productId: product.id,
+          productName: product.name,
+          price: product.price,
+        },
+      });
+    }
+  }, [product?.id]);
 
   React.useEffect(() => {
     if (product && selectedQuantity > availableQuantity && availableQuantity > 0) {

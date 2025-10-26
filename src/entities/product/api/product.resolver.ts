@@ -208,13 +208,49 @@ const productResolvers = {
 
     deleteProduct: async (_: unknown, { id }: DeleteProductArgs) => {
       try {
+        // Check if product exists in any cart
+        const cartItems = await prisma.cartItem.findFirst({
+          where: { productId: id },
+        });
+
+        if (cartItems) {
+          throw new Error(
+            'Cannot delete this product because it is currently in one or more shopping carts. Please wait for customers to remove it from their carts or remove it manually.'
+          );
+        }
+
+        // Check if product exists in any order
+        const orderItems = await prisma.orderItem.findFirst({
+          where: { productId: id },
+        });
+
+        if (orderItems) {
+          throw new Error(
+            'Cannot delete this product because it exists in order history. Products that have been ordered cannot be deleted to preserve order records.'
+          );
+        }
+
+        // If no conflicts, proceed with deletion
         await prisma.product.delete({
           where: { id },
         });
         return true;
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Failed to delete product:', error);
-        return false;
+
+        // If it's already a thrown error with our custom message, re-throw it
+        if (error instanceof Error && error.message.includes('Cannot delete this product')) {
+          throw error;
+        }
+
+        // Check if it's a foreign key constraint error (as a fallback)
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'P2003') {
+          throw new Error(
+            'Cannot delete this product because it is being referenced by other records in the database.'
+          );
+        }
+
+        throw new Error('Failed to delete product');
       }
     },
 
