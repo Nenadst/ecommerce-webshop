@@ -20,6 +20,7 @@ import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import Button from '@/shared/components/elements/Button';
 import toast from 'react-hot-toast';
+import { AuthModal } from '@/shared/components/modals/AuthModal';
 
 interface Product {
   id: string;
@@ -47,6 +48,7 @@ const Products = () => {
   const [productsPerPage, setProductsPerPage] = useState(12);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addToCart, cartItems } = useCart();
   const { openDrawer } = useCartDrawer();
@@ -148,6 +150,12 @@ const Products = () => {
   const handleToggleFavorite = async (e: React.MouseEvent, productId: string) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     await toggleFavorite(productId);
   };
 
@@ -200,6 +208,7 @@ const Products = () => {
 
   return (
     <>
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
       <div className="mx-auto min-h-full container mt-2 p-16 flex md:p-4">
         <div className="w-[300px] h-full hidden lg:block">
           <SideCategories
@@ -259,23 +268,19 @@ const Products = () => {
                           className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
                           priority={index < 4}
                         />
-                        {isAuthenticated && (
-                          <button
-                            onClick={(e) => handleToggleFavorite(e, product.id)}
-                            className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
-                            aria-label={
-                              isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
-                            }
-                          >
-                            <HeartIconBig
-                              className={`w-5 h-5 transition-colors ${
-                                isFavorite(product.id)
-                                  ? 'fill-red-500 text-red-500'
-                                  : 'text-gray-400'
-                              }`}
-                            />
-                          </button>
-                        )}
+                        <button
+                          onClick={(e) => handleToggleFavorite(e, product.id)}
+                          className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
+                          aria-label={
+                            isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
+                          }
+                        >
+                          <HeartIconBig
+                            className={`w-5 h-5 transition-colors ${
+                              isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                            }`}
+                          />
+                        </button>
                         <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
                           {product.category.name}
                         </span>
