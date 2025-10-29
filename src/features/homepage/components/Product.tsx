@@ -6,8 +6,6 @@ import Star from '@/shared/components/elements/Star';
 import { ButtonLoveIcon } from '@/shared/components/icons';
 import Link from 'next/link';
 import React from 'react';
-import { useQuery } from '@apollo/client';
-import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 import Image from 'next/image';
 
 interface Product {
@@ -22,23 +20,17 @@ interface Product {
   };
 }
 
-const Product = () => {
-  const { data, loading } = useQuery(GET_PRODUCTS, {
-    variables: {
-      page: 1,
-      limit: 20,
-      filter: {},
-      sort: { field: 'createdAt', order: -1 },
-    },
-  });
+interface ProductProps {
+  initialProducts: Product[];
+}
 
-  const products = data?.products?.items || [];
+const Product = ({ initialProducts }: ProductProps) => {
+  const products = initialProducts;
 
-  if (loading || products.length === 0) {
+  if (products.length === 0) {
     return null;
   }
 
-  // Get up to 9 products for homepage display
   const displayProducts = products.slice(0, 9);
 
   return (

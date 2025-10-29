@@ -12,7 +12,6 @@ import BannerPromotion from '@/features/homepage/components/BannerPromotion';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
-import Spinner from '@/shared/components/spinner/Spinner';
 import { HeartIconBig } from '@/shared/components/icons';
 import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
@@ -35,7 +34,11 @@ interface Product {
   };
 }
 
-const Products = () => {
+interface ProductsProps {
+  initialData: Product[];
+}
+
+const Products = ({ initialData }: ProductsProps) => {
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get('category');
 
@@ -70,17 +73,17 @@ const Products = () => {
     setCurrentPage(1);
   }, [selectedCategories, inStockSelected, outOfStockSelected]);
 
-  const { data, loading } = useQuery(GET_PRODUCTS, {
+  const { data } = useQuery(GET_PRODUCTS, {
     variables: {
       page: 1,
       limit: 1000,
       filter: selectedCategories.length > 0 ? { categoryIds: selectedCategories } : {},
       sort: { field: sortField, order: sortOrder },
     },
-    fetchPolicy: 'network-only',
+    fetchPolicy: 'cache-first',
   });
 
-  const allProducts = data?.products?.items || [];
+  const allProducts = data?.products?.items || initialData;
 
   const filteredProducts = allProducts.filter((product: Product) => {
     if (!inStockSelected && !outOfStockSelected) return true;
@@ -247,11 +250,7 @@ const Products = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {loading ? (
-              <div className="col-span-full flex justify-center py-20">
-                <Spinner />
-              </div>
-            ) : products.length === 0 ? (
+            {products.length === 0 ? (
               <div className="col-span-full text-center py-20 text-gray-500">No products found</div>
             ) : (
               products.map((product: Product, index: number) => {
@@ -411,7 +410,7 @@ const Products = () => {
               })
             )}
           </div>
-          {!loading && allProducts.length > 0 && (
+          {allProducts.length > 0 && (
             <div className="relative flex items-center mt-8 mb-8">
               <div className="flex items-center gap-2">
                 <label htmlFor="perPageBottom" className="text-gray-700 font-medium">

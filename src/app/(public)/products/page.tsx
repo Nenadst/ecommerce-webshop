@@ -1,21 +1,25 @@
-import { Suspense } from 'react';
 import { BreadCrumb } from '@/shared/components/layouts/BreadCrumb';
 import Products from '@/features/products';
-import Spinner from '@/shared/components/spinner/Spinner';
+import { getClient } from '@/shared/lib/apollo-server-client';
+import { GET_PRODUCTS } from '@/entities/product/api/product.queries';
 
-export default function CategoriesPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function ProductsPage() {
+  const { data } = await getClient().query({
+    query: GET_PRODUCTS,
+    variables: {
+      page: 1,
+      limit: 1000,
+      filter: {},
+      sort: { field: 'createdAt', order: -1 },
+    },
+  });
+
   return (
     <>
       <BreadCrumb />
-      <Suspense
-        fallback={
-          <div className="w-full flex justify-center py-20">
-            <Spinner />
-          </div>
-        }
-      >
-        <Products />
-      </Suspense>
+      <Products initialData={data.products?.items || []} />
     </>
   );
 }

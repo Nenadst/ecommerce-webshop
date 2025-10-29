@@ -6,27 +6,22 @@ import Star from '@/shared/components/elements/Star';
 import { HeartIconBig } from '@/shared/components/icons';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@apollo/client';
-import { GET_PRODUCT } from '@/entities/product/api/product.queries';
 import { Product } from '@/entities/product/types/product.types';
 import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
 import { useAuth } from '@/shared/contexts/AuthContext';
 import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
-import Spinner from '@/shared/components/spinner/Spinner';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { AuthModal } from '@/shared/components/modals/AuthModal';
 
-const ProductDetails = () => {
-  const params = useParams();
-  const productId = params?.id as string;
+interface ProductDetailsProps {
+  initialProduct: Product;
+}
 
-  const { data, loading, error } = useQuery<{ product: Product }>(GET_PRODUCT, {
-    variables: { id: productId },
-  });
+const ProductDetails = ({ initialProduct }: ProductDetailsProps) => {
+  const product = initialProduct;
 
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -40,53 +35,28 @@ const ProductDetails = () => {
   const { isAuthenticated } = useAuth();
   const { trackActivity } = useActivityTracker();
 
-  const product = data?.product;
-  const quantityInCart = cartItems.find((item) => item.productId === productId)?.quantity || 0;
-  const availableQuantity = product ? product.quantity - quantityInCart : 0;
-
-  // Track product view
-  React.useEffect(() => {
-    if (product) {
-      trackActivity({
-        action: 'VIEW_PRODUCT',
-        description: `Viewed product: ${product.name}`,
-        metadata: {
-          productId: product.id,
-          productName: product.name,
-          price: product.price,
-        },
-      });
-    }
-  }, [product?.id]);
+  const quantityInCart = cartItems.find((item) => item.productId === product.id)?.quantity || 0;
+  const availableQuantity = product.quantity - quantityInCart;
 
   React.useEffect(() => {
-    if (product && selectedQuantity > availableQuantity && availableQuantity > 0) {
+    trackActivity({
+      action: 'VIEW_PRODUCT',
+      description: `Viewed product: ${product.name}`,
+      metadata: {
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+      },
+    });
+  }, [product.id]);
+
+  React.useEffect(() => {
+    if (selectedQuantity > availableQuantity && availableQuantity > 0) {
       setSelectedQuantity(availableQuantity);
     } else if (availableQuantity === 0) {
       setSelectedQuantity(0);
     }
-  }, [availableQuantity, selectedQuantity, product]);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-20 flex justify-center">
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (error || !product) {
-    return (
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
-          <Link href="/products" className="text-sky-900 hover:underline">
-            Back to products
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  }, [availableQuantity, selectedQuantity]);
 
   const images =
     product.images && product.images.length > 0 ? product.images : ['/assets/img/no-product.png'];

@@ -9,13 +9,29 @@ import Features from './Features';
 import Testimoni from './Testimoni';
 import Partner from './Partner';
 
-const Homepage = () => {
+interface ProductType {
+  id: string;
+  name: string;
+  description?: string;
+  price: number;
+  images?: string[];
+  category: {
+    id: string;
+    name: string;
+  };
+}
+
+interface HomepageProps {
+  initialProducts: ProductType[];
+}
+
+const Homepage = ({ initialProducts }: HomepageProps) => {
   return (
     <>
       <Slider />
       <Category />
       <PopularProduct />
-      <Product />
+      <Product initialProducts={initialProducts} />
       <BannerPromotion />
       <TopSeller />
       <Features />
