@@ -1,9 +1,23 @@
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 
 export function getClient() {
+  const isServer = typeof window === 'undefined';
+
+  let uri: string;
+
+  if (isServer) {
+    if (process.env.VERCEL_URL) {
+      uri = `https://${process.env.VERCEL_URL}/api/graphql`;
+    } else {
+      uri = 'http://localhost:3000/api/graphql';
+    }
+  } else {
+    uri = '/api/graphql';
+  }
+
   return new ApolloClient({
     link: new HttpLink({
-      uri: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/graphql',
+      uri,
       fetch,
     }),
     cache: new InMemoryCache(),
