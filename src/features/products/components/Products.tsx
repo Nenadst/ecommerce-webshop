@@ -44,7 +44,7 @@ const Products = ({ initialData }: ProductsProps) => {
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [inStockSelected, setInStockSelected] = useState(true);
-  const [outOfStockSelected, setOutOfStockSelected] = useState(true);
+  const [outOfStockSelected, setOutOfStockSelected] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<1 | -1>(-1);
@@ -73,19 +73,22 @@ const Products = ({ initialData }: ProductsProps) => {
     setCurrentPage(1);
   }, [selectedCategories, inStockSelected, outOfStockSelected]);
 
-  const { data } = useQuery(GET_PRODUCTS, {
+  const { data, loading } = useQuery(GET_PRODUCTS, {
     variables: {
       page: 1,
       limit: 1000,
-      filter: selectedCategories.length > 0 ? { categoryIds: selectedCategories } : {},
+      filter: {},
       sort: { field: sortField, order: sortOrder },
     },
-    fetchPolicy: 'cache-first',
+    fetchPolicy: 'cache-and-network',
   });
 
   const allProducts = data?.products?.items || initialData;
 
   const filteredProducts = allProducts.filter((product: Product) => {
+    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category.id)) {
+      return false;
+    }
     if (!inStockSelected && !outOfStockSelected) return true;
     if (inStockSelected && outOfStockSelected) return true;
     if (inStockSelected && product.quantity > 0) return true;
@@ -217,6 +220,7 @@ const Products = ({ initialData }: ProductsProps) => {
           <SideCategories
             selectedCategories={selectedCategories}
             onCategoriesChange={setSelectedCategories}
+            allProducts={allProducts}
           />
           <Separator />
           <SideAvaliability
@@ -249,167 +253,181 @@ const Products = ({ initialData }: ProductsProps) => {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {products.length === 0 ? (
-              <div className="col-span-full text-center py-20 text-gray-500">No products found</div>
-            ) : (
-              products.map((product: Product, index: number) => {
-                const availableQty = getAvailableQuantity(product.id, product.quantity);
-                return (
-                  <Link href={`/products/${product.id}`} key={product.id}>
-                    <Card className="w-full h-[520px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
-                      <div className="relative h-64 min-h-64 max-h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
-                        <Image
-                          src={product.images?.[0] || '/assets/img/no-product.png'}
-                          alt={product.name}
-                          width={256}
-                          height={256}
-                          className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
-                          priority={index < 4}
-                        />
-                        <button
-                          onClick={(e) => handleToggleFavorite(e, product.id)}
-                          className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
-                          aria-label={
-                            isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
-                          }
-                        >
-                          <HeartIconBig
-                            className={`w-5 h-5 transition-colors ${
-                              isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
-                            }`}
+          {loading && initialData.length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="bg-gray-200 h-[520px] rounded-lg animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {products.length === 0 ? (
+                <div className="col-span-full text-center py-20 text-gray-500">
+                  No products found
+                </div>
+              ) : (
+                products.map((product: Product, index: number) => {
+                  const availableQty = getAvailableQuantity(product.id, product.quantity);
+                  return (
+                    <Link href={`/products/${product.id}`} key={product.id}>
+                      <Card className="w-full h-[520px] flex flex-col overflow-hidden cursor-pointer hover:shadow-xl transition-all duration-300 group">
+                        <div className="relative h-64 min-h-64 max-h-64 bg-gray-50 flex items-center justify-center overflow-hidden">
+                          <Image
+                            src={product.images?.[0] || '/assets/img/no-product.png'}
+                            alt={product.name}
+                            width={256}
+                            height={256}
+                            className="object-contain w-full h-full p-4 group-hover:scale-105 transition-transform duration-300"
+                            priority={index < 4}
                           />
-                        </button>
-                        <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
-                          {product.category.name}
-                        </span>
-                        {availableQty > 0 ? (
-                          <span className="absolute bottom-3 left-3 bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                            {availableQty} Available
-                          </span>
-                        ) : product.quantity > 0 ? (
-                          <span className="absolute bottom-3 left-3 bg-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                            All in Cart
-                          </span>
-                        ) : (
-                          <span className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-full">
-                            Out of Stock
-                          </span>
-                        )}
-                      </div>
-                      <div className="px-4 pb-4 pt-1 flex flex-col flex-1 min-h-0">
-                        <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
-                          {product.name}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-1 line-clamp-3 h-[4.5rem]">
-                          {product.description
-                            ? truncateText(product.description, 120)
-                            : 'No description available'}
-                        </p>
-                        <div className="flex items-center justify-between mt-1 mb-3">
-                          <div className="flex flex-col">
-                            <span className="text-2xl font-bold text-sky-900">
-                              €{product.price}
-                            </span>
-                          </div>
-                          <Star count={5} />
-                        </div>
-
-                        <div
-                          className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <span className="text-sm text-gray-700 font-medium">Quantity:</span>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                updateQuantity(product.id, -1, availableQty);
-                              }}
-                              disabled={availableQty === 0 || getSelectedQuantity(product.id) <= 1}
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                              <svg
-                                className="w-4 h-4 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M20 12H4"
-                                />
-                              </svg>
-                            </button>
-                            <span className="w-10 text-center font-bold text-gray-900">
-                              {availableQty === 0 ? 0 : getSelectedQuantity(product.id)}
-                            </span>
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                updateQuantity(product.id, 1, availableQty);
-                              }}
-                              disabled={
-                                availableQty === 0 ||
-                                getSelectedQuantity(product.id) >= availableQty
-                              }
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                              <svg
-                                className="w-4 h-4 text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M12 4v16m8-8H4"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-
-                        <div
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Button
-                            onClick={(e) => e && handleAddToCart(e, product)}
-                            disabled={availableQty === 0 || addingToCart === product.id}
-                            className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
-                              availableQty > 0
-                                ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                            } disabled:opacity-50`}
+                          <button
+                            onClick={(e) => handleToggleFavorite(e, product.id)}
+                            className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-md z-10"
+                            aria-label={
+                              isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'
+                            }
                           >
-                            {addingToCart === product.id
-                              ? 'Adding...'
-                              : availableQty > 0
-                                ? 'Add to Cart'
-                                : product.quantity > 0
-                                  ? 'All in Cart'
-                                  : 'Out of Stock'}
-                          </Button>
+                            <HeartIconBig
+                              className={`w-5 h-5 transition-colors ${
+                                isFavorite(product.id)
+                                  ? 'fill-red-500 text-red-500'
+                                  : 'text-gray-400'
+                              }`}
+                            />
+                          </button>
+                          <span className="absolute top-3 left-3 bg-sky-900 text-white text-xs font-medium px-3 py-1 rounded-full">
+                            {product.category.name}
+                          </span>
+                          {availableQty > 0 ? (
+                            <span className="absolute bottom-3 left-3 bg-green-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                              In Stock
+                            </span>
+                          ) : product.quantity > 0 ? (
+                            <span className="absolute bottom-3 left-3 bg-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                              All in Cart
+                            </span>
+                          ) : (
+                            <span className="absolute bottom-3 left-3 bg-red-500 text-white text-xs font-medium px-3 py-1 rounded-full">
+                              Out of Stock
+                            </span>
+                          )}
                         </div>
-                      </div>
-                    </Card>
-                  </Link>
-                );
-              })
-            )}
-          </div>
+                        <div className="px-4 pb-4 pt-1 flex flex-col flex-1 min-h-0">
+                          <h3 className="text-sky-900 text-lg font-semibold mb-2 line-clamp-1">
+                            {product.name}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-1 line-clamp-3 h-[4.5rem]">
+                            {product.description
+                              ? truncateText(product.description, 120)
+                              : 'No description available'}
+                          </p>
+                          <div className="flex items-center justify-between mt-1 mb-3">
+                            <div className="flex flex-col">
+                              <span className="text-2xl font-bold text-sky-900">
+                                €{product.price}
+                              </span>
+                            </div>
+                            <Star count={5} />
+                          </div>
+
+                          <div
+                            className="mb-2 flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <span className="text-sm text-gray-700 font-medium">Quantity:</span>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  updateQuantity(product.id, -1, availableQty);
+                                }}
+                                disabled={
+                                  availableQty === 0 || getSelectedQuantity(product.id) <= 1
+                                }
+                                className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <svg
+                                  className="w-4 h-4 text-gray-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M20 12H4"
+                                  />
+                                </svg>
+                              </button>
+                              <span className="w-10 text-center font-bold text-gray-900">
+                                {availableQty === 0 ? 0 : getSelectedQuantity(product.id)}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  updateQuantity(product.id, 1, availableQty);
+                                }}
+                                disabled={
+                                  availableQty === 0 ||
+                                  getSelectedQuantity(product.id) >= availableQty
+                                }
+                                className="w-7 h-7 flex items-center justify-center rounded-md bg-white border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <svg
+                                  className="w-4 h-4 text-gray-600"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 4v16m8-8H4"
+                                  />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+
+                          <div
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                            }}
+                          >
+                            <Button
+                              onClick={(e) => e && handleAddToCart(e, product)}
+                              disabled={availableQty === 0 || addingToCart === product.id}
+                              className={`w-full py-2.5 text-sm font-medium rounded-lg transition-all duration-300 ${
+                                availableQty > 0
+                                  ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-md hover:shadow-lg'
+                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              } disabled:opacity-50`}
+                            >
+                              {addingToCart === product.id
+                                ? 'Adding...'
+                                : availableQty > 0
+                                  ? 'Add to Cart'
+                                  : product.quantity > 0
+                                    ? 'All in Cart'
+                                    : 'Out of Stock'}
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          )}
           {allProducts.length > 0 && (
             <div className="relative flex items-center mt-8 mb-8">
               <div className="flex items-center gap-2">
