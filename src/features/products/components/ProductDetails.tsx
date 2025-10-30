@@ -6,7 +6,6 @@ import Star from '@/shared/components/elements/Star';
 import { HeartIconBig } from '@/shared/components/icons';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import { Product } from '@/entities/product/types/product.types';
 import { useFavorites } from '@/shared/hooks/useFavorites';
 import { useCart } from '@/shared/contexts/CartContext';
 import { useCartDrawer } from '@/shared/contexts/CartDrawerContext';
@@ -15,13 +14,20 @@ import { useActivityTracker } from '@/shared/hooks/useActivityTracker';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { AuthModal } from '@/shared/components/modals/AuthModal';
+import { useParams } from 'next/navigation';
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCT } from '@/entities/product/api/product.queries';
 
-interface ProductDetailsProps {
-  initialProduct: Product;
-}
+const ProductDetails = () => {
+  const params = useParams();
+  const productId = params.id as string;
 
-const ProductDetails = ({ initialProduct }: ProductDetailsProps) => {
-  const product = initialProduct;
+  const { data, loading, error } = useQuery(GET_PRODUCT, {
+    variables: { id: productId },
+    skip: !productId,
+  });
+
+  const product = data?.product;
 
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -35,20 +41,24 @@ const ProductDetails = ({ initialProduct }: ProductDetailsProps) => {
   const { isAuthenticated } = useAuth();
   const { trackActivity } = useActivityTracker();
 
-  const quantityInCart = cartItems.find((item) => item.productId === product.id)?.quantity || 0;
-  const availableQuantity = product.quantity - quantityInCart;
+  const quantityInCart = product
+    ? cartItems.find((item) => item.productId === product.id)?.quantity || 0
+    : 0;
+  const availableQuantity = product ? product.quantity - quantityInCart : 0;
 
   React.useEffect(() => {
-    trackActivity({
-      action: 'VIEW_PRODUCT',
-      description: `Viewed product: ${product.name}`,
-      metadata: {
-        productId: product.id,
-        productName: product.name,
-        price: product.price,
-      },
-    });
-  }, [product.id]);
+    if (product) {
+      trackActivity({
+        action: 'VIEW_PRODUCT',
+        description: `Viewed product: ${product.name}`,
+        metadata: {
+          productId: product.id,
+          productName: product.name,
+          price: product.price,
+        },
+      });
+    }
+  }, [product?.id, product?.name, product?.price, trackActivity]);
 
   React.useEffect(() => {
     if (selectedQuantity > availableQuantity && availableQuantity > 0) {
@@ -57,6 +67,31 @@ const ProductDetails = ({ initialProduct }: ProductDetailsProps) => {
       setSelectedQuantity(0);
     }
   }, [availableQuantity, selectedQuantity]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-14">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="container mx-auto py-14">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <p className="text-gray-600">Product not found</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const images =
     product.images && product.images.length > 0 ? product.images : ['/assets/img/no-product.png'];
@@ -137,7 +172,7 @@ const ProductDetails = ({ initialProduct }: ProductDetailsProps) => {
             </div>
             {images.length > 1 && (
               <div className="w-full max-w-[500px] mx-auto grid grid-cols-4 gap-3">
-                {images.map((image, index) => (
+                {images.map((image: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
