@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { User, Mail, Shield, Package, Settings } from 'lucide-react';
 import { useAuth } from '@/shared/contexts/AuthContext';
@@ -9,7 +9,7 @@ import { UPDATE_USER_MUTATION } from '@/shared/graphql/mutations/auth.mutations'
 import toast from 'react-hot-toast';
 import OrdersTab from '@/features/profile/components/OrdersTab';
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, user, login } = useAuth();
@@ -288,5 +288,15 @@ export default function ProfilePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}
+    >
+      <ProfileContent />
+    </Suspense>
   );
 }
